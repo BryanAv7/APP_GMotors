@@ -26,6 +26,19 @@ class _ViewMotorcycleScreenState extends State<ViewMotorcycleScreen> {
   late TextEditingController kilometrajeController;
   late TextEditingController cilindrajeController;
 
+  String? tipoMotoSeleccionado;
+  final List<String> tiposMotos = [
+    'Adventure',
+    'Deportiva',
+    'Naked',
+    'Ninja',
+    'Royal enfield',
+    'Scooters',
+    'Scrambler',
+    'Utilitarios',
+    'Otros'
+  ];
+
   File? selectedImage;
   final ImagePicker _picker = ImagePicker();
 
@@ -39,6 +52,7 @@ class _ViewMotorcycleScreenState extends State<ViewMotorcycleScreen> {
     anioController = TextEditingController(text: widget.moto.anio?.toString() ?? '');
     kilometrajeController = TextEditingController(text: widget.moto.kilometraje?.toString() ?? '');
     cilindrajeController = TextEditingController(text: widget.moto.cilindraje?.toString() ?? '');
+    tipoMotoSeleccionado = widget.moto.tipoMoto ?? 'Otros';
   }
 
   @override
@@ -291,7 +305,7 @@ class _ViewMotorcycleScreenState extends State<ViewMotorcycleScreen> {
       marca: marcaController.text.trim(),
       modelo: modeloController.text.trim(),
       nombreMoto: nombreMotoController.text.trim(),
-      tipoMoto: widget.moto.tipoMoto,
+      tipoMoto: tipoMotoSeleccionado,
       kilometraje: int.tryParse(kilometrajeController.text),
       cilindraje: int.tryParse(cilindrajeController.text),
       id_usuario: widget.usuario.idUsuario,
@@ -411,6 +425,10 @@ class _ViewMotorcycleScreenState extends State<ViewMotorcycleScreen> {
               _buildTextField('Modelo', controller: modeloController),
               const SizedBox(height: 15),
 
+              // Dropdown para Tipo de Moto
+              _buildTipoMotoDropdown(),
+              const SizedBox(height: 15),
+
               // Campo placa con ícono de cámara para OCR
               TextFormField(
                 controller: placaController,
@@ -481,6 +499,48 @@ class _ViewMotorcycleScreenState extends State<ViewMotorcycleScreen> {
           ),
         ),
       ),
+    );
+  }
+
+  Widget _buildTipoMotoDropdown() {
+    return DropdownButtonFormField<String>(
+      value: tipoMotoSeleccionado,
+      items: tiposMotos.map((tipo) {
+        return DropdownMenuItem<String>(
+          value: tipo,
+          child: Text(tipo),
+        );
+      }).toList(),
+      onChanged: (value) {
+        setState(() {
+          tipoMotoSeleccionado = value;
+        });
+      },
+      validator: (value) {
+        if (value == null || value.isEmpty) return 'Este campo es obligatorio';
+        return null;
+      },
+      decoration: InputDecoration(
+        labelText: 'Tipo de Moto',
+        labelStyle: const TextStyle(color: Colors.grey),
+        filled: true,
+        fillColor: Colors.grey[850],
+        prefixIcon: const Icon(Icons.two_wheeler, color: Colors.yellow),
+        border: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(8),
+          borderSide: const BorderSide(color: Colors.yellow),
+        ),
+        enabledBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(8),
+          borderSide: const BorderSide(color: Colors.yellow),
+        ),
+        focusedBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(8),
+          borderSide: const BorderSide(color: Colors.yellow, width: 2),
+        ),
+      ),
+      style: const TextStyle(color: Colors.white),
+      dropdownColor: Colors.grey[850],
     );
   }
 

@@ -330,6 +330,7 @@ class _InventarioScreenState extends State<InventarioScreen> {
                   const SizedBox(height: 8),
                   Row(
                     children: [
+                      /*
                       Expanded(
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
@@ -352,6 +353,7 @@ class _InventarioScreenState extends State<InventarioScreen> {
                           ],
                         ),
                       ),
+                      */
                       Expanded(
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
@@ -374,11 +376,6 @@ class _InventarioScreenState extends State<InventarioScreen> {
                           ],
                         ),
                       ),
-                    ],
-                  ),
-                  const SizedBox(height: 8),
-                  Row(
-                    children: [
                       Expanded(
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
@@ -400,6 +397,7 @@ class _InventarioScreenState extends State<InventarioScreen> {
                           ],
                         ),
                       ),
+                      /*
                       Expanded(
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
@@ -421,6 +419,8 @@ class _InventarioScreenState extends State<InventarioScreen> {
                           ],
                         ),
                       ),
+
+                       */
                     ],
                   ),
                 ],

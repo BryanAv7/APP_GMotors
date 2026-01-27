@@ -33,7 +33,10 @@ class _QuickAccountCreationScreenState
     _placaSuffix = const Icon(Icons.close, color: Colors.red);
 
     // Escuchar cambios en el campo de placa
-    placaCtrl.addListener(_validarPlaca);
+    placaCtrl.addListener(() {
+      _formatearPlaca();
+      _validarPlaca();
+    });
   }
 
   @override
@@ -52,6 +55,30 @@ class _QuickAccountCreationScreenState
       setState(() => _placaSuffix = const Icon(Icons.check_circle, color: Colors.green));
     } else {
       setState(() => _placaSuffix = const Icon(Icons.close, color: Colors.red));
+    }
+  }
+
+  void _formatearPlaca() {
+    String placa = placaCtrl.text.replaceAll('-', '').toUpperCase();
+
+    // Si tiene más de 6 caracteres, trunxa
+    if (placa.length > 6) {
+      placa = placa.substring(0, 6);
+    }
+
+    // Agrega guión en la posición correcta
+    if (placa.length >= 4) {
+      placa = '${placa.substring(0, 3)}-${placa.substring(3)}';
+    }
+
+    // Actualiza sin volver a disparar el listener
+    if (placaCtrl.text != placa) {
+      placaCtrl.value = placaCtrl.value.copyWith(
+        text: placa,
+        selection: TextSelection.fromPosition(
+          TextPosition(offset: placa.length),
+        ),
+      );
     }
   }
 
@@ -225,7 +252,15 @@ class _QuickAccountCreationScreenState
       return;
     }
 
-    // Validar placa
+// Validar que placa NO esté vacía
+    if (placaCtrl.text.trim().isEmpty) {
+      _showSnack('La placa del vehículo es obligatoria');
+      return;
+    }
+
+    _formatearPlaca();
+
+// Validar placa
     final errorPlaca = QuickAccountService.validarPlaca(placaCtrl.text);
     if (errorPlaca != null) {
       _showSnack(errorPlaca);

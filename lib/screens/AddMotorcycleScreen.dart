@@ -25,12 +25,15 @@ class _AddMotorcycleScreenState extends State<AddMotorcycleScreen> {
 
   String? selectedTipoMoto;
   final List<String> tiposMoto = [
-    'Scooters',
-    'Naked',
+    'Adventure',
     'Deportiva',
+    'Naked',
+    'Ninja',
+    'Royal enfield',
+    'Scooters',
     'Scrambler',
     'Utilitarios',
-    'Otro'
+    'Otros'
   ];
 
   File? nuevaImagen;

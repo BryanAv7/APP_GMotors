@@ -80,4 +80,26 @@ class DetalleUI {
 
     return map;
   }
+
+  // 🔧 CORREGIDO: Manejo correcto de idProducto nullable
+  @override
+  bool operator ==(Object other) {
+    if (identical(this, other)) return true;
+
+    return other is DetalleUI &&
+        runtimeType == other.runtimeType &&
+        idProducto == other.idProducto &&
+        // Si es concepto manual (idProducto == null), compara también por nombre
+        (idProducto != null || nombre == other.nombre);
+  }
+
+  @override
+  int get hashCode {
+    if (idProducto != null) {
+      return idProducto.hashCode;
+    } else {
+      // Para conceptos manuales, usa el nombre como identificador único
+      return nombre.hashCode;
+    }
+  }
 }

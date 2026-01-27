@@ -94,6 +94,7 @@ class _DetalleMantenimientoPageState extends State<DetalleMantenimientoPage> {
             precioUnitario: d.precioUnitario ?? 0,
             esProducto: true,
           ))
+              .toSet() //
               .toList();
         });
       }
