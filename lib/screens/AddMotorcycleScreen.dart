@@ -20,21 +20,9 @@ class _AddMotorcycleScreenState extends State<AddMotorcycleScreen> {
   late TextEditingController modeloController;
   late TextEditingController placaController;
   late TextEditingController kilometrajeController;
+  late TextEditingController TipoMotoController;
   late TextEditingController cilindrajeController;
   late TextEditingController anioController;
-
-  String? selectedTipoMoto;
-  final List<String> tiposMoto = [
-    'Adventure',
-    'Deportiva',
-    'Naked',
-    'Ninja',
-    'Royal enfield',
-    'Scooters',
-    'Scrambler',
-    'Utilitarios',
-    'Otros'
-  ];
 
   File? nuevaImagen;
   final ImagePicker _picker = ImagePicker();
@@ -47,6 +35,7 @@ class _AddMotorcycleScreenState extends State<AddMotorcycleScreen> {
     modeloController = TextEditingController();
     placaController = TextEditingController();
     kilometrajeController = TextEditingController();
+    TipoMotoController = TextEditingController();
     cilindrajeController = TextEditingController();
     anioController = TextEditingController();
   }
@@ -58,6 +47,7 @@ class _AddMotorcycleScreenState extends State<AddMotorcycleScreen> {
     modeloController.dispose();
     placaController.dispose();
     kilometrajeController.dispose();
+    TipoMotoController.dispose();
     cilindrajeController.dispose();
     anioController.dispose();
     super.dispose();
@@ -234,7 +224,7 @@ class _AddMotorcycleScreenState extends State<AddMotorcycleScreen> {
     if (marcaController.text.isEmpty ||
         modeloController.text.isEmpty ||
         placaController.text.isEmpty ||
-        selectedTipoMoto == null ||
+        TipoMotoController.text.isEmpty ||
         anioController.text.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
@@ -349,7 +339,7 @@ class _AddMotorcycleScreenState extends State<AddMotorcycleScreen> {
       nombreMoto: nombreMotoController.text.trim().isEmpty
           ? 'N/A'
           : nombreMotoController.text.trim(),
-      tipoMoto: selectedTipoMoto!,
+      tipoMoto: TipoMotoController.text.trim(),
       kilometraje: kilometraje,
       cilindraje: cilindraje,
       id_usuario: widget.usuario.idUsuario!,
@@ -512,12 +502,13 @@ class _AddMotorcycleScreenState extends State<AddMotorcycleScreen> {
                 isRequired: true),
             const SizedBox(height: 15),
 
-            _buildDropdownField(
-              label: 'Tipo *',
-              value: selectedTipoMoto,
-              onChanged: (value) => setState(() => selectedTipoMoto = value),
-              items: tiposMoto,
-            ),
+            const SizedBox(height: 15),
+            _buildTextField('Tipo de Moto',
+                controller: TipoMotoController,
+                hint: 'Royal Enfield',
+                keyboardType: TextInputType.text,
+                isRequired: true),
+            const SizedBox(height: 15),
 
             const SizedBox(height: 15),
             _buildTextField('Año',

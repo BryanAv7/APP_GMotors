@@ -25,19 +25,7 @@ class _ViewMotorcycleScreenState extends State<ViewMotorcycleScreen> {
   late TextEditingController anioController;
   late TextEditingController kilometrajeController;
   late TextEditingController cilindrajeController;
-
-  String? tipoMotoSeleccionado;
-  final List<String> tiposMotos = [
-    'Adventure',
-    'Deportiva',
-    'Naked',
-    'Ninja',
-    'Royal enfield',
-    'Scooters',
-    'Scrambler',
-    'Utilitarios',
-    'Otros'
-  ];
+  late TextEditingController tipoMotoController;
 
   File? selectedImage;
   final ImagePicker _picker = ImagePicker();
@@ -52,7 +40,7 @@ class _ViewMotorcycleScreenState extends State<ViewMotorcycleScreen> {
     anioController = TextEditingController(text: widget.moto.anio?.toString() ?? '');
     kilometrajeController = TextEditingController(text: widget.moto.kilometraje?.toString() ?? '');
     cilindrajeController = TextEditingController(text: widget.moto.cilindraje?.toString() ?? '');
-    tipoMotoSeleccionado = widget.moto.tipoMoto ?? 'Otros';
+    tipoMotoController = TextEditingController(text: widget.moto.tipoMoto ?? '');
   }
 
   @override
@@ -64,6 +52,7 @@ class _ViewMotorcycleScreenState extends State<ViewMotorcycleScreen> {
     anioController.dispose();
     kilometrajeController.dispose();
     cilindrajeController.dispose();
+    tipoMotoController.dispose();
     super.dispose();
   }
 
@@ -141,7 +130,6 @@ class _ViewMotorcycleScreenState extends State<ViewMotorcycleScreen> {
 
     final File imageFile = File(imagen.path);
 
-    // Loader con mensaje
     showDialog(
       context: context,
       barrierDismissible: false,
@@ -170,7 +158,7 @@ class _ViewMotorcycleScreenState extends State<ViewMotorcycleScreen> {
     try {
       final placaDetectada = await MotoService.detectarPlacaOCR(imageFile);
 
-      Navigator.pop(context); // cerrar loader
+      Navigator.pop(context);
 
       if (placaDetectada != null && placaDetectada.isNotEmpty) {
         setState(() {
@@ -183,9 +171,7 @@ class _ViewMotorcycleScreenState extends State<ViewMotorcycleScreen> {
               children: [
                 const Icon(Icons.check_circle, color: Colors.green),
                 const SizedBox(width: 12),
-                Expanded(
-                  child: Text('Placa detectada: $placaDetectada'),
-                ),
+                Expanded(child: Text('Placa detectada: $placaDetectada')),
               ],
             ),
             backgroundColor: Colors.grey[850],
@@ -216,7 +202,7 @@ class _ViewMotorcycleScreenState extends State<ViewMotorcycleScreen> {
         );
       }
     } catch (e) {
-      Navigator.pop(context); // cerrar loader
+      Navigator.pop(context);
 
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
@@ -224,9 +210,7 @@ class _ViewMotorcycleScreenState extends State<ViewMotorcycleScreen> {
             children: const [
               Icon(Icons.error, color: Colors.red),
               SizedBox(width: 12),
-              Expanded(
-                child: Text('Error al procesar la imagen'),
-              ),
+              Expanded(child: Text('Error al procesar la imagen')),
             ],
           ),
           backgroundColor: Colors.grey[850],
@@ -239,7 +223,6 @@ class _ViewMotorcycleScreenState extends State<ViewMotorcycleScreen> {
   Future<void> updateMoto() async {
     if (!_formKey.currentState!.validate()) return;
 
-    // Mostrar loader
     showDialog(
       context: context,
       barrierDismissible: false,
@@ -267,7 +250,6 @@ class _ViewMotorcycleScreenState extends State<ViewMotorcycleScreen> {
 
     String? uploadedUrl = widget.moto.ruta_imagenMotos;
 
-    // Si seleccionó una nueva imagen, subirla
     if (selectedImage != null) {
       try {
         final url = await MotoService.uploadMotoImage(selectedImage!);
@@ -297,7 +279,6 @@ class _ViewMotorcycleScreenState extends State<ViewMotorcycleScreen> {
       }
     }
 
-    // Actualizar campos de la moto
     final updatedMoto = Moto(
       id_moto: widget.moto.id_moto,
       placa: placaController.text.trim().toUpperCase(),
@@ -305,7 +286,7 @@ class _ViewMotorcycleScreenState extends State<ViewMotorcycleScreen> {
       marca: marcaController.text.trim(),
       modelo: modeloController.text.trim(),
       nombreMoto: nombreMotoController.text.trim(),
-      tipoMoto: tipoMotoSeleccionado,
+      tipoMoto: tipoMotoController.text.trim(), // ✅
       kilometraje: int.tryParse(kilometrajeController.text),
       cilindraje: int.tryParse(cilindrajeController.text),
       id_usuario: widget.usuario.idUsuario,
@@ -314,7 +295,7 @@ class _ViewMotorcycleScreenState extends State<ViewMotorcycleScreen> {
 
     final result = await MotoService.actualizarMotoAndGet(updatedMoto);
 
-    Navigator.pop(context); // cerrar loader
+    Navigator.pop(context);
 
     if (result != null) {
       ScaffoldMessenger.of(context).showSnackBar(
@@ -323,16 +304,14 @@ class _ViewMotorcycleScreenState extends State<ViewMotorcycleScreen> {
             children: const [
               Icon(Icons.check_circle, color: Colors.green),
               SizedBox(width: 12),
-              Expanded(
-                child: Text('¡Moto actualizada con éxito!'),
-              ),
+              Expanded(child: Text('¡Moto actualizada con éxito!')),
             ],
           ),
           backgroundColor: Colors.grey[850],
           behavior: SnackBarBehavior.floating,
         ),
       );
-      Navigator.pop(context, true); // volver y recargar la lista
+      Navigator.pop(context, true);
     } else {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
@@ -340,9 +319,7 @@ class _ViewMotorcycleScreenState extends State<ViewMotorcycleScreen> {
             children: const [
               Icon(Icons.error, color: Colors.red),
               SizedBox(width: 12),
-              Expanded(
-                child: Text('Error al actualizar la moto'),
-              ),
+              Expanded(child: Text('Error al actualizar la moto')),
             ],
           ),
           backgroundColor: Colors.grey[850],
@@ -358,7 +335,8 @@ class _ViewMotorcycleScreenState extends State<ViewMotorcycleScreen> {
       backgroundColor: Colors.black87,
       appBar: AppBar(
         backgroundColor: Colors.yellow[700],
-        title: const Text('Editar Motocicleta', style: TextStyle(color: Colors.black, fontWeight: FontWeight.normal)),
+        title: const Text('Editar Motocicleta',
+            style: TextStyle(color: Colors.black, fontWeight: FontWeight.normal)),
         leading: IconButton(
           icon: const Icon(Icons.arrow_back, color: Colors.black),
           onPressed: () => Navigator.pop(context),
@@ -371,7 +349,7 @@ class _ViewMotorcycleScreenState extends State<ViewMotorcycleScreen> {
           key: _formKey,
           child: Column(
             children: [
-              // --- Imagen de la moto centrada ---
+              // Imagen de la moto
               Center(
                 child: GestureDetector(
                   onTap: pickImage,
@@ -382,12 +360,16 @@ class _ViewMotorcycleScreenState extends State<ViewMotorcycleScreen> {
                         backgroundColor: Colors.grey[850],
                         backgroundImage: selectedImage != null
                             ? FileImage(selectedImage!)
-                            : (widget.moto.ruta_imagenMotos != null && widget.moto.ruta_imagenMotos!.isNotEmpty)
-                            ? NetworkImage(widget.moto.ruta_imagenMotos!) as ImageProvider
+                            : (widget.moto.ruta_imagenMotos != null &&
+                            widget.moto.ruta_imagenMotos!.isNotEmpty)
+                            ? NetworkImage(widget.moto.ruta_imagenMotos!)
+                        as ImageProvider
                             : null,
                         child: (selectedImage == null &&
-                            (widget.moto.ruta_imagenMotos == null || widget.moto.ruta_imagenMotos!.isEmpty))
-                            ? const Icon(Icons.camera_alt, color: Colors.grey, size: 36)
+                            (widget.moto.ruta_imagenMotos == null ||
+                                widget.moto.ruta_imagenMotos!.isEmpty))
+                            ? const Icon(Icons.camera_alt,
+                            color: Colors.grey, size: 36)
                             : null,
                       ),
                       Positioned(
@@ -399,11 +381,8 @@ class _ViewMotorcycleScreenState extends State<ViewMotorcycleScreen> {
                             color: Colors.yellow[700],
                             shape: BoxShape.circle,
                           ),
-                          child: const Icon(
-                            Icons.edit,
-                            color: Colors.black,
-                            size: 20,
-                          ),
+                          child: const Icon(Icons.edit,
+                              color: Colors.black, size: 20),
                         ),
                       ),
                     ],
@@ -412,7 +391,9 @@ class _ViewMotorcycleScreenState extends State<ViewMotorcycleScreen> {
               ),
               const SizedBox(height: 12),
               Text(
-                selectedImage == null ? 'Toca para cambiar la imagen' : 'Imagen seleccionada',
+                selectedImage == null
+                    ? 'Toca para cambiar la imagen'
+                    : 'Imagen seleccionada',
                 style: TextStyle(color: Colors.grey[400], fontSize: 14),
               ),
 
@@ -425,17 +406,18 @@ class _ViewMotorcycleScreenState extends State<ViewMotorcycleScreen> {
               _buildTextField('Modelo', controller: modeloController),
               const SizedBox(height: 15),
 
-              // Dropdown para Tipo de Moto
-              _buildTipoMotoDropdown(),
+              // ✅ Tipo de moto ahora es campo de texto libre
+              _buildTextField('Tipo de Moto', controller: tipoMotoController),
               const SizedBox(height: 15),
 
-              // Campo placa con ícono de cámara para OCR
+              // Campo placa con OCR
               TextFormField(
                 controller: placaController,
                 style: const TextStyle(color: Colors.white),
                 textCapitalization: TextCapitalization.characters,
                 validator: (value) {
-                  if (value == null || value.isEmpty) return 'Este campo es obligatorio';
+                  if (value == null || value.isEmpty)
+                    return 'Este campo es obligatorio';
                   return null;
                 },
                 decoration: InputDecoration(
@@ -445,7 +427,8 @@ class _ViewMotorcycleScreenState extends State<ViewMotorcycleScreen> {
                   hintStyle: const TextStyle(color: Colors.grey),
                   filled: true,
                   fillColor: Colors.grey[850],
-                  prefixIcon: const Icon(Icons.credit_card, color: Colors.yellow),
+                  prefixIcon:
+                  const Icon(Icons.credit_card, color: Colors.yellow),
                   suffixIcon: IconButton(
                     icon: const Icon(Icons.camera_alt, color: Colors.yellow),
                     onPressed: abrirCamaraPlaca,
@@ -461,17 +444,24 @@ class _ViewMotorcycleScreenState extends State<ViewMotorcycleScreen> {
                   ),
                   focusedBorder: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(8),
-                    borderSide: const BorderSide(color: Colors.yellow, width: 2),
+                    borderSide:
+                    const BorderSide(color: Colors.yellow, width: 2),
                   ),
                 ),
               ),
 
               const SizedBox(height: 15),
-              _buildTextField('Kilometraje', controller: kilometrajeController, keyboardType: TextInputType.number),
+              _buildTextField('Kilometraje',
+                  controller: kilometrajeController,
+                  keyboardType: TextInputType.number),
               const SizedBox(height: 15),
-              _buildTextField('Año', controller: anioController, keyboardType: TextInputType.number),
+              _buildTextField('Año',
+                  controller: anioController,
+                  keyboardType: TextInputType.number),
               const SizedBox(height: 15),
-              _buildTextField('Cilindraje', controller: cilindrajeController, keyboardType: TextInputType.number),
+              _buildTextField('Cilindraje',
+                  controller: cilindrajeController,
+                  keyboardType: TextInputType.number),
               const SizedBox(height: 30),
 
               SizedBox(
@@ -481,7 +471,8 @@ class _ViewMotorcycleScreenState extends State<ViewMotorcycleScreen> {
                   style: ElevatedButton.styleFrom(
                     backgroundColor: Colors.yellow[700],
                     padding: const EdgeInsets.symmetric(vertical: 16),
-                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                    shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(12)),
                     elevation: 3,
                   ),
                   icon: const Icon(Icons.save, color: Colors.black, size: 22),
@@ -502,59 +493,19 @@ class _ViewMotorcycleScreenState extends State<ViewMotorcycleScreen> {
     );
   }
 
-  Widget _buildTipoMotoDropdown() {
-    return DropdownButtonFormField<String>(
-      value: tipoMotoSeleccionado,
-      items: tiposMotos.map((tipo) {
-        return DropdownMenuItem<String>(
-          value: tipo,
-          child: Text(tipo),
-        );
-      }).toList(),
-      onChanged: (value) {
-        setState(() {
-          tipoMotoSeleccionado = value;
-        });
-      },
-      validator: (value) {
-        if (value == null || value.isEmpty) return 'Este campo es obligatorio';
-        return null;
-      },
-      decoration: InputDecoration(
-        labelText: 'Tipo de Moto',
-        labelStyle: const TextStyle(color: Colors.grey),
-        filled: true,
-        fillColor: Colors.grey[850],
-        prefixIcon: const Icon(Icons.two_wheeler, color: Colors.yellow),
-        border: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(8),
-          borderSide: const BorderSide(color: Colors.yellow),
-        ),
-        enabledBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(8),
-          borderSide: const BorderSide(color: Colors.yellow),
-        ),
-        focusedBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(8),
-          borderSide: const BorderSide(color: Colors.yellow, width: 2),
-        ),
-      ),
-      style: const TextStyle(color: Colors.white),
-      dropdownColor: Colors.grey[850],
-    );
-  }
-
-  Widget _buildTextField(String label,
-      {required TextEditingController controller,
+  Widget _buildTextField(
+      String label, {
+        required TextEditingController controller,
         TextInputType keyboardType = TextInputType.text,
-        bool enabled = true}) {
+        bool enabled = true,
+      }) {
     return TextFormField(
       controller: controller,
       keyboardType: keyboardType,
       enabled: enabled,
       style: const TextStyle(color: Colors.white),
       validator: (value) {
-        if (!enabled) return null; // si está bloqueado, no validar
+        if (!enabled) return null;
         if (value == null || value.isEmpty) return 'Este campo es obligatorio';
         return null;
       },

@@ -134,6 +134,45 @@ class MotoService {
   }
 
   // =========================
+// Buscar moto por placa
+// =========================
+  static Future<Moto?> obtenerMotoPorPlaca(String placa) async {
+    try {
+      final baseUrl = await ApiConfig.getBaseUrl();
+      if (baseUrl.isEmpty) return null;
+
+      final url = Uri.parse('$baseUrl/motos/placa/$placa');
+
+      final token = await TokenManager.getToken();
+      if (token == null) return null;
+
+      final response = await http.get(
+        url,
+        headers: {
+          'Authorization': 'Bearer $token',
+        },
+      );
+
+      if (response.statusCode == 200) {
+        final data = jsonDecode(response.body);
+        return Moto.fromJson(data);
+      }
+
+      if (response.statusCode == 404) {
+        return null;
+      }
+
+      return null;
+
+    } catch (e) {
+      print('Error en obtenerMotoPorPlaca: $e');
+      throw Exception(
+          'No se pudo conectar con la Base de Datos. '
+              'Por favor contacte con un administrador. Detalle: $e'
+      );
+    }
+  }
+  // =========================
   // Buscar dueño por placa usando OCR
   // =========================
   static Future<Map<String, dynamic>?> buscarDuenoPorPlaca(File imageFile) async {

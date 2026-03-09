@@ -407,18 +407,18 @@ class _DetalleMantenimientoPageState extends State<DetalleMantenimientoPage> {
         decoration: BoxDecoration(
           color: const Color(0xFF1E1E1E),
           borderRadius: BorderRadius.circular(12),
-          border: Border.all(
-            color: Colors.white24,
-            width: 1.5,
-          ),
+          border: Border.all(color: Colors.white24, width: 1.5),
         ),
         child: const Center(
-          child: CircularProgressIndicator(
-            color: Color(0xFFFFD700),
-          ),
+          child: CircularProgressIndicator(color: Color(0xFFFFD700)),
         ),
       );
     }
+
+    final tipoActual = tiposMantenimiento
+        .where((t) => t.idTipo == idTipoSeleccionado)
+        .map((t) => t.nombre)
+        .firstOrNull ?? '';
 
     return Container(
       decoration: BoxDecoration(
@@ -431,9 +431,7 @@ class _DetalleMantenimientoPageState extends State<DetalleMantenimientoPage> {
           width: 1.5,
         ),
       ),
-      child: DropdownButtonFormField<int>(
-        dropdownColor: const Color(0xFF2B2B2B),
-        style: const TextStyle(color: Colors.white, fontSize: 15),
+      child: InputDecorator(
         decoration: InputDecoration(
           labelText: "Tipo de mantenimiento",
           labelStyle: TextStyle(
@@ -452,18 +450,10 @@ class _DetalleMantenimientoPageState extends State<DetalleMantenimientoPage> {
             vertical: 16,
           ),
         ),
-        value: idTipoSeleccionado,
-        items: tiposMantenimiento.map((tipo) {
-          return DropdownMenuItem<int>(
-            value: tipo.idTipo,
-            child: Text(tipo.nombre),
-          );
-        }).toList(),
-        onChanged: (value) {
-          setState(() => idTipoSeleccionado = value);
-        },
-        validator: (value) =>
-        value == null ? 'Seleccione un tipo de mantenimiento' : null,
+        child: Text(
+          tipoActual,
+          style: const TextStyle(color: Colors.white, fontSize: 15),
+        ),
       ),
     );
   }
@@ -871,6 +861,7 @@ class _DetalleMantenimientoPageState extends State<DetalleMantenimientoPage> {
       final resultadoEstado = await RegistrosService.actualizarEstado(
         widget.idRegistro,
         estadoSeleccionado!,
+        observaciones: observacionesCtrl.text.trim(),
       );
 
       if (resultadoEstado == null || resultadoEstado['success'] != true) {

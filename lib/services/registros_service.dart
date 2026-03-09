@@ -31,7 +31,6 @@ class RegistrosService {
     try {
       final uri = await _buildUrl('');
 
-      // OBTENER TOKEN
       final token = await TokenManager.getToken();
       if (token == null) {
         print('No hay token disponible');
@@ -67,7 +66,6 @@ class RegistrosService {
     try {
       final uri = await _buildUrl('/$idRegistro');
 
-      // OBTENER TOKEN
       final token = await TokenManager.getToken();
       if (token == null) {
         print('No hay token disponible');
@@ -110,7 +108,6 @@ class RegistrosService {
 
       final url = Uri.parse('$baseUrl/registros');
 
-      // OBTENER TOKEN
       final token = await TokenManager.getToken();
       if (token == null) {
         print('No hay token disponible');
@@ -144,8 +141,8 @@ class RegistrosService {
   // (GET /api/registros/historial/{idCliente})
   // =====================================================
   static Future<List<RegistroDetalleDTO>> obtenerHistorialMantenimientos(
-    int idCliente,
-  ) async {
+      int idCliente,
+      ) async {
     try {
       final uri = await _buildUrl('/historial/$idCliente');
 
@@ -179,10 +176,12 @@ class RegistrosService {
     }
   }
 
+  // =====================================================
   // OBTENER DETALLES DE FACTURA
+  // =====================================================
   static Future<List<DetalleFacturaDTO>> obtenerDetallesFactura(
-    int idFactura,
-  ) async {
+      int idFactura,
+      ) async {
     try {
       final uri = await _buildUrl('/$idFactura/detalles-factura');
 
@@ -200,8 +199,6 @@ class RegistrosService {
         },
       );
 
-      //print("[RegistrosService] DETALLES FACTURA $idFactura → ${response.statusCode}");
-
       if (response.statusCode == 200) {
         final List data = json.decode(response.body);
         return data.map((e) => DetalleFacturaDTO.fromJson(e)).toList();
@@ -217,22 +214,21 @@ class RegistrosService {
   }
 
   // =====================================================
-  // ACTUALIZAR ESTADO (PATCH /api/registros/{id}/estado)
-  // =====================================================
+// ACTUALIZAR ESTADO (PATCH /api/registros/{id}/estado)
+// =====================================================
   static Future<Map<String, dynamic>?> actualizarEstado(
-    int idRegistro,
-    int nuevoEstado,
-  ) async {
+      int idRegistro,
+      int nuevoEstado, {
+        String? observaciones,
+      }) async {
     try {
       final baseUrl = await ApiConfig.getBaseUrl();
+      if (baseUrl.isEmpty) throw Exception("IP del servidor no configurada");
 
-      if (baseUrl.isEmpty) {
-        throw Exception("IP del servidor no configurada");
+      String urlString = '$baseUrl/registros/$idRegistro/estado?estado=$nuevoEstado';
+      if (observaciones != null && observaciones.isNotEmpty) {
+        urlString += '&observaciones=${Uri.encodeComponent(observaciones)}';
       }
-
-      final url = Uri.parse(
-        '$baseUrl/registros/$idRegistro/estado?estado=$nuevoEstado',
-      );
 
       final token = await TokenManager.getToken();
       if (token == null) {
@@ -241,25 +237,20 @@ class RegistrosService {
       }
 
       final response = await http.patch(
-        url,
+        Uri.parse(urlString),
         headers: {
           'Content-Type': 'application/json',
           'Authorization': 'Bearer $token',
         },
       );
 
-      print(
-        "[RegistrosService] ACTUALIZAR ESTADO $idRegistro → ${response.statusCode}",
-      );
+      print("[RegistrosService] ACTUALIZAR ESTADO $idRegistro → ${response.statusCode}");
 
       if (response.statusCode == 200) {
         return {'success': true, 'data': jsonDecode(response.body)};
       } else {
         final error = jsonDecode(response.body);
-        return {
-          'success': false,
-          'error': error['error'] ?? 'Error desconocido',
-        };
+        return {'success': false, 'error': error['error'] ?? 'Error desconocido'};
       }
     } catch (e) {
       print('Error en actualizarEstado: $e');
@@ -271,9 +262,9 @@ class RegistrosService {
   // ACTUALIZAR FACTURA (PUT /api/registros/{idRegistro}/factura)
   // =====================================================
   static Future<Map<String, dynamic>?> actualizarFactura(
-    int idRegistro,
-    List<Map<String, dynamic>> detalles,
-  ) async {
+      int idRegistro,
+      List<Map<String, dynamic>> detalles,
+      ) async {
     try {
       final baseUrl = await ApiConfig.getBaseUrl();
 
@@ -315,10 +306,13 @@ class RegistrosService {
     }
   }
 
-  // ================= BUSCAR POR NOMBRE DE CLIENTE =================
+  // =====================================================
+  // BUSCAR HISTORIAL POR NOMBRE DE CLIENTE
+  // (GET /api/registros/buscar/nombre?nombreCliente=...)
+  // =====================================================
   static Future<List<RegistroDetalleDTO>> buscarHistorialPorNombre(
-    String nombreCliente,
-  ) async {
+      String nombreCliente,
+      ) async {
     try {
       final uri = await _buildUrl(
         '/buscar/nombre?nombreCliente=$nombreCliente',
@@ -356,10 +350,82 @@ class RegistrosService {
     }
   }
 
-  // ================= BUSCAR HISTORIAL POR PLACA (CON OCR) =================
+  // =====================================================
+  //  BUSCAR HISTORIAL POR NÚMERO DE PLACA (TEXTO)
+  // =====================================================
+  static Future<List<RegistroDetalleDTO>> buscarHistorialPorPlacaTexto(
+      String placa,
+      ) async {
+    try {
+      final baseUrl = await ApiConfig.getBaseUrl();
+      if (baseUrl.isEmpty) {
+        throw Exception("IP del servidor no configurada");
+      }
+
+      final token = await TokenManager.getToken();
+      if (token == null) {
+        throw Exception("No hay token de autenticación");
+      }
+
+      // Consultar la moto por placa para obtener el dueño
+      final motoUri = Uri.parse('$baseUrl/motos/placa/$placa');
+
+      print("[RegistrosService] BUSCAR PLACA TEXTO '$placa' → $motoUri");
+
+      final motoResponse = await http.get(
+        motoUri,
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": "Bearer $token",
+        },
+      );
+
+      print(
+        "[RegistrosService] MOTO PLACA '$placa' → ${motoResponse.statusCode}",
+      );
+
+      if (motoResponse.statusCode == 404) {
+        throw Exception('No se encontró ningún vehículo con la placa "$placa"');
+      }
+
+      if (motoResponse.statusCode != 200) {
+        throw Exception(
+          'Error al buscar la placa: ${motoResponse.statusCode} ${motoResponse.reasonPhrase}',
+        );
+      }
+
+      // Extraer nombre del cliente desde el JSON de la moto
+      final motoData = json.decode(motoResponse.body);
+
+      // Intentar obtener el nombre desde el objeto usuario anidado
+      final String nombreCliente =
+          motoData['usuario']?['nombre_completo'] as String? ?? '';
+
+      if (nombreCliente.isEmpty) {
+        throw Exception(
+          'El vehículo con placa "$placa" no tiene un dueño registrado',
+        );
+      }
+
+      print(
+        "[RegistrosService] Placa '$placa' → dueño: '$nombreCliente'",
+      );
+
+      // búsqueda por nombre para traer el historial
+      return buscarHistorialPorNombre(nombreCliente);
+    } catch (e) {
+      print('Error en buscarHistorialPorPlacaTexto: $e');
+      rethrow;
+    }
+  }
+
+  // =====================================================
+  // BUSCAR HISTORIAL POR PLACA CON OCR (imagen)
+  // (POST /api/registros/ocr/historial)
+  // =====================================================
   static Future<List<RegistroDetalleDTO>> buscarHistorialPorPlacaOCR(
-    Uint8List imageBytes,
-  ) async {
+      Uint8List imageBytes,
+      ) async {
     try {
       final baseUrl = await ApiConfig.getBaseUrl();
       final uri = Uri.parse('$baseUrl/registros/ocr/historial');
@@ -370,7 +436,6 @@ class RegistrosService {
         throw Exception("No hay token de autenticación");
       }
 
-      // Crear request multipart
       final request = http.MultipartRequest('POST', uri);
       request.headers['Authorization'] = 'Bearer $token';
       request.files.add(
