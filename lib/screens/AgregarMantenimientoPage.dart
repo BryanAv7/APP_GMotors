@@ -818,6 +818,7 @@ class _AgregarMantenimientoPageState extends State<AgregarMantenimientoPage> {
 
             setState(() {
               idTipoSeleccionado = value;
+              detallesSeleccionados.clear();
 
               if (tipoSeleccionado != null &&
                   tipoSeleccionado.producto != null &&

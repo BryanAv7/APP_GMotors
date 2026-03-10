@@ -35,6 +35,7 @@ class _DetalleMantenimientoPageState extends State<DetalleMantenimientoPage> {
     super.initState();
     _cargarTipos();
     _cargarRegistro();
+    _cargarTodoEnOrden();
   }
 
   Future<void> _cargarTipos() async {
@@ -46,6 +47,11 @@ class _DetalleMantenimientoPageState extends State<DetalleMantenimientoPage> {
     } catch (e) {
       print('Error al cargar tipos: $e');
     }
+  }
+
+  Future<void> _cargarTodoEnOrden() async {
+    await _cargarTipos();    // espera a que tipos estén listos
+    await _cargarRegistro(); // luego carga el registro
   }
 
   Future<void> _cargarRegistro() async {
@@ -74,10 +80,9 @@ class _DetalleMantenimientoPageState extends State<DetalleMantenimientoPage> {
         }
       }
 
-      // 🆕 CARGAR ESTADO ACTUAL
       setState(() {
         idTipoSeleccionado = idTipo;
-        estadoSeleccionado = detalle.estado; // Cargar estado desde backend
+        estadoSeleccionado = detalle.estado;
       });
 
       if (detalle.idFactura != null) {
@@ -94,7 +99,7 @@ class _DetalleMantenimientoPageState extends State<DetalleMantenimientoPage> {
             precioUnitario: d.precioUnitario ?? 0,
             esProducto: true,
           ))
-              .toSet() //
+              .toSet()
               .toList();
         });
       }
