@@ -27,6 +27,9 @@ class _HistorialMantenimientosPageState
 
   final ImagePicker _imagePicker = ImagePicker();
 
+  // Caché de futures para evitar re-llamadas al servicio en cada rebuild
+  final Map<int, Future<List<DetalleFacturaDTO>>> _facturaFutures = {};
+
   @override
   void initState() {
     super.initState();
@@ -39,11 +42,29 @@ class _HistorialMantenimientosPageState
     super.dispose();
   }
 
+  // Devuelve siempre el mismo Future para el mismo idFactura
+  Future<List<DetalleFacturaDTO>> _getFacturaFuture(int idFactura) {
+    _facturaFutures[idFactura] ??=
+        RegistrosService.obtenerDetallesFactura(idFactura);
+    return _facturaFutures[idFactura]!;
+  }
+
+  // ✅ Elimina duplicados que vienen del backend
+  // Compara descripcion + precioUnitario + cantidad como clave única
+  List<DetalleFacturaDTO> _deduplicarDetalles(List<DetalleFacturaDTO> detalles) {
+    final vistos = <String>{};
+    return detalles.where((d) {
+      final clave = '${d.descripcion}_${d.precioUnitario}_${d.cantidad}';
+      return vistos.add(clave); // add() devuelve false si la clave ya existía
+    }).toList();
+  }
+
   void _cargarHistorial(String nombreCliente) {
     setState(() {
       cargando = true;
       _nombreClienteSeleccionado = nombreCliente;
       _mostrarHistorial = true;
+      _facturaFutures.clear();
       futureHistorial = RegistrosService.buscarHistorialPorNombre(nombreCliente);
     });
   }
@@ -53,6 +74,7 @@ class _HistorialMantenimientosPageState
       cargando = true;
       _nombreClienteSeleccionado = 'Placa: $placa';
       _mostrarHistorial = true;
+      _facturaFutures.clear();
       futureHistorial = RegistrosService.buscarHistorialPorPlacaTexto(placa);
     });
 
@@ -74,6 +96,7 @@ class _HistorialMantenimientosPageState
       _mostrarHistorial = false;
       _nombreClienteSeleccionado = '';
       historialMantenimientos = [];
+      _facturaFutures.clear();
     });
   }
 
@@ -185,6 +208,7 @@ class _HistorialMantenimientosPageState
         _nombreClienteSeleccionado = nombreCliente;
         _mostrarHistorial = true;
         futureHistorial = Future.value(historial);
+        _facturaFutures.clear();
       });
 
       Navigator.pop(context);
@@ -244,7 +268,6 @@ class _HistorialMantenimientosPageState
           ),
           const SizedBox(height: 24),
 
-          // ── SECCIÓN 1: Búsqueda por nombre ──────────────────────────────
           _buildSectionLabel(
               'Búsqueda por Nombre', Icons.person_search, const Color(0xFFFFD700)),
           const SizedBox(height: 8),
@@ -268,7 +291,6 @@ class _HistorialMantenimientosPageState
           ),
           const SizedBox(height: 12),
 
-          // ✅ Botón 1 — centrado
           Center(
             child: SizedBox(
               width: 200,
@@ -286,8 +308,7 @@ class _HistorialMantenimientosPageState
                     return;
                   }
                   if (nombreText.length < 2) {
-                    _mostrarError(
-                        'El nombre debe tener al menos 2 caracteres');
+                    _mostrarError('El nombre debe tener al menos 2 caracteres');
                     return;
                   }
                   _cargarHistorial(nombreText);
@@ -308,7 +329,6 @@ class _HistorialMantenimientosPageState
           _buildDivider(),
           const SizedBox(height: 28),
 
-          // ── SECCIÓN 2: Búsqueda por número de placa ──────────────────────
           _buildSectionLabel('Búsqueda por Número de Placa',
               Icons.directions_car, const Color(0xFF1565C0)),
           const SizedBox(height: 8),
@@ -333,7 +353,6 @@ class _HistorialMantenimientosPageState
           ),
           const SizedBox(height: 12),
 
-          // ✅ Botón 2 — centrado
           Center(
             child: SizedBox(
               width: 200,
@@ -345,15 +364,13 @@ class _HistorialMantenimientosPageState
                       borderRadius: BorderRadius.circular(12)),
                 ),
                 onPressed: () {
-                  final placa =
-                  _placaController.text.trim().toUpperCase();
+                  final placa = _placaController.text.trim().toUpperCase();
                   if (placa.isEmpty) {
                     _mostrarError('Por favor ingresa un número de placa');
                     return;
                   }
                   if (placa.length < 3) {
-                    _mostrarError(
-                        'La placa debe tener al menos 3 caracteres');
+                    _mostrarError('La placa debe tener al menos 3 caracteres');
                     return;
                   }
                   _cargarHistorialPorPlaca(placa);
@@ -374,12 +391,10 @@ class _HistorialMantenimientosPageState
           _buildDivider(),
           const SizedBox(height: 28),
 
-          // ── SECCIÓN 3: Escanear placa con OCR ────────────────────────────
           _buildSectionLabel(
               'Búsqueda con IA', Icons.camera_alt, const Color(0xFF4CAF50)),
           const SizedBox(height: 8),
 
-          // ✅ Botón 3 — centrado
           Center(
             child: SizedBox(
               width: 200,
@@ -408,8 +423,6 @@ class _HistorialMantenimientosPageState
       ),
     );
   }
-
-  // ── Helpers de UI ────────────────────────────────────────────────────────
 
   Widget _buildSectionLabel(String label, IconData icon, Color color) {
     return Row(
@@ -481,8 +494,7 @@ class _HistorialMantenimientosPageState
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          CircularProgressIndicator(
-              color: Color(0xFFFFD700), strokeWidth: 3),
+          CircularProgressIndicator(color: Color(0xFFFFD700), strokeWidth: 3),
           SizedBox(height: 20),
           Text('Cargando historial...',
               style: TextStyle(color: Colors.white, fontSize: 16)),
@@ -509,8 +521,7 @@ class _HistorialMantenimientosPageState
             ),
             const SizedBox(height: 12),
             Text(error,
-                style:
-                const TextStyle(color: Colors.white70, fontSize: 14),
+                style: const TextStyle(color: Colors.white70, fontSize: 14),
                 textAlign: TextAlign.center),
             const SizedBox(height: 24),
             ElevatedButton.icon(
@@ -593,8 +604,8 @@ class _HistorialMantenimientosPageState
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       const Text('Cliente',
-                          style: TextStyle(
-                              color: Colors.white54, fontSize: 12)),
+                          style:
+                          TextStyle(color: Colors.white54, fontSize: 12)),
                       const SizedBox(height: 4),
                       Text(
                         _nombreClienteSeleccionado,
@@ -631,8 +642,7 @@ class _HistorialMantenimientosPageState
             child: OutlinedButton.icon(
               onPressed: _limpiarBusqueda,
               style: OutlinedButton.styleFrom(
-                side: const BorderSide(
-                    color: Color(0xFFFFD700), width: 1.5),
+                side: const BorderSide(color: Color(0xFFFFD700), width: 1.5),
                 padding: const EdgeInsets.symmetric(vertical: 12),
               ),
               icon: const Icon(Icons.search, color: Color(0xFFFFD700)),
@@ -687,8 +697,7 @@ class _HistorialMantenimientosPageState
         ],
       ),
       child: Theme(
-        data:
-        Theme.of(context).copyWith(dividerColor: Colors.transparent),
+        data: Theme.of(context).copyWith(dividerColor: Colors.transparent),
         child: ExpansionTile(
           iconColor: const Color(0xFFFFD700),
           collapsedIconColor: const Color(0xFFFFD700),
@@ -810,8 +819,7 @@ class _HistorialMantenimientosPageState
                         children: [
                           const Row(
                             children: [
-                              Icon(Icons.note,
-                                  color: Colors.amber, size: 16),
+                              Icon(Icons.note, color: Colors.amber, size: 16),
                               SizedBox(width: 8),
                               Text(
                                 'Observaciones',
@@ -849,8 +857,7 @@ class _HistorialMantenimientosPageState
         border: Border.all(color: Colors.blue.withOpacity(0.3)),
       ),
       child: Theme(
-        data:
-        Theme.of(context).copyWith(dividerColor: Colors.transparent),
+        data: Theme.of(context).copyWith(dividerColor: Colors.transparent),
         child: ExpansionTile(
           iconColor: Colors.blue,
           collapsedIconColor: Colors.blue,
@@ -873,11 +880,9 @@ class _HistorialMantenimientosPageState
             Padding(
               padding: const EdgeInsets.all(12),
               child: FutureBuilder<List<DetalleFacturaDTO>>(
-                future:
-                RegistrosService.obtenerDetallesFactura(idFactura),
+                future: _getFacturaFuture(idFactura),
                 builder: (context, snapshot) {
-                  if (snapshot.connectionState ==
-                      ConnectionState.waiting) {
+                  if (snapshot.connectionState == ConnectionState.waiting) {
                     return const Padding(
                       padding: EdgeInsets.all(12),
                       child: CircularProgressIndicator(
@@ -887,11 +892,9 @@ class _HistorialMantenimientosPageState
                     return Padding(
                       padding: const EdgeInsets.all(12),
                       child: Text('Error al cargar detalles',
-                          style:
-                          TextStyle(color: Colors.red.shade300)),
+                          style: TextStyle(color: Colors.red.shade300)),
                     );
-                  } else if (!snapshot.hasData ||
-                      snapshot.data!.isEmpty) {
+                  } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
                     return const Padding(
                       padding: EdgeInsets.all(12),
                       child: Text('No hay detalles disponibles',
@@ -899,13 +902,15 @@ class _HistorialMantenimientosPageState
                     );
                   }
 
-                  final detalles = snapshot.data!;
+                  // ✅ Deduplicar antes de mostrar para corregir duplicados del backend
+                  final detalles = _deduplicarDetalles(snapshot.data!);
+
                   return ListView.separated(
                     shrinkWrap: true,
                     physics: const NeverScrollableScrollPhysics(),
                     itemCount: detalles.length,
-                    separatorBuilder: (_, __) => const Divider(
-                        color: Colors.white12, height: 12),
+                    separatorBuilder: (_, __) =>
+                    const Divider(color: Colors.white12, height: 12),
                     itemBuilder: (context, index) {
                       final detalle = detalles[index];
                       return Container(
@@ -915,8 +920,7 @@ class _HistorialMantenimientosPageState
                           borderRadius: BorderRadius.circular(6),
                         ),
                         child: Column(
-                          crossAxisAlignment:
-                          CrossAxisAlignment.start,
+                          crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
                             Text(
                               'Producto:\n${detalle.descripcion}',
@@ -944,8 +948,7 @@ class _HistorialMantenimientosPageState
                                     style: const TextStyle(
                                         color: Colors.yellow,
                                         fontSize: 12,
-                                        fontWeight:
-                                        FontWeight.bold)),
+                                        fontWeight: FontWeight.bold)),
                               ],
                             ),
                           ],
@@ -984,8 +987,8 @@ class _HistorialMantenimientosPageState
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text(label,
-                  style: const TextStyle(
-                      color: Colors.white54, fontSize: 11)),
+                  style:
+                  const TextStyle(color: Colors.white54, fontSize: 11)),
               const SizedBox(height: 2),
               Text(value,
                   style: const TextStyle(
@@ -1023,8 +1026,7 @@ class _HistorialMantenimientosPageState
       decoration: BoxDecoration(
         color: colorEstado.withOpacity(0.2),
         borderRadius: BorderRadius.circular(8),
-        border:
-        Border.all(color: colorEstado.withOpacity(0.5), width: 1),
+        border: Border.all(color: colorEstado.withOpacity(0.5), width: 1),
       ),
       child: Row(
         mainAxisSize: MainAxisSize.min,
@@ -1066,8 +1068,8 @@ class _HistorialMantenimientosPageState
         ),
         backgroundColor: Colors.red.shade700,
         behavior: SnackBarBehavior.floating,
-        shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(12)),
+        shape:
+        RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
       ),
     );
   }

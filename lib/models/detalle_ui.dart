@@ -17,14 +17,8 @@ class DetalleUI {
     this.imagenUrl,
   });
 
-  // ⬅️ CAMBIO AQUÍ: Si es concepto manual, NO multiplica
-  double get subtotal {
-    if (esProducto) {
-      return cantidad * precioUnitario; // Productos SÍ multiplican
-    } else {
-      return precioUnitario; // Conceptos manuales NO multiplican
-    }
-  }
+  // Fix, multiplicar por la cantidad.
+  double get subtotal => cantidad * precioUnitario;
 
   // Constructor desde Producto
   factory DetalleUI.fromProducto(Producto producto, int cantidad) {
