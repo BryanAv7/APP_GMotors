@@ -4,6 +4,7 @@ import '../models/RegistroDetalleDTO.dart';
 import '../models/DetalleFacturaDTO.dart';
 import '../services/registros_service.dart';
 import 'package:flutter/services.dart';
+import '../services/pdf_factura_service.dart';
 
 class HistorialMantenimientosPage extends StatefulWidget {
   const HistorialMantenimientosPage({super.key});
@@ -216,6 +217,36 @@ class _HistorialMantenimientosPageState
     } catch (e) {
       Navigator.pop(context);
       _mostrarError('Error al procesar la imagen: $e');
+    }
+  }
+
+  // =====================================================
+  // Método para generar e imprimir la factura PDF
+  // Solo disponible para registros con estado == 2 (Finalizado)
+  // =====================================================
+  Future<void> _imprimirFactura(RegistroDetalleDTO registro) async {
+    try {
+      // Muestra loading mientras se cargan los detalles y genera el PDF
+      showDialog(
+        context: context,
+        barrierDismissible: false,
+        builder: (_) => const Center(
+          child: CircularProgressIndicator(color: Color(0xFFFFD700)),
+        ),
+      );
+
+      final detalles = await _getFacturaFuture(registro.idFactura!);
+      final detallesLimpios = _deduplicarDetalles(detalles);
+
+      Navigator.pop(context); // Cierra loading
+
+      await PdfFacturaService.generarEImprimir(
+        registro: registro,
+        detalles: detallesLimpios,
+      );
+    } catch (e) {
+      Navigator.pop(context);
+      _mostrarError('Error al generar PDF: $e');
     }
   }
 
@@ -843,6 +874,34 @@ class _HistorialMantenimientosPageState
                                 color: Colors.white70, fontSize: 13),
                           ),
                         ],
+                      ),
+                    ),
+                  ],
+
+                  // =====================================================
+                  // PASO 3 - Botón imprimir/compartir PDF
+                  // Solo visible cuando el registro está Finalizado (estado == 2)
+                  // y tiene una factura asociada
+                  // =====================================================
+                  if (registro.estado == 2 && registro.idFactura != null) ...[
+                    const SizedBox(height: 16),
+                    SizedBox(
+                      width: double.infinity,
+                      child: ElevatedButton.icon(
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: const Color(0xFFFFD700),
+                          foregroundColor: Colors.black,
+                          padding: const EdgeInsets.symmetric(vertical: 12),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(10),
+                          ),
+                        ),
+                        icon: const Icon(Icons.print),
+                        label: const Text(
+                          'Imprimir / Compartir Factura',
+                          style: TextStyle(fontWeight: FontWeight.bold),
+                        ),
+                        onPressed: () => _imprimirFactura(registro),
                       ),
                     ),
                   ],
