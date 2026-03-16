@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import '../models/productos.dart';
+import '../models/categoria.dart';
 import '../services/productos_service.dart';
+import '../services/categoria_service.dart';
 import '../screens/EditProductosScreen.dart';
 
 class InventarioScreen extends StatefulWidget {
@@ -13,6 +15,7 @@ class InventarioScreen extends StatefulWidget {
 class _InventarioScreenState extends State<InventarioScreen> {
   List<Producto> productos = [];
   List<Producto> productosFiltrados = [];
+  List<Categoria> categorias = []; // categorias
   bool isLoading = true;
   int? categoriaSeleccionada;
   int? selectedProductoIndex;
@@ -21,6 +24,7 @@ class _InventarioScreenState extends State<InventarioScreen> {
   void initState() {
     super.initState();
     _cargarProductos();
+    _cargarCategorias();
   }
 
   Future<void> _cargarProductos() async {
@@ -37,6 +41,18 @@ class _InventarioScreenState extends State<InventarioScreen> {
     });
   }
 
+
+  Future<void> _cargarCategorias() async {
+    final categoriasObtenidas = await CategoriaService.listarCategorias();
+
+    // Ordenar categorías alfabéticamente
+    categoriasObtenidas.sort((a, b) => a.nombre.compareTo(b.nombre));
+
+    setState(() {
+      categorias = categoriasObtenidas;
+    });
+  }
+
   void _filtrarProductos(String query) {
     setState(() {
       if (query.isEmpty) {
@@ -47,7 +63,8 @@ class _InventarioScreenState extends State<InventarioScreen> {
           final codigo = producto.codigoPersonal?.toLowerCase() ?? '';
           final busqueda = query.toLowerCase();
 
-          bool coincideBusqueda = nombre.contains(busqueda) || codigo.contains(busqueda);
+          bool coincideBusqueda =
+              nombre.contains(busqueda) || codigo.contains(busqueda);
           bool coincideCategoria = categoriaSeleccionada == null ||
               producto.idCategoria == categoriaSeleccionada;
 
@@ -121,6 +138,7 @@ class _InventarioScreenState extends State<InventarioScreen> {
             ),
           ),
 
+
           Container(
             color: Colors.grey[850],
             height: 50,
@@ -128,11 +146,19 @@ class _InventarioScreenState extends State<InventarioScreen> {
               scrollDirection: Axis.horizontal,
               padding: const EdgeInsets.symmetric(horizontal: 16),
               children: [
+
                 _buildCategoriaChip('Todas', null),
+
                 const SizedBox(width: 8),
-                _buildCategoriaChip('General', 1),
-                const SizedBox(width: 8),
-                _buildCategoriaChip('OTROS', 1),///SE DEBERIA DE OBTENER DE "CATEGORIAS"
+
+                ...categorias.map((c) => Padding(
+                  padding: const EdgeInsets.only(right: 8),
+                  child: _buildCategoriaChip(
+                    c.nombre,
+                    c.idCategoria,
+                  ),
+                )),
+
               ],
             ),
           ),
@@ -164,7 +190,8 @@ class _InventarioScreenState extends State<InventarioScreen> {
                 final isSelected = selectedProductoIndex == index;
                 return Padding(
                   padding: const EdgeInsets.only(bottom: 12),
-                  child: _buildProductCard(producto, index, isSelected),
+                  child:
+                  _buildProductCard(producto, index, isSelected),
                 );
               },
             ),
@@ -174,7 +201,8 @@ class _InventarioScreenState extends State<InventarioScreen> {
       floatingActionButton: selectedProductoIndex != null
           ? FloatingActionButton.extended(
         onPressed: () async {
-          final selectedProducto = productosFiltrados[selectedProductoIndex!];
+          final selectedProducto =
+          productosFiltrados[selectedProductoIndex!];
 
           final resultado = await Navigator.push(
             context,
@@ -195,7 +223,8 @@ class _InventarioScreenState extends State<InventarioScreen> {
         backgroundColor: Colors.yellow[700],
         label: const Text(
           'Editar',
-          style: TextStyle(color: Colors.black, fontWeight: FontWeight.bold),
+          style:
+          TextStyle(color: Colors.black, fontWeight: FontWeight.bold),
         ),
         icon: const Icon(Icons.edit, color: Colors.black),
       )
@@ -419,8 +448,7 @@ class _InventarioScreenState extends State<InventarioScreen> {
                           ],
                         ),
                       ),
-
-                       */
+                      */
                     ],
                   ),
                 ],
