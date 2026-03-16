@@ -4,6 +4,7 @@ import 'package:image_picker/image_picker.dart';
 import '../models/moto.dart';
 import '../models/usuario.dart';
 import '../services/moto_service.dart';
+import 'package:flutter/services.dart';
 
 class AddMotorcycleScreen extends StatefulWidget {
   final Usuario usuario;
@@ -450,6 +451,11 @@ class _AddMotorcycleScreenState extends State<AddMotorcycleScreen> {
               controller: placaController,
               style: const TextStyle(color: Colors.white),
               textCapitalization: TextCapitalization.characters,
+
+              inputFormatters: [
+                FilteringTextInputFormatter.allow(RegExp(r'[A-Za-z0-9]')),
+              ],
+
               decoration: InputDecoration(
                 label: RichText(
                   text: const TextSpan(
@@ -469,7 +475,7 @@ class _AddMotorcycleScreenState extends State<AddMotorcycleScreen> {
                     ],
                   ),
                 ),
-                hintText: 'Ej: ABC-123',
+                hintText: 'Ej: ABC123',
                 hintStyle: const TextStyle(color: Colors.grey),
                 filled: true,
                 fillColor: Colors.grey[850],

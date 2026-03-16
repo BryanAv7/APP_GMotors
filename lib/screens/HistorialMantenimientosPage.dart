@@ -3,6 +3,7 @@ import 'package:image_picker/image_picker.dart';
 import '../models/RegistroDetalleDTO.dart';
 import '../models/DetalleFacturaDTO.dart';
 import '../services/registros_service.dart';
+import 'package:flutter/services.dart';
 
 class HistorialMantenimientosPage extends StatefulWidget {
   const HistorialMantenimientosPage({super.key});
@@ -338,9 +339,14 @@ class _HistorialMantenimientosPageState
               controller: _placaController,
               keyboardType: TextInputType.text,
               textCapitalization: TextCapitalization.characters,
+
+              inputFormatters: [
+                FilteringTextInputFormatter.allow(RegExp(r'[A-Za-z0-9]')),
+              ],
+
               style: const TextStyle(color: Colors.white, fontSize: 16),
               decoration: InputDecoration(
-                labelText: "Número de Placa  (ej: ABC-1234)",
+                labelText: "Número de Placa  (ej: ABC1234)",
                 labelStyle: TextStyle(
                     color: Colors.white.withOpacity(0.6), fontSize: 14),
                 prefixIcon: const Icon(Icons.directions_car,

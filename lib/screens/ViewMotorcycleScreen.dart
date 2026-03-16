@@ -4,6 +4,7 @@ import '../models/usuario.dart';
 import '../models/moto.dart';
 import '../services/moto_service.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:flutter/services.dart';
 
 class ViewMotorcycleScreen extends StatefulWidget {
   final Usuario usuario;
@@ -406,7 +407,7 @@ class _ViewMotorcycleScreenState extends State<ViewMotorcycleScreen> {
               _buildTextField('Modelo', controller: modeloController),
               const SizedBox(height: 15),
 
-              // ✅ Tipo de moto ahora es campo de texto libre
+              // Tipo de moto
               _buildTextField('Tipo de Moto', controller: tipoMotoController),
               const SizedBox(height: 15),
 
@@ -415,6 +416,11 @@ class _ViewMotorcycleScreenState extends State<ViewMotorcycleScreen> {
                 controller: placaController,
                 style: const TextStyle(color: Colors.white),
                 textCapitalization: TextCapitalization.characters,
+
+                inputFormatters: [
+                  FilteringTextInputFormatter.allow(RegExp(r'[A-Za-z0-9]')),
+                ],
+
                 validator: (value) {
                   if (value == null || value.isEmpty)
                     return 'Este campo es obligatorio';
