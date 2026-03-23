@@ -70,7 +70,7 @@ class _AgregarMantenimientoPageState extends State<AgregarMantenimientoPage> {
     clienteCtrl.dispose();
     vehiculoCtrl.dispose();
     descripcionCtrl.dispose();
-    placaCtrl.dispose(); // ── NUEVO ──
+    placaCtrl.dispose();
     super.dispose();
   }
 
@@ -152,7 +152,7 @@ class _AgregarMantenimientoPageState extends State<AgregarMantenimientoPage> {
               // ── Búsqueda por nombre ──
               _searchClienteField(),
               const SizedBox(height: 12),
-              // ── Búsqueda auxiliar por placa texto ──
+              // ── NUEVO: Búsqueda auxiliar por placa texto ──
               _searchPlacaField(),
               const SizedBox(height: 20),
 
@@ -351,7 +351,7 @@ class _AgregarMantenimientoPageState extends State<AgregarMantenimientoPage> {
     );
   }
 
-  // ── Búsqueda auxiliar por placa texto ──
+  // ── NUEVO: Búsqueda auxiliar por placa texto ──
   Widget _searchPlacaField() {
     return Container(
       decoration: BoxDecoration(
@@ -377,7 +377,7 @@ class _AgregarMantenimientoPageState extends State<AgregarMantenimientoPage> {
                 FilteringTextInputFormatter.allow(RegExp(r'[A-Za-z0-9]')),
               ],
               decoration: InputDecoration(
-                labelText: "Buscar por Placa  (ej: ABC1234)",
+                labelText: "Buscar por Placa (ej: ABC123)",
                 labelStyle: TextStyle(
                   color: Colors.white.withOpacity(0.6),
                   fontSize: 14,
@@ -465,6 +465,7 @@ class _AgregarMantenimientoPageState extends State<AgregarMantenimientoPage> {
         final idMoto = resultado['idMoto'];
         final motoExiste = motosCliente.any((m) => m.id_moto == idMoto);
         setState(() => idMotoSeleccionada = motoExiste ? idMoto : null);
+        // ← Sin snackbar verde
       } else {
         _mostrarError(resultado?['mensaje'] ?? 'No se encontró el vehículo');
       }
