@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'dart:io';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:image_picker/image_picker.dart';
 import '../models/usuario.dart';
 import '../models/moto.dart';
@@ -30,6 +31,7 @@ class _AgregarMantenimientoPageState extends State<AgregarMantenimientoPage> {
   final TextEditingController clienteCtrl = TextEditingController();
   final TextEditingController vehiculoCtrl = TextEditingController();
   final TextEditingController descripcionCtrl = TextEditingController();
+  final TextEditingController placaCtrl = TextEditingController();
 
   // ---------------- DATA ----------------
   int? idClienteSeleccionado;
@@ -63,6 +65,15 @@ class _AgregarMantenimientoPageState extends State<AgregarMantenimientoPage> {
     _cargarNumeroRegistro();
   }
 
+  @override
+  void dispose() {
+    clienteCtrl.dispose();
+    vehiculoCtrl.dispose();
+    descripcionCtrl.dispose();
+    placaCtrl.dispose(); // ── NUEVO ──
+    super.dispose();
+  }
+
   Future<void> _cargarNumeroRegistro() async {
     try {
       final registros = await RegistrosService.listarRegistros();
@@ -88,6 +99,7 @@ class _AgregarMantenimientoPageState extends State<AgregarMantenimientoPage> {
       clienteCtrl.clear();
       vehiculoCtrl.clear();
       descripcionCtrl.clear();
+      placaCtrl.clear(); // ── NUEVO ──
       motosCliente = [];
       clienteSeleccionadoPorOCR = false;
       intentoGuardar = false;
@@ -137,7 +149,11 @@ class _AgregarMantenimientoPageState extends State<AgregarMantenimientoPage> {
 
               _buildSectionTitle('Información del Cliente', Icons.person),
               const SizedBox(height: 12),
+              // ── Búsqueda por nombre ──
               _searchClienteField(),
+              const SizedBox(height: 12),
+              // ── Búsqueda auxiliar por placa texto ──
+              _searchPlacaField(),
               const SizedBox(height: 20),
 
               _buildSectionTitle('Vehículo', Icons.motorcycle),
@@ -197,11 +213,7 @@ class _AgregarMantenimientoPageState extends State<AgregarMantenimientoPage> {
                 label: 'Fecha',
                 value: DateTime.now().toString().split(' ')[0],
               ),
-              Container(
-                height: 40,
-                width: 1,
-                color: Colors.white24,
-              ),
+              Container(height: 40, width: 1, color: Colors.white24),
               _buildInfoItem(
                 icon: Icons.tag,
                 label: 'Registro',
@@ -226,13 +238,7 @@ class _AgregarMantenimientoPageState extends State<AgregarMantenimientoPage> {
         children: [
           Icon(icon, color: const Color(0xFFFFD700), size: 24),
           const SizedBox(height: 8),
-          Text(
-            label,
-            style: const TextStyle(
-              color: Colors.white54,
-              fontSize: 12,
-            ),
-          ),
+          Text(label, style: const TextStyle(color: Colors.white54, fontSize: 12)),
           const SizedBox(height: 4),
           Text(
             value,
@@ -256,11 +262,7 @@ class _AgregarMantenimientoPageState extends State<AgregarMantenimientoPage> {
             color: const Color(0xFFFFD700).withOpacity(0.2),
             borderRadius: BorderRadius.circular(8),
           ),
-          child: Icon(
-            icon,
-            color: const Color(0xFFFFD700),
-            size: 20,
-          ),
+          child: Icon(icon, color: const Color(0xFFFFD700), size: 20),
         ),
         const SizedBox(width: 12),
         Text(
@@ -275,6 +277,7 @@ class _AgregarMantenimientoPageState extends State<AgregarMantenimientoPage> {
     );
   }
 
+  // ── Búsqueda por nombre ──
   Widget _searchClienteField() {
     return Container(
       decoration: BoxDecoration(
@@ -302,7 +305,7 @@ class _AgregarMantenimientoPageState extends State<AgregarMantenimientoPage> {
               readOnly: true,
               style: const TextStyle(color: Colors.white, fontSize: 15),
               decoration: InputDecoration(
-                labelText: "Cliente",
+                labelText: "Buscar por Nombre",
                 labelStyle: TextStyle(
                   color: Colors.white.withOpacity(0.6),
                   fontSize: 14,
@@ -330,18 +333,145 @@ class _AgregarMantenimientoPageState extends State<AgregarMantenimientoPage> {
           Container(
             margin: const EdgeInsets.only(right: 8),
             decoration: BoxDecoration(
-              color: clienteSeleccionadoPorOCR ? Colors.grey : const Color(0xFFFFD700),
+              color: clienteSeleccionadoPorOCR
+                  ? Colors.grey
+                  : const Color(0xFFFFD700),
               borderRadius: BorderRadius.circular(8),
             ),
             child: IconButton(
               icon: const Icon(Icons.search, color: Colors.black),
               onPressed: clienteSeleccionadoPorOCR ? null : _buscarCliente,
-              tooltip: clienteSeleccionadoPorOCR ? 'Deshabilitado - Cliente seleccionado por OCR' : 'Buscar cliente',
+              tooltip: clienteSeleccionadoPorOCR
+                  ? 'Deshabilitado - Cliente seleccionado por OCR'
+                  : 'Buscar cliente por nombre',
             ),
           ),
         ],
       ),
     );
+  }
+
+  // ── Búsqueda auxiliar por placa texto ──
+  Widget _searchPlacaField() {
+    return Container(
+      decoration: BoxDecoration(
+        color: const Color(0xFF1E1E1E),
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: Colors.white24, width: 1.5),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.2),
+            blurRadius: 8,
+            offset: const Offset(0, 2),
+          ),
+        ],
+      ),
+      child: Row(
+        children: [
+          Expanded(
+            child: TextField(
+              controller: placaCtrl,
+              style: const TextStyle(color: Colors.white, fontSize: 15),
+              textCapitalization: TextCapitalization.characters,
+              inputFormatters: [
+                FilteringTextInputFormatter.allow(RegExp(r'[A-Za-z0-9]')),
+              ],
+              decoration: InputDecoration(
+                labelText: "Buscar por Placa  (ej: ABC1234)",
+                labelStyle: TextStyle(
+                  color: Colors.white.withOpacity(0.6),
+                  fontSize: 14,
+                ),
+                prefixIcon: const Icon(Icons.badge_outlined, color: Colors.white54),
+                border: InputBorder.none,
+                contentPadding: const EdgeInsets.symmetric(
+                  horizontal: 16,
+                  vertical: 16,
+                ),
+              ),
+            ),
+          ),
+          Container(
+            margin: const EdgeInsets.only(right: 8),
+            decoration: BoxDecoration(
+              color: const Color(0xFFFFD700),
+              borderRadius: BorderRadius.circular(8),
+            ),
+            child: IconButton(
+              icon: const Icon(Icons.search, color: Colors.black),
+              onPressed: _buscarPorPlaca,
+              tooltip: 'Buscar cliente por placa',
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  // ── NUEVO: Método buscar por placa texto ──
+  Future<void> _buscarPorPlaca() async {
+    final placa = placaCtrl.text.trim().toUpperCase();
+    if (placa.isEmpty) {
+      _mostrarError('Ingresa un número de placa');
+      return;
+    }
+    if (placa.length < 3) {
+      _mostrarError('La placa debe tener al menos 3 caracteres');
+      return;
+    }
+
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (_) => Center(
+        child: Container(
+          padding: const EdgeInsets.all(32),
+          decoration: BoxDecoration(
+            color: const Color(0xFF2B2B2B),
+            borderRadius: BorderRadius.circular(20),
+          ),
+          child: const Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              CircularProgressIndicator(color: Color(0xFFFFD700), strokeWidth: 3),
+              SizedBox(height: 20),
+              Text(
+                'Buscando placa...',
+                style: TextStyle(color: Colors.white, fontSize: 16),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+
+    try {
+      final resultado = await MotoService.buscarClientePorPlacaTexto(placa);
+      Navigator.pop(context);
+
+      if (resultado != null && resultado['success'] == true) {
+        setState(() {
+          idClienteSeleccionado = resultado['idUsuario'];
+          clienteCtrl.text = resultado['nombreCompleto'];
+          clienteSeleccionadoPorOCR = false;
+          idMotoSeleccionada = null;
+          motosCliente.clear();
+          cargandoMotos = true;
+        });
+
+        await _cargarMotos(resultado['idUsuario']);
+
+        // Verificar que el idMoto del resultado exista en la lista cargada
+        final idMoto = resultado['idMoto'];
+        final motoExiste = motosCliente.any((m) => m.id_moto == idMoto);
+        setState(() => idMotoSeleccionada = motoExiste ? idMoto : null);
+      } else {
+        _mostrarError(resultado?['mensaje'] ?? 'No se encontró el vehículo');
+      }
+    } catch (e) {
+      Navigator.pop(context);
+      _mostrarError('Error: $e');
+    }
   }
 
   Future<void> _abrirCamaraCliente() async {
@@ -369,14 +499,9 @@ class _AgregarMantenimientoPageState extends State<AgregarMantenimientoPage> {
               ),
               ListTile(
                 leading: const Icon(Icons.camera_alt, color: Colors.yellow),
-                title: const Text(
-                  'Tomar foto',
-                  style: TextStyle(color: Colors.white),
-                ),
-                subtitle: const Text(
-                  'Detecta Placa',
-                  style: TextStyle(color: Colors.grey, fontSize: 12),
-                ),
+                title: const Text('Tomar foto', style: TextStyle(color: Colors.white)),
+                subtitle: const Text('Detecta Placa',
+                    style: TextStyle(color: Colors.grey, fontSize: 12)),
                 onTap: () {
                   Navigator.pop(context);
                   _procesarPlacaOCR(ImageSource.camera);
@@ -384,14 +509,10 @@ class _AgregarMantenimientoPageState extends State<AgregarMantenimientoPage> {
               ),
               ListTile(
                 leading: const Icon(Icons.photo_library, color: Colors.yellow),
-                title: const Text(
-                  'Elegir de galería',
-                  style: TextStyle(color: Colors.white),
-                ),
-                subtitle: const Text(
-                  'Selecciona una foto de la placa',
-                  style: TextStyle(color: Colors.grey, fontSize: 12),
-                ),
+                title: const Text('Elegir de galería',
+                    style: TextStyle(color: Colors.white)),
+                subtitle: const Text('Selecciona una foto de la placa',
+                    style: TextStyle(color: Colors.grey, fontSize: 12)),
                 onTap: () {
                   Navigator.pop(context);
                   _procesarPlacaOCR(ImageSource.gallery);
@@ -418,34 +539,27 @@ class _AgregarMantenimientoPageState extends State<AgregarMantenimientoPage> {
     showDialog(
       context: context,
       barrierDismissible: false,
-      builder: (_) =>
-          Center(
-            child: Container(
-              padding: const EdgeInsets.all(32),
-              decoration: BoxDecoration(
-                color: const Color(0xFF2B2B2B),
-                borderRadius: BorderRadius.circular(20),
-              ),
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                children: const [
-                  CircularProgressIndicator(
-                    color: Color(0xFFFFD700),
-                    strokeWidth: 3,
-                  ),
-                  SizedBox(height: 20),
-                  Text(
-                    'Detectando placa y\nbuscando dueño...',
-                    style: TextStyle(
-                      color: Colors.white,
-                      fontSize: 16,
-                    ),
-                    textAlign: TextAlign.center,
-                  ),
-                ],
-              ),
-            ),
+      builder: (_) => Center(
+        child: Container(
+          padding: const EdgeInsets.all(32),
+          decoration: BoxDecoration(
+            color: const Color(0xFF2B2B2B),
+            borderRadius: BorderRadius.circular(20),
           ),
+          child: const Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              CircularProgressIndicator(color: Color(0xFFFFD700), strokeWidth: 3),
+              SizedBox(height: 20),
+              Text(
+                'Detectando placa y\nbuscando dueño...',
+                style: TextStyle(color: Colors.white, fontSize: 16),
+                textAlign: TextAlign.center,
+              ),
+            ],
+          ),
+        ),
+      ),
     );
 
     try {
@@ -474,15 +588,12 @@ class _AgregarMantenimientoPageState extends State<AgregarMantenimientoPage> {
             ),
             backgroundColor: Colors.green.shade700,
             behavior: SnackBarBehavior.floating,
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(12),
-            ),
+            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
             duration: const Duration(seconds: 3),
           ),
         );
       } else {
-        final mensaje = resultado?['mensaje'] ??
-            'No se pudo procesar la imagen';
+        final mensaje = resultado?['mensaje'] ?? 'No se pudo procesar la imagen';
         final placa = resultado?['placa'];
 
         ScaffoldMessenger.of(context).showSnackBar(
@@ -494,9 +605,7 @@ class _AgregarMantenimientoPageState extends State<AgregarMantenimientoPage> {
             ),
             backgroundColor: Colors.red.shade700,
             behavior: SnackBarBehavior.floating,
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(12),
-            ),
+            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
             action: SnackBarAction(
               label: 'Reintentar',
               textColor: Colors.yellow,
@@ -520,10 +629,7 @@ class _AgregarMantenimientoPageState extends State<AgregarMantenimientoPage> {
         decoration: BoxDecoration(
           color: const Color(0xFF1E1E1E),
           borderRadius: BorderRadius.circular(12),
-          border: Border.all(
-            color: Colors.white24,
-            width: 1.5,
-          ),
+          border: Border.all(color: Colors.white24, width: 1.5),
           boxShadow: [
             BoxShadow(
               color: Colors.black.withOpacity(0.2),
@@ -539,15 +645,12 @@ class _AgregarMantenimientoPageState extends State<AgregarMantenimientoPage> {
                 padding: const EdgeInsets.all(16),
                 child: Row(
                   children: [
-                    Icon(Icons.lock_outline, color: Colors.white38, size: 25),
+                    const Icon(Icons.lock_outline, color: Colors.white38, size: 25),
                     const SizedBox(width: 12),
-                    Expanded(
+                    const Expanded(
                       child: Text(
                         "Seleccione primero un cliente",
-                        style: const TextStyle(
-                          color: Colors.white38,
-                          fontSize: 14,
-                        ),
+                        style: TextStyle(color: Colors.white38, fontSize: 14),
                       ),
                     ),
                   ],
@@ -586,23 +689,21 @@ class _AgregarMantenimientoPageState extends State<AgregarMantenimientoPage> {
             Expanded(
               child: Container(
                 padding: const EdgeInsets.all(16),
-                child: Row(
+                child: const Row(
                   children: [
-                    const SizedBox(
+                    SizedBox(
                       width: 20,
                       height: 20,
                       child: CircularProgressIndicator(
                         strokeWidth: 2,
-                        valueColor: AlwaysStoppedAnimation<Color>(Color(0xFFFFD700)),
+                        valueColor:
+                        AlwaysStoppedAnimation<Color>(Color(0xFFFFD700)),
                       ),
                     ),
-                    const SizedBox(width: 16),
-                    const Text(
+                    SizedBox(width: 16),
+                    Text(
                       "Cargando vehículos...",
-                      style: TextStyle(
-                        color: Colors.white70,
-                        fontSize: 14,
-                      ),
+                      style: TextStyle(color: Colors.white70, fontSize: 14),
                     ),
                   ],
                 ),
@@ -611,13 +712,18 @@ class _AgregarMantenimientoPageState extends State<AgregarMantenimientoPage> {
             Container(
               margin: const EdgeInsets.only(right: 8),
               decoration: BoxDecoration(
-                color: clienteSeleccionadoPorOCR ? const Color(0xFFFFD700) : Colors.grey,
+                color: clienteSeleccionadoPorOCR
+                    ? const Color(0xFFFFD700)
+                    : Colors.grey,
                 borderRadius: BorderRadius.circular(8),
               ),
               child: IconButton(
                 icon: const Icon(Icons.camera_alt, color: Colors.black),
-                onPressed: clienteSeleccionadoPorOCR ? _abrirCamaraCliente : null,
-                tooltip: clienteSeleccionadoPorOCR ? 'Detectar placa con cámara' : 'Deshabilitado - Cliente seleccionado por búsqueda',
+                onPressed:
+                clienteSeleccionadoPorOCR ? _abrirCamaraCliente : null,
+                tooltip: clienteSeleccionadoPorOCR
+                    ? 'Detectar placa con cámara'
+                    : 'Deshabilitado - Cliente seleccionado por búsqueda',
               ),
             ),
           ],
@@ -630,10 +736,7 @@ class _AgregarMantenimientoPageState extends State<AgregarMantenimientoPage> {
         decoration: BoxDecoration(
           color: const Color(0xFF1E1E1E),
           borderRadius: BorderRadius.circular(12),
-          border: Border.all(
-            color: Colors.white24,
-            width: 1.5,
-          ),
+          border: Border.all(color: Colors.white24, width: 1.5),
           boxShadow: [
             BoxShadow(
               color: Colors.black.withOpacity(0.2),
@@ -649,15 +752,14 @@ class _AgregarMantenimientoPageState extends State<AgregarMantenimientoPage> {
                 padding: const EdgeInsets.all(16),
                 child: Row(
                   children: [
-                    Icon(Icons.warning_amber, color: Colors.white38, size: 20),
+                    const Icon(Icons.warning_amber,
+                        color: Colors.white38, size: 20),
                     const SizedBox(width: 12),
-                    Expanded(
+                    const Expanded(
                       child: Text(
                         "Este cliente no tiene vehículos registrados",
-                        style: const TextStyle(
-                          color: Colors.white38,
-                          fontSize: 14,
-                        ),
+                        style:
+                        TextStyle(color: Colors.white38, fontSize: 14),
                       ),
                     ),
                   ],
@@ -667,13 +769,18 @@ class _AgregarMantenimientoPageState extends State<AgregarMantenimientoPage> {
             Container(
               margin: const EdgeInsets.only(right: 8),
               decoration: BoxDecoration(
-                color: clienteSeleccionadoPorOCR ? const Color(0xFFFFD700) : Colors.grey,
+                color: clienteSeleccionadoPorOCR
+                    ? const Color(0xFFFFD700)
+                    : Colors.grey,
                 borderRadius: BorderRadius.circular(8),
               ),
               child: IconButton(
                 icon: const Icon(Icons.camera_alt, color: Colors.black),
-                onPressed: clienteSeleccionadoPorOCR ? _abrirCamaraCliente : null,
-                tooltip: clienteSeleccionadoPorOCR ? 'Detectar placa con cámara' : 'Deshabilitado - Cliente seleccionado por búsqueda',
+                onPressed:
+                clienteSeleccionadoPorOCR ? _abrirCamaraCliente : null,
+                tooltip: clienteSeleccionadoPorOCR
+                    ? 'Detectar placa con cámara'
+                    : 'Deshabilitado - Cliente seleccionado por búsqueda',
               ),
             ),
           ],
@@ -733,19 +840,25 @@ class _AgregarMantenimientoPageState extends State<AgregarMantenimientoPage> {
               onChanged: (value) {
                 setState(() => idMotoSeleccionada = value);
               },
-              validator: (value) => value == null ? 'Seleccione un vehículo' : null,
+              validator: (value) =>
+              value == null ? 'Seleccione un vehículo' : null,
             ),
           ),
           Container(
             margin: const EdgeInsets.only(right: 8),
             decoration: BoxDecoration(
-              color: clienteSeleccionadoPorOCR ? const Color(0xFFFFD700) : Colors.grey,
+              color: clienteSeleccionadoPorOCR
+                  ? const Color(0xFFFFD700)
+                  : Colors.grey,
               borderRadius: BorderRadius.circular(8),
             ),
             child: IconButton(
               icon: const Icon(Icons.camera_alt, color: Colors.black),
-              onPressed: clienteSeleccionadoPorOCR ? _abrirCamaraCliente : null,
-              tooltip: clienteSeleccionadoPorOCR ? 'Detectar placa con cámara' : 'Deshabilitado - Cliente seleccionado por búsqueda',
+              onPressed:
+              clienteSeleccionadoPorOCR ? _abrirCamaraCliente : null,
+              tooltip: clienteSeleccionadoPorOCR
+                  ? 'Detectar placa con cámara'
+                  : 'Deshabilitado - Cliente seleccionado por búsqueda',
             ),
           ),
         ],
@@ -811,7 +924,6 @@ class _AgregarMantenimientoPageState extends State<AgregarMantenimientoPage> {
             child: Text(tipo.nombre),
           );
         }).toList(),
-
         onChanged: (value) async {
           if (value != null) {
             final tipoSeleccionado = await TipoService.obtenerPorId(value);
@@ -821,11 +933,9 @@ class _AgregarMantenimientoPageState extends State<AgregarMantenimientoPage> {
               detallesSeleccionados.clear();
 
               if (tipoSeleccionado != null) {
-
                 // -------- PRODUCTO (si existe) --------
                 if (tipoSeleccionado.producto != null &&
                     tipoSeleccionado.productoPvp != null) {
-
                   final detalleAutomatico = DetalleUI(
                     idProducto: tipoSeleccionado.producto!.id_producto,
                     nombre: tipoSeleccionado.producto!.nombre,
@@ -835,8 +945,9 @@ class _AgregarMantenimientoPageState extends State<AgregarMantenimientoPage> {
                     imagenUrl: tipoSeleccionado.producto!.rutaImagenProductos,
                   );
 
-                  if (!detallesSeleccionados.any(
-                          (d) => d.idProducto == tipoSeleccionado.producto!.id_producto)) {
+                  if (!detallesSeleccionados.any((d) =>
+                  d.idProducto ==
+                      tipoSeleccionado.producto!.id_producto)) {
                     detallesSeleccionados.add(detalleAutomatico);
                   }
                 }
@@ -844,12 +955,12 @@ class _AgregarMantenimientoPageState extends State<AgregarMantenimientoPage> {
                 // -------- CONCEPTO MANUAL --------
                 if (tipoSeleccionado.conceptoManual != null &&
                     tipoSeleccionado.conceptoManual!.isNotEmpty) {
-
                   final conceptoManual = DetalleUI(
                     idProducto: -1,
                     nombre: tipoSeleccionado.conceptoManual!,
                     cantidad: tipoSeleccionado.conceptoCantidad ?? 1,
-                    precioUnitario: tipoSeleccionado.conceptoPrecioUnitario ?? 0,
+                    precioUnitario:
+                    tipoSeleccionado.conceptoPrecioUnitario ?? 0,
                     esProducto: false,
                   );
 
@@ -929,7 +1040,9 @@ class _AgregarMantenimientoPageState extends State<AgregarMantenimientoPage> {
                         borderRadius: BorderRadius.circular(8),
                       ),
                       child: Icon(
-                        hayDetalles ? Icons.check_circle : Icons.add_shopping_cart,
+                        hayDetalles
+                            ? Icons.check_circle
+                            : Icons.add_shopping_cart,
                         color: const Color(0xFFFFD700),
                         size: 20,
                       ),
@@ -947,11 +1060,8 @@ class _AgregarMantenimientoPageState extends State<AgregarMantenimientoPage> {
                     ),
                   ],
                 ),
-                Icon(
-                  Icons.arrow_forward_ios,
-                  color: const Color(0xFFFFD700),
-                  size: 16,
-                ),
+                const Icon(Icons.arrow_forward_ios,
+                    color: Color(0xFFFFD700), size: 16),
               ],
             ),
             if (hayDetalles) ...[
@@ -968,13 +1078,9 @@ class _AgregarMantenimientoPageState extends State<AgregarMantenimientoPage> {
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    const Text(
-                      "Total:",
-                      style: TextStyle(
-                        color: Colors.white70,
-                        fontSize: 16,
-                      ),
-                    ),
+                    const Text("Total:",
+                        style:
+                        TextStyle(color: Colors.white70, fontSize: 16)),
                     Text(
                       "\$${_calcularTotal().toStringAsFixed(2)}",
                       style: const TextStyle(
@@ -995,10 +1101,8 @@ class _AgregarMantenimientoPageState extends State<AgregarMantenimientoPage> {
                   const SizedBox(width: 8),
                   Text(
                     'Debe seleccionar al menos un producto',
-                    style: TextStyle(
-                      color: Colors.red.shade300,
-                      fontSize: 12,
-                    ),
+                    style:
+                    TextStyle(color: Colors.red.shade300, fontSize: 12),
                   ),
                 ],
               ),
@@ -1101,10 +1205,7 @@ class _AgregarMantenimientoPageState extends State<AgregarMantenimientoPage> {
       decoration: BoxDecoration(
         color: const Color(0xFF1E1E1E).withOpacity(0.5),
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(
-          color: Colors.white12,
-          width: 1.5,
-        ),
+        border: Border.all(color: Colors.white12, width: 1.5),
       ),
       child: Row(
         children: [
@@ -1113,10 +1214,7 @@ class _AgregarMantenimientoPageState extends State<AgregarMantenimientoPage> {
           Expanded(
             child: Text(
               texto,
-              style: const TextStyle(
-                color: Colors.white38,
-                fontSize: 14,
-              ),
+              style: const TextStyle(color: Colors.white38, fontSize: 14),
             ),
           ),
         ],
@@ -1142,16 +1240,14 @@ class _AgregarMantenimientoPageState extends State<AgregarMantenimientoPage> {
             height: 20,
             child: CircularProgressIndicator(
               strokeWidth: 2,
-              valueColor: AlwaysStoppedAnimation<Color>(Color(0xFFFFD700)),
+              valueColor:
+              AlwaysStoppedAnimation<Color>(Color(0xFFFFD700)),
             ),
           ),
           const SizedBox(width: 16),
           Text(
             texto,
-            style: const TextStyle(
-              color: Colors.white70,
-              fontSize: 14,
-            ),
+            style: const TextStyle(color: Colors.white70, fontSize: 14),
           ),
         ],
       ),
@@ -1221,9 +1317,7 @@ class _AgregarMantenimientoPageState extends State<AgregarMantenimientoPage> {
       context: context,
       builder: (_) => AlertDialog(
         backgroundColor: const Color(0xFF1E1E1E),
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(20),
-        ),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
         title: Row(
           children: [
             Container(
@@ -1241,10 +1335,7 @@ class _AgregarMantenimientoPageState extends State<AgregarMantenimientoPage> {
             const SizedBox(width: 12),
             const Text(
               "Confirmar",
-              style: TextStyle(
-                color: Colors.white,
-                fontWeight: FontWeight.bold,
-              ),
+              style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
             ),
           ],
         ),
@@ -1254,10 +1345,7 @@ class _AgregarMantenimientoPageState extends State<AgregarMantenimientoPage> {
           children: [
             const Text(
               "¿Está seguro de guardar este mantenimiento?",
-              style: TextStyle(
-                color: Colors.white70,
-                fontSize: 15,
-              ),
+              style: TextStyle(color: Colors.white70, fontSize: 15),
             ),
             const SizedBox(height: 20),
             Container(
@@ -1272,13 +1360,8 @@ class _AgregarMantenimientoPageState extends State<AgregarMantenimientoPage> {
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  const Text(
-                    "Total:",
-                    style: TextStyle(
-                      color: Colors.white70,
-                      fontSize: 16,
-                    ),
-                  ),
+                  const Text("Total:",
+                      style: TextStyle(color: Colors.white70, fontSize: 16)),
                   Text(
                     "\$${_calcularTotal().toStringAsFixed(2)}",
                     style: const TextStyle(
@@ -1300,10 +1383,7 @@ class _AgregarMantenimientoPageState extends State<AgregarMantenimientoPage> {
             ),
             child: const Text(
               "Cancelar",
-              style: TextStyle(
-                color: Colors.white70,
-                fontSize: 16,
-              ),
+              style: TextStyle(color: Colors.white70, fontSize: 16),
             ),
           ),
           ElevatedButton(
@@ -1315,16 +1395,14 @@ class _AgregarMantenimientoPageState extends State<AgregarMantenimientoPage> {
               backgroundColor: const Color(0xFFFFD700),
               padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
               shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(8),
-              ),
+                  borderRadius: BorderRadius.circular(8)),
             ),
             child: const Text(
               "Confirmar",
               style: TextStyle(
-                color: Colors.black,
-                fontSize: 16,
-                fontWeight: FontWeight.bold,
-              ),
+                  color: Colors.black,
+                  fontSize: 16,
+                  fontWeight: FontWeight.bold),
             ),
           ),
         ],
@@ -1343,20 +1421,14 @@ class _AgregarMantenimientoPageState extends State<AgregarMantenimientoPage> {
             color: const Color(0xFF1E1E1E),
             borderRadius: BorderRadius.circular(20),
           ),
-          child: Column(
+          child: const Column(
             mainAxisSize: MainAxisSize.min,
-            children: const [
-              CircularProgressIndicator(
-                color: Color(0xFFFFD700),
-                strokeWidth: 3,
-              ),
+            children: [
+              CircularProgressIndicator(color: Color(0xFFFFD700), strokeWidth: 3),
               SizedBox(height: 20),
               Text(
                 'Guardando mantenimiento...',
-                style: TextStyle(
-                  color: Colors.white,
-                  fontSize: 16,
-                ),
+                style: TextStyle(color: Colors.white, fontSize: 16),
               ),
             ],
           ),
@@ -1409,8 +1481,7 @@ class _AgregarMantenimientoPageState extends State<AgregarMantenimientoPage> {
             backgroundColor: Colors.green.shade700,
             behavior: SnackBarBehavior.floating,
             shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(12),
-            ),
+                borderRadius: BorderRadius.circular(12)),
             duration: const Duration(seconds: 2),
           ),
         );
@@ -1435,18 +1506,14 @@ class _AgregarMantenimientoPageState extends State<AgregarMantenimientoPage> {
             const Icon(Icons.error_outline, color: Colors.white, size: 24),
             const SizedBox(width: 12),
             Expanded(
-              child: Text(
-                mensaje,
-                style: const TextStyle(fontSize: 15),
-              ),
+              child: Text(mensaje, style: const TextStyle(fontSize: 15)),
             ),
           ],
         ),
         backgroundColor: Colors.red.shade700,
         behavior: SnackBarBehavior.floating,
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(12),
-        ),
+        shape:
+        RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
         duration: const Duration(seconds: 3),
       ),
     );
@@ -1464,7 +1531,6 @@ class _AgregarMantenimientoPageState extends State<AgregarMantenimientoPage> {
         idClienteSeleccionado = usuario.idUsuario;
         clienteCtrl.text = usuario.nombreCompleto ?? '';
         clienteSeleccionadoPorOCR = false;
-
         idMotoSeleccionada = null;
         vehiculoCtrl.clear();
         motosCliente.clear();
@@ -1494,8 +1560,7 @@ class _AgregarMantenimientoPageState extends State<AgregarMantenimientoPage> {
           backgroundColor: Colors.red.shade700,
           behavior: SnackBarBehavior.floating,
           shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(12),
-          ),
+              borderRadius: BorderRadius.circular(12)),
         ),
       );
     } finally {
@@ -1523,8 +1588,7 @@ class _AgregarMantenimientoPageState extends State<AgregarMantenimientoPage> {
           backgroundColor: Colors.red.shade700,
           behavior: SnackBarBehavior.floating,
           shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(12),
-          ),
+              borderRadius: BorderRadius.circular(12)),
         ),
       );
     } finally {

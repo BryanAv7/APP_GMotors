@@ -136,40 +136,49 @@ class MotoService {
   // =========================
 // Buscar moto por placa
 // =========================
-  static Future<Moto?> obtenerMotoPorPlaca(String placa) async {
+  static Future<Map<String, dynamic>?> buscarClientePorPlacaTexto(String placa) async {
     try {
       final baseUrl = await ApiConfig.getBaseUrl();
       if (baseUrl.isEmpty) return null;
-
-      final url = Uri.parse('$baseUrl/motos/placa/$placa');
 
       final token = await TokenManager.getToken();
       if (token == null) return null;
 
       final response = await http.get(
-        url,
+        Uri.parse('$baseUrl/motos/placa/$placa'),
         headers: {
+          'Content-Type': 'application/json',
           'Authorization': 'Bearer $token',
         },
       );
 
-      if (response.statusCode == 200) {
-        final data = jsonDecode(response.body);
-        return Moto.fromJson(data);
-      }
-
       if (response.statusCode == 404) {
-        return null;
+        return {'success': false, 'mensaje': 'No se encontró ningún vehículo con la placa "$placa"'};
       }
 
-      return null;
+      if (response.statusCode != 200) {
+        return {'success': false, 'mensaje': 'Error al buscar: ${response.statusCode}'};
+      }
 
+      final data = jsonDecode(response.body);
+      final usuario = data['usuario'];
+
+      if (usuario == null) {
+        return {'success': false, 'mensaje': 'El vehículo no tiene dueño registrado'};
+      }
+
+      return {
+        'success': true,
+        'idUsuario': usuario['id_usuario'],
+        'nombreCompleto': usuario['nombre_completo'] ?? '',
+        'idMoto': data['idMoto'],
+        'placa': data['placa'] ?? placa,
+        'marca': data['marca'] ?? '',
+        'modelo': data['modelo'] ?? '',
+      };
     } catch (e) {
-      print('Error en obtenerMotoPorPlaca: $e');
-      throw Exception(
-          'No se pudo conectar con la Base de Datos. '
-              'Por favor contacte con un administrador. Detalle: $e'
-      );
+      print('Error en buscarClientePorPlacaTexto: $e');
+      return {'success': false, 'mensaje': 'Error de conexión: $e'};
     }
   }
   // =========================
