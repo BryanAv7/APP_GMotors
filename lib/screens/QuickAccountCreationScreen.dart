@@ -59,19 +59,15 @@ class _QuickAccountCreationScreenState
   }
 
   void _formatearPlaca() {
-    String placa = placaCtrl.text.replaceAll('-', '').toUpperCase();
+    String placa = placaCtrl.text
+        .replaceAll(RegExp(r'[^A-Za-z0-9]'), '') // Fix
+        .toUpperCase();
 
-    // Si tiene más de 6 caracteres, trunxa
+    // Máximo 6 caracteres
     if (placa.length > 6) {
       placa = placa.substring(0, 6);
     }
 
-    // Agrega guión en la posición correcta
-    if (placa.length >= 4) {
-      placa = '${placa.substring(0, 3)}-${placa.substring(3)}';
-    }
-
-    // Actualiza sin volver a disparar el listener
     if (placaCtrl.text != placa) {
       placaCtrl.value = placaCtrl.value.copyWith(
         text: placa,
@@ -463,7 +459,7 @@ class _QuickAccountCreationScreenState
                       ],
                     ),
                   ),
-                  hintText: 'Ej: ABC-123',
+                  hintText: 'Ej: ABC123',
                   hintStyle: const TextStyle(color: Colors.grey),
                   filled: true,
                   fillColor: Colors.grey[850],
