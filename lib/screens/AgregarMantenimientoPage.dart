@@ -31,6 +31,7 @@ class _AgregarMantenimientoPageState extends State<AgregarMantenimientoPage> {
   final TextEditingController clienteCtrl = TextEditingController();
   final TextEditingController vehiculoCtrl = TextEditingController();
   final TextEditingController descripcionCtrl = TextEditingController();
+  // ── NUEVO: controller para búsqueda por placa texto ──
   final TextEditingController placaCtrl = TextEditingController();
 
   // ---------------- DATA ----------------
@@ -70,7 +71,7 @@ class _AgregarMantenimientoPageState extends State<AgregarMantenimientoPage> {
     clienteCtrl.dispose();
     vehiculoCtrl.dispose();
     descripcionCtrl.dispose();
-    placaCtrl.dispose();
+    placaCtrl.dispose(); // ── NUEVO ──
     super.dispose();
   }
 
@@ -305,7 +306,7 @@ class _AgregarMantenimientoPageState extends State<AgregarMantenimientoPage> {
               readOnly: true,
               style: const TextStyle(color: Colors.white, fontSize: 15),
               decoration: InputDecoration(
-                labelText: "Buscar por Nombre",
+                labelText: "Buscar por Nombre",  // ← CAMBIO
                 labelStyle: TextStyle(
                   color: Colors.white.withOpacity(0.6),
                   fontSize: 14,
@@ -971,9 +972,8 @@ class _AgregarMantenimientoPageState extends State<AgregarMantenimientoPage> {
                   }
                 }
 
-                if (descripcionCtrl.text.isEmpty) {
-                  descripcionCtrl.text = tipoSeleccionado.descripcion ?? '';
-                }
+                // Fix 3/4/2026: Actualizar Observaciones al Cambiar el Sv
+                descripcionCtrl.text = tipoSeleccionado.descripcion ?? '';
               }
             });
           }
