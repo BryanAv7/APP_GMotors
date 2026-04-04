@@ -14,6 +14,7 @@ class MantenimientosPage extends StatefulWidget {
 class _MantenimientosPageState extends State<MantenimientosPage> {
   late Future<List<RegistroDTO>> registrosFuture;
   String _filtroSeleccionado = 'todos';
+  bool _ordenReciente = true; // ── NUEVO: true = más recientes primero ──
   List<RegistroDTO> _registrosCache = [];
 
   @override
@@ -30,15 +31,26 @@ class _MantenimientosPageState extends State<MantenimientosPage> {
   }
 
   List<RegistroDTO> _aplicarFiltro(List<RegistroDTO> registros) {
+    List<RegistroDTO> resultado;
+
     switch (_filtroSeleccionado) {
       case 'enProceso':
-        return registros.where((r) => r.estado == 1).toList();
+        resultado = registros.where((r) => r.estado == 1).toList();
+        break;
       case 'finalizados':
-        return registros.where((r) => r.estado != 1).toList();
+        resultado = registros.where((r) => r.estado != 1).toList();
+        break;
       case 'todos':
       default:
-        return registros;
+        resultado = List.from(registros);
     }
+
+    // Ordenar por fecha
+    resultado.sort((a, b) => _ordenReciente
+        ? b.fecha.compareTo(a.fecha)
+        : a.fecha.compareTo(b.fecha));
+
+    return resultado;
   }
 
   @override
@@ -61,6 +73,17 @@ class _MantenimientosPageState extends State<MantenimientosPage> {
           ),
         ),
         actions: [
+          // Botón toggle de orden ──
+          IconButton(
+            icon: Icon(
+              _ordenReciente ? Icons.arrow_downward : Icons.arrow_upward,
+              color: Colors.black,
+            ),
+            tooltip: _ordenReciente ? 'Más recientes primero' : 'Más antiguos primero',
+            onPressed: () {
+              setState(() => _ordenReciente = !_ordenReciente);
+            },
+          ),
           IconButton(
             icon: const Icon(Icons.refresh, color: Colors.black),
             onPressed: _recargarLista,
@@ -146,14 +169,11 @@ class _MantenimientosPageState extends State<MantenimientosPage> {
           }
 
           final registros = snapshot.data!;
-          _registrosCache = registros; // Cachear los datos
+          _registrosCache = registros;
 
           return Column(
             children: [
-              // Header con estadísticas - SIN FutureBuilder
               _buildHeaderStats(registros),
-
-              // Lista de mantenimientos
               Expanded(
                 child: _buildListaMantenimientos(registros),
               ),
@@ -270,11 +290,7 @@ class _MantenimientosPageState extends State<MantenimientosPage> {
             color: const Color(0xFFFFD700),
             filtroKey: 'todos',
           ),
-          Container(
-            height: 40,
-            width: 1,
-            color: Colors.white24,
-          ),
+          Container(height: 40, width: 1, color: Colors.white24),
           _buildStatItemButton(
             icon: Icons.pending_actions,
             label: 'En Proceso',
@@ -282,11 +298,7 @@ class _MantenimientosPageState extends State<MantenimientosPage> {
             color: Colors.green,
             filtroKey: 'enProceso',
           ),
-          Container(
-            height: 40,
-            width: 1,
-            color: Colors.white24,
-          ),
+          Container(height: 40, width: 1, color: Colors.white24),
           _buildStatItemButton(
             icon: Icons.check_circle,
             label: 'Finalizados',
@@ -316,7 +328,6 @@ class _MantenimientosPageState extends State<MantenimientosPage> {
       },
       child: Column(
         children: [
-          // Indicador visual de selección
           if (isSelected)
             Container(
               width: 60,
@@ -329,18 +340,12 @@ class _MantenimientosPageState extends State<MantenimientosPage> {
             )
           else
             const SizedBox(height: 7),
-          Icon(
-            icon,
-            color: color,
-            size: 28,
-          ),
+          Icon(icon, color: color, size: 28),
           const SizedBox(height: 8),
           Text(
             value,
             style: TextStyle(
-              color: isSelected
-                  ? Colors.white
-                  : Colors.white.withOpacity(0.6),
+              color: isSelected ? Colors.white : Colors.white.withOpacity(0.6),
               fontSize: 24,
               fontWeight: FontWeight.bold,
             ),
@@ -461,7 +466,6 @@ class _MantenimientosPageState extends State<MantenimientosPage> {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        // Cliente y moto
                         Text(
                           registro.nombreCliente,
                           style: const TextStyle(
@@ -495,8 +499,6 @@ class _MantenimientosPageState extends State<MantenimientosPage> {
                           ],
                         ),
                         const SizedBox(height: 8),
-
-                        // Fecha
                         Row(
                           children: [
                             Icon(
@@ -515,8 +517,6 @@ class _MantenimientosPageState extends State<MantenimientosPage> {
                           ],
                         ),
                         const SizedBox(height: 6),
-
-                        // Descripción
                         Text(
                           registro.descripcion,
                           style: const TextStyle(
@@ -527,8 +527,6 @@ class _MantenimientosPageState extends State<MantenimientosPage> {
                           overflow: TextOverflow.ellipsis,
                         ),
                         const SizedBox(height: 10),
-
-                        // Estado y flecha
                         Row(
                           mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           children: [
@@ -556,9 +554,8 @@ class _MantenimientosPageState extends State<MantenimientosPage> {
                                         ? Icons.pending_actions
                                         : Icons.check_circle,
                                     size: 14,
-                                    color: enProceso
-                                        ? Colors.green
-                                        : Colors.blue,
+                                    color:
+                                    enProceso ? Colors.green : Colors.blue,
                                   ),
                                   const SizedBox(width: 4),
                                   Text(

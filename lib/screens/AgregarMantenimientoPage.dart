@@ -1538,7 +1538,12 @@ class _AgregarMantenimientoPageState extends State<AgregarMantenimientoPage> {
         cargandoMotos = true;
       });
 
-      _cargarMotos(usuario.idUsuario!);
+      _cargarMotos(usuario.idUsuario!).then((_) {
+        // Si el cliente tiene exactamente una moto, seleccionarla automáticamente
+        if (motosCliente.length == 1) {
+          setState(() => idMotoSeleccionada = motosCliente.first.id_moto);
+        }
+      });
     }
   }
 
