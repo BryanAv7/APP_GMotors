@@ -33,6 +33,7 @@ class _AgregarMantenimientoPageState extends State<AgregarMantenimientoPage> {
   final TextEditingController descripcionCtrl = TextEditingController();
   // ── NUEVO: controller para búsqueda por placa texto ──
   final TextEditingController placaCtrl = TextEditingController();
+  final TextEditingController kilometrajeCtrl = TextEditingController();
 
   // ---------------- DATA ----------------
   int? idClienteSeleccionado;
@@ -71,7 +72,8 @@ class _AgregarMantenimientoPageState extends State<AgregarMantenimientoPage> {
     clienteCtrl.dispose();
     vehiculoCtrl.dispose();
     descripcionCtrl.dispose();
-    placaCtrl.dispose(); // ── NUEVO ──
+    placaCtrl.dispose();
+    kilometrajeCtrl.dispose();
     super.dispose();
   }
 
@@ -100,7 +102,8 @@ class _AgregarMantenimientoPageState extends State<AgregarMantenimientoPage> {
       clienteCtrl.clear();
       vehiculoCtrl.clear();
       descripcionCtrl.clear();
-      placaCtrl.clear(); // ── NUEVO ──
+      placaCtrl.clear();
+      kilometrajeCtrl.clear();
       motosCliente = [];
       clienteSeleccionadoPorOCR = false;
       intentoGuardar = false;
@@ -150,10 +153,10 @@ class _AgregarMantenimientoPageState extends State<AgregarMantenimientoPage> {
 
               _buildSectionTitle('Información del Cliente', Icons.person),
               const SizedBox(height: 12),
-              // ── Búsqueda por nombre ──
+
               _searchClienteField(),
               const SizedBox(height: 12),
-              // ── NUEVO: Búsqueda auxiliar por placa texto ──
+
               _searchPlacaField(),
               const SizedBox(height: 20),
 
@@ -170,6 +173,11 @@ class _AgregarMantenimientoPageState extends State<AgregarMantenimientoPage> {
               _buildSectionTitle('Productos y Repuestos', Icons.shopping_cart),
               const SizedBox(height: 12),
               _productsBox(),
+              const SizedBox(height: 20),
+
+              _buildSectionTitle('Kilometraje', Icons.speed),
+              const SizedBox(height: 12),
+              _kilometrajeField(),
               const SizedBox(height: 20),
 
               _buildSectionTitle('Observaciones', Icons.note_alt),
@@ -466,6 +474,11 @@ class _AgregarMantenimientoPageState extends State<AgregarMantenimientoPage> {
         final idMoto = resultado['idMoto'];
         final motoExiste = motosCliente.any((m) => m.id_moto == idMoto);
         setState(() => idMotoSeleccionada = motoExiste ? idMoto : null);
+        if (motoExiste) {
+          final moto = motosCliente.firstWhere((m) => m.id_moto == idMoto);
+          kilometrajeCtrl.text = moto.kilometraje.toString();
+        }
+
         // ← Sin snackbar verde
       } else {
         _mostrarError(resultado?['mensaje'] ?? 'No se encontró el vehículo');
@@ -581,6 +594,11 @@ class _AgregarMantenimientoPageState extends State<AgregarMantenimientoPage> {
 
         setState(() {
           idMotoSeleccionada = resultado['idMoto'];
+          final moto = motosCliente.firstWhere(
+                (m) => m.id_moto == resultado['idMoto'],
+            orElse: () => motosCliente.first,
+          );
+          kilometrajeCtrl.text = moto.kilometraje.toString();
         });
 
         ScaffoldMessenger.of(context).showSnackBar(
@@ -840,8 +858,14 @@ class _AgregarMantenimientoPageState extends State<AgregarMantenimientoPage> {
                 );
               }).toList(),
               onChanged: (value) {
-                setState(() => idMotoSeleccionada = value);
-              },
+                setState(() {
+                  idMotoSeleccionada = value;
+                if (value != null) {
+                  final motoSeleccionada = motosCliente.firstWhere((m) => m.id_moto == value);
+                  kilometrajeCtrl.text = motoSeleccionada.kilometraje.toString();
+                }
+              });
+  },
               validator: (value) =>
               value == null ? 'Seleccione un vehículo' : null,
             ),
@@ -1110,6 +1134,64 @@ class _AgregarMantenimientoPageState extends State<AgregarMantenimientoPage> {
             ],
           ],
         ),
+      ),
+    );
+  }
+
+  Widget _kilometrajeField() {
+    return Container(
+      decoration: BoxDecoration(
+        color: const Color(0xFF1E1E1E),
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(
+          color: kilometrajeCtrl.text.isNotEmpty
+              ? const Color(0xFFFFD700).withOpacity(0.5)
+              : Colors.white24,
+          width: 1.5,
+        ),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.2),
+            blurRadius: 8,
+            offset: const Offset(0, 2),
+          ),
+        ],
+      ),
+      child: TextFormField(
+        controller: kilometrajeCtrl,
+        keyboardType: TextInputType.number,
+        inputFormatters: [FilteringTextInputFormatter.digitsOnly],
+        style: const TextStyle(color: Colors.white, fontSize: 15),
+        decoration: InputDecoration(
+          labelText: "Kilometraje actual",
+          labelStyle: TextStyle(
+            color: Colors.white.withOpacity(0.6),
+            fontSize: 14,
+          ),
+          hintText: "Ej: 15000",
+          hintStyle: TextStyle(
+            color: Colors.white.withOpacity(0.3),
+            fontSize: 14,
+          ),
+          prefixIcon: const Icon(Icons.speed, color: Colors.white54),
+          suffixText: "km",
+          suffixStyle: const TextStyle(color: Colors.white54, fontSize: 14),
+          border: InputBorder.none,
+          contentPadding: const EdgeInsets.symmetric(
+            horizontal: 16,
+            vertical: 16,
+          ),
+        ),
+        validator: (value) {
+          if (value == null || value.trim().isEmpty) {
+            return 'Ingrese el kilometraje actual';
+          }
+          final km = int.tryParse(value.trim());
+          if (km == null || km < 0) {
+            return 'Ingrese un kilometraje válido';
+          }
+          return null;
+        },
       ),
     );
   }
@@ -1452,7 +1534,8 @@ class _AgregarMantenimientoPageState extends State<AgregarMantenimientoPage> {
         "idEncargado": idUsuarioActual,
         "idMoto": idMotoSeleccionada,
         "idTipo": idTipoSeleccionado,
-        "estado": 1,
+        "estado": 0,
+        "kilometraje": int.tryParse(kilometrajeCtrl.text.trim()) ?? 0,
         "observaciones": descripcionCtrl.text.trim(),
         "detalles":
         detallesSeleccionados.map((detalle) => detalle.toJson()).toList(),
@@ -1539,9 +1622,9 @@ class _AgregarMantenimientoPageState extends State<AgregarMantenimientoPage> {
       });
 
       _cargarMotos(usuario.idUsuario!).then((_) {
-        // Si el cliente tiene exactamente una moto, seleccionarla automáticamente
         if (motosCliente.length == 1) {
           setState(() => idMotoSeleccionada = motosCliente.first.id_moto);
+          kilometrajeCtrl.text = motosCliente.first.kilometraje.toString();
         }
       });
     }

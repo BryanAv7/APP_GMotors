@@ -5,6 +5,7 @@ import '../models/Tipo.dart';
 import '../services/registros_service.dart';
 import '../services/tipo_service.dart';
 import '../screens/seleccionar_productos_page.dart';
+import 'package:flutter/services.dart';
 
 class DetalleMantenimientoPage extends StatefulWidget {
   final int idRegistro;
@@ -27,8 +28,9 @@ class _DetalleMantenimientoPageState extends State<DetalleMantenimientoPage> {
   bool intentoGuardar = false;
   final _formKey = GlobalKey<FormState>();
   int? idTipoSeleccionado;
-  int? estadoSeleccionado; // 🆕 NUEVO: Variable para el estado
+  int? estadoSeleccionado;
   final TextEditingController observacionesCtrl = TextEditingController();
+  final TextEditingController kilometrajeCtrl = TextEditingController();
 
   @override
   void initState() {
@@ -64,6 +66,12 @@ class _DetalleMantenimientoPageState extends State<DetalleMantenimientoPage> {
       if (detalle.descripcion != null) {
         setState(() {
           observacionesCtrl.text = detalle.descripcion!;
+        });
+      }
+
+      if (detalle.kilometraje != null) {
+        setState(() {
+          kilometrajeCtrl.text = detalle.kilometraje.toString();
         });
       }
 
@@ -111,6 +119,7 @@ class _DetalleMantenimientoPageState extends State<DetalleMantenimientoPage> {
   @override
   void dispose() {
     observacionesCtrl.dispose();
+    kilometrajeCtrl.dispose();
     super.dispose();
   }
 
@@ -193,6 +202,11 @@ class _DetalleMantenimientoPageState extends State<DetalleMantenimientoPage> {
                   _buildSectionTitle('Productos y Repuestos', Icons.shopping_cart),
                   const SizedBox(height: 12),
                   _productsBox(),
+                  const SizedBox(height: 20),
+
+                  _buildSectionTitle('Kilometraje', Icons.speed),
+                  const SizedBox(height: 12),
+                  _kilometrajeField(),
                   const SizedBox(height: 20),
 
                   _buildSectionTitle('Observaciones', Icons.note_alt),
@@ -502,15 +516,19 @@ class _DetalleMantenimientoPageState extends State<DetalleMantenimientoPage> {
             ],
           ),
           const SizedBox(height: 16),
-          Wrap(
-            spacing: 12,
-            runSpacing: 12,
-            children: [
-              _buildChipEstado(1, 'En Proceso', Colors.blue),
-              _buildChipEstado(2, 'Finalizado', Colors.green),
-              ///Descomentar si empieza Logica de "Reserva"
-              ///_buildChipEstado(3, 'Reservado', Colors.orange),
-            ],
+          Center(
+            child: Wrap(
+              spacing: 12,
+              runSpacing: 12,
+              alignment: WrapAlignment.center,
+              children: [
+                _buildChipEstado(0, 'Recibido', Colors.lime),
+                _buildChipEstado(1, 'En Proceso', Colors.blue),
+                _buildChipEstado(2, 'Finalizado', Colors.green),
+                _buildChipEstado(3, 'Entregado', Colors.deepOrange),
+                _buildChipEstado(4, 'Facturado', Colors.indigo),
+              ],
+            ),
           ),
           if (error) ...[
             const SizedBox(height: 12),
@@ -727,6 +745,64 @@ class _DetalleMantenimientoPageState extends State<DetalleMantenimientoPage> {
     );
   }
 
+  Widget _kilometrajeField() {
+    return Container(
+      decoration: BoxDecoration(
+        color: const Color(0xFF1E1E1E),
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(
+          color: kilometrajeCtrl.text.isNotEmpty
+              ? const Color(0xFFFFD700).withOpacity(0.5)
+              : Colors.white24,
+          width: 1.5,
+        ),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.2),
+            blurRadius: 8,
+            offset: const Offset(0, 2),
+          ),
+        ],
+      ),
+      child: TextFormField(
+        controller: kilometrajeCtrl,
+        keyboardType: TextInputType.number,
+        inputFormatters: [FilteringTextInputFormatter.digitsOnly],
+        style: const TextStyle(color: Colors.white, fontSize: 15),
+        decoration: InputDecoration(
+          labelText: "Kilometraje actual",
+          labelStyle: TextStyle(
+            color: Colors.white.withOpacity(0.6),
+            fontSize: 14,
+          ),
+          hintText: "Ej: 15000",
+          hintStyle: TextStyle(
+            color: Colors.white.withOpacity(0.3),
+            fontSize: 14,
+          ),
+          prefixIcon: const Icon(Icons.speed, color: Colors.white54),
+          suffixText: "km",
+          suffixStyle: const TextStyle(color: Colors.white54, fontSize: 14),
+          border: InputBorder.none,
+          contentPadding: const EdgeInsets.symmetric(
+            horizontal: 16,
+            vertical: 16,
+          ),
+        ),
+        validator: (value) {
+          if (value == null || value.trim().isEmpty) {
+            return 'Ingrese el kilometraje actual';
+          }
+          final km = int.tryParse(value.trim());
+          if (km == null || km < 0) {
+            return 'Ingrese un kilometraje válido';
+          }
+          return null;
+        },
+      ),
+    );
+  }
+
   Widget _buildObservacionesField() {
     return Container(
       decoration: BoxDecoration(
@@ -867,6 +943,7 @@ class _DetalleMantenimientoPageState extends State<DetalleMantenimientoPage> {
         widget.idRegistro,
         estadoSeleccionado!,
         observaciones: observacionesCtrl.text.trim(),
+        kilometraje: int.tryParse(kilometrajeCtrl.text.trim()),
       );
 
       if (resultadoEstado == null || resultadoEstado['success'] != true) {

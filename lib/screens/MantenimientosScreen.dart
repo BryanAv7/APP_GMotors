@@ -14,7 +14,7 @@ class MantenimientosPage extends StatefulWidget {
 class _MantenimientosPageState extends State<MantenimientosPage> {
   late Future<List<RegistroDTO>> registrosFuture;
   String _filtroSeleccionado = 'todos';
-  bool _ordenReciente = true; // ── NUEVO: true = más recientes primero ──
+  bool _ordenReciente = true;
   List<RegistroDTO> _registrosCache = [];
 
   @override
@@ -30,27 +30,82 @@ class _MantenimientosPageState extends State<MantenimientosPage> {
     });
   }
 
+  // ================= HELPERS DE ESTADO =================
+  Color _colorEstado(int estado) {
+    switch (estado) {
+      case 0: return Colors.lime;
+      case 1: return Colors.blue;
+      case 2: return Colors.green;
+      case 3: return Colors.deepOrange;
+      case 4: return Colors.indigo;
+      default: return Colors.white24;
+    }
+  }
+
+  String _textoEstado(int estado) {
+    switch (estado) {
+      case 0: return 'Recibido';
+      case 1: return 'En Proceso';
+      case 2: return 'Finalizado';
+      case 3: return 'Entregado';
+      case 4: return 'Facturado';
+      default: return 'Desconocido';
+    }
+  }
+
+  IconData _iconoEstado(int estado) {
+    switch (estado) {
+      case 0: return Icons.inbox;
+      case 1: return Icons.pending_actions;
+      case 2: return Icons.check_circle;
+      case 3: return Icons.local_shipping;
+      case 4: return Icons.receipt_long;
+      default: return Icons.help_outline;
+    }
+  }
+
+  // ================= FILTRO =================
   List<RegistroDTO> _aplicarFiltro(List<RegistroDTO> registros) {
     List<RegistroDTO> resultado;
 
     switch (_filtroSeleccionado) {
+      case 'recibido':
+        resultado = registros.where((r) => r.estado == 0).toList();
+        break;
       case 'enProceso':
         resultado = registros.where((r) => r.estado == 1).toList();
         break;
-      case 'finalizados':
-        resultado = registros.where((r) => r.estado != 1).toList();
+      case 'finalizado':
+        resultado = registros.where((r) => r.estado == 2).toList();
+        break;
+      case 'entregado':
+        resultado = registros.where((r) => r.estado == 3).toList();
+        break;
+      case 'facturado':
+        resultado = registros.where((r) => r.estado == 4).toList();
         break;
       case 'todos':
       default:
         resultado = List.from(registros);
     }
 
-    // Ordenar por fecha
     resultado.sort((a, b) => _ordenReciente
         ? b.fecha.compareTo(a.fecha)
         : a.fecha.compareTo(b.fecha));
 
     return resultado;
+  }
+
+  // ================= MENSAJE VACIO =================
+  String _mensajeVacio() {
+    switch (_filtroSeleccionado) {
+      case 'recibido':   return 'No hay mantenimientos recibidos';
+      case 'enProceso':  return 'No hay mantenimientos en proceso';
+      case 'finalizado': return 'No hay mantenimientos finalizados';
+      case 'entregado':  return 'No hay mantenimientos entregados';
+      case 'facturado':  return 'No hay mantenimientos facturados';
+      default:           return 'No hay mantenimientos registrados';
+    }
   }
 
   @override
@@ -73,13 +128,14 @@ class _MantenimientosPageState extends State<MantenimientosPage> {
           ),
         ),
         actions: [
-          // Botón toggle de orden ──
           IconButton(
             icon: Icon(
               _ordenReciente ? Icons.arrow_downward : Icons.arrow_upward,
               color: Colors.black,
             ),
-            tooltip: _ordenReciente ? 'Más recientes primero' : 'Más antiguos primero',
+            tooltip: _ordenReciente
+                ? 'Más recientes primero'
+                : 'Más antiguos primero',
             onPressed: () {
               setState(() => _ordenReciente = !_ordenReciente);
             },
@@ -106,10 +162,7 @@ class _MantenimientosPageState extends State<MantenimientosPage> {
                   SizedBox(height: 16),
                   Text(
                     'Cargando mantenimientos...',
-                    style: TextStyle(
-                      color: Colors.white70,
-                      fontSize: 14,
-                    ),
+                    style: TextStyle(color: Colors.white70, fontSize: 14),
                   ),
                 ],
               ),
@@ -121,11 +174,8 @@ class _MantenimientosPageState extends State<MantenimientosPage> {
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  Icon(
-                    Icons.error_outline,
-                    size: 64,
-                    color: Colors.red.shade400,
-                  ),
+                  Icon(Icons.error_outline,
+                      size: 64, color: Colors.red.shade400),
                   const SizedBox(height: 16),
                   Text(
                     "Error al cargar datos",
@@ -138,29 +188,21 @@ class _MantenimientosPageState extends State<MantenimientosPage> {
                   const SizedBox(height: 8),
                   Text(
                     "${snapshot.error}",
-                    style: const TextStyle(
-                      color: Colors.white54,
-                      fontSize: 14,
-                    ),
+                    style: const TextStyle(color: Colors.white54, fontSize: 14),
                     textAlign: TextAlign.center,
                   ),
                   const SizedBox(height: 24),
                   ElevatedButton.icon(
                     onPressed: _recargarLista,
                     icon: const Icon(Icons.refresh, color: Colors.black),
-                    label: const Text(
-                      'Reintentar',
-                      style: TextStyle(color: Colors.black),
-                    ),
+                    label: const Text('Reintentar',
+                        style: TextStyle(color: Colors.black)),
                     style: ElevatedButton.styleFrom(
                       backgroundColor: const Color(0xFFFFD700),
                       padding: const EdgeInsets.symmetric(
-                        horizontal: 24,
-                        vertical: 12,
-                      ),
+                          horizontal: 24, vertical: 12),
                       shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(12),
-                      ),
+                          borderRadius: BorderRadius.circular(12)),
                     ),
                   ),
                 ],
@@ -174,9 +216,7 @@ class _MantenimientosPageState extends State<MantenimientosPage> {
           return Column(
             children: [
               _buildHeaderStats(registros),
-              Expanded(
-                child: _buildListaMantenimientos(registros),
-              ),
+              Expanded(child: _buildListaMantenimientos(registros)),
             ],
           );
         },
@@ -186,12 +226,9 @@ class _MantenimientosPageState extends State<MantenimientosPage> {
           final resultado = await Navigator.push(
             context,
             MaterialPageRoute(
-              builder: (_) => const AgregarMantenimientoPage(),
-            ),
+                builder: (_) => const AgregarMantenimientoPage()),
           );
-          if (resultado == true) {
-            _recargarLista();
-          }
+          if (resultado == true) _recargarLista();
         },
         backgroundColor: const Color(0xFFFFD700),
         icon: const Icon(Icons.add, color: Colors.black),
@@ -215,18 +252,11 @@ class _MantenimientosPageState extends State<MantenimientosPage> {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Icon(
-              Icons.inbox_outlined,
-              size: 80,
-              color: Colors.white.withOpacity(0.3),
-            ),
+            Icon(Icons.inbox_outlined,
+                size: 80, color: Colors.white.withOpacity(0.3)),
             const SizedBox(height: 16),
             Text(
-              _filtroSeleccionado == 'todos'
-                  ? "No hay mantenimientos registrados"
-                  : _filtroSeleccionado == 'enProceso'
-                  ? "No hay mantenimientos en proceso"
-                  : "No hay mantenimientos finalizados",
+              _mensajeVacio(),
               style: const TextStyle(
                 color: Colors.white70,
                 fontSize: 18,
@@ -236,10 +266,7 @@ class _MantenimientosPageState extends State<MantenimientosPage> {
             const SizedBox(height: 8),
             const Text(
               "Presiona el botón + para agregar uno",
-              style: TextStyle(
-                color: Colors.white38,
-                fontSize: 14,
-              ),
+              style: TextStyle(color: Colors.white38, fontSize: 14),
             ),
           ],
         ),
@@ -247,10 +274,7 @@ class _MantenimientosPageState extends State<MantenimientosPage> {
     }
 
     return ListView.builder(
-      padding: const EdgeInsets.symmetric(
-        horizontal: 16,
-        vertical: 8,
-      ),
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
       itemCount: registrosFiltrados.length,
       itemBuilder: (context, index) {
         return _buildCard(context, registrosFiltrados[index], index);
@@ -259,8 +283,11 @@ class _MantenimientosPageState extends State<MantenimientosPage> {
   }
 
   Widget _buildHeaderStats(List<RegistroDTO> registros) {
-    final enProceso = registros.where((r) => r.estado == 1).length;
-    final finalizados = registros.where((r) => r.estado != 1).length;
+    final recibidos   = registros.where((r) => r.estado == 0).length;
+    final enProceso   = registros.where((r) => r.estado == 1).length;
+    final finalizados = registros.where((r) => r.estado == 2).length;
+    final entregados  = registros.where((r) => r.estado == 3).length;
+    final facturados  = registros.where((r) => r.estado == 4).length;
 
     return Container(
       margin: const EdgeInsets.all(10),
@@ -280,34 +307,69 @@ class _MantenimientosPageState extends State<MantenimientosPage> {
           width: 1,
         ),
       ),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceAround,
-        children: [
-          _buildStatItemButton(
-            icon: Icons.format_list_bulleted,
-            label: 'Total',
-            value: '${registros.length}',
-            color: const Color(0xFFFFD700),
-            filtroKey: 'todos',
-          ),
-          Container(height: 40, width: 1, color: Colors.white24),
-          _buildStatItemButton(
-            icon: Icons.pending_actions,
-            label: 'En Proceso',
-            value: '$enProceso',
-            color: Colors.green,
-            filtroKey: 'enProceso',
-          ),
-          Container(height: 40, width: 1, color: Colors.white24),
-          _buildStatItemButton(
-            icon: Icons.check_circle,
-            label: 'Finalizados',
-            value: '$finalizados',
-            color: Colors.blue,
-            filtroKey: 'finalizados',
-          ),
-        ],
+      child: SingleChildScrollView(
+        scrollDirection: Axis.horizontal,
+        child: Row(
+          children: [
+            _buildStatItemButton(
+              icon: Icons.format_list_bulleted,
+              label: 'Total',
+              value: '${registros.length}',
+              color: const Color(0xFFFFD700),
+              filtroKey: 'todos',
+            ),
+            _buildDivider(),
+            _buildStatItemButton(
+              icon: Icons.inbox,
+              label: 'Recibido',
+              value: '$recibidos',
+              color: Colors.lime,
+              filtroKey: 'recibido',
+            ),
+            _buildDivider(),
+            _buildStatItemButton(
+              icon: Icons.pending_actions,
+              label: 'Proceso',
+              value: '$enProceso',
+              color: Colors.blue,
+              filtroKey: 'enProceso',
+            ),
+            _buildDivider(),
+            _buildStatItemButton(
+              icon: Icons.check_circle,
+              label: 'Finalizado',
+              value: '$finalizados',
+              color: Colors.green,
+              filtroKey: 'finalizado',
+            ),
+            _buildDivider(),
+            _buildStatItemButton(
+              icon: Icons.motorcycle_outlined,
+              label: 'Entregado',
+              value: '$entregados',
+              color: Colors.deepOrange,
+              filtroKey: 'entregado',
+            ),
+            _buildDivider(),
+            _buildStatItemButton(
+              icon: Icons.receipt_long,
+              label: 'Facturado',
+              value: '$facturados',
+              color: Colors.indigo,
+              filtroKey: 'facturado',
+            ),
+          ],
+        ),
       ),
+    );
+  }
+
+  Widget _buildDivider() {
+    return Container(
+      height: 40,
+      width: 1,
+      color: Colors.white24,
+      margin: const EdgeInsets.symmetric(horizontal: 8),
     );
   }
 
@@ -321,11 +383,7 @@ class _MantenimientosPageState extends State<MantenimientosPage> {
     final isSelected = _filtroSeleccionado == filtroKey;
 
     return GestureDetector(
-      onTap: () {
-        setState(() {
-          _filtroSeleccionado = filtroKey;
-        });
-      },
+      onTap: () => setState(() => _filtroSeleccionado = filtroKey),
       child: Column(
         children: [
           if (isSelected)
@@ -345,7 +403,9 @@ class _MantenimientosPageState extends State<MantenimientosPage> {
           Text(
             value,
             style: TextStyle(
-              color: isSelected ? Colors.white : Colors.white.withOpacity(0.6),
+              color: isSelected
+                  ? Colors.white
+                  : Colors.white.withOpacity(0.6),
               fontSize: 24,
               fontWeight: FontWeight.bold,
             ),
@@ -366,8 +426,6 @@ class _MantenimientosPageState extends State<MantenimientosPage> {
   }
 
   Widget _buildCard(BuildContext context, RegistroDTO registro, int index) {
-    final bool enProceso = registro.estado == 1;
-
     return Hero(
       tag: 'registro_${registro.idRegistro}',
       child: Container(
@@ -376,9 +434,7 @@ class _MantenimientosPageState extends State<MantenimientosPage> {
           color: const Color(0xFF1E1E1E),
           borderRadius: BorderRadius.circular(16),
           border: Border.all(
-            color: enProceso
-                ? Colors.green.withOpacity(0.3)
-                : Colors.blue.withOpacity(0.3),
+            color: _colorEstado(registro.estado).withOpacity(0.3),
             width: 1.5,
           ),
           boxShadow: [
@@ -408,7 +464,7 @@ class _MantenimientosPageState extends State<MantenimientosPage> {
               child: Row(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  // Imagen con badge de número
+                  // Imagen con badge
                   Stack(
                     children: [
                       ClipRRect(
@@ -439,9 +495,7 @@ class _MantenimientosPageState extends State<MantenimientosPage> {
                         left: 6,
                         child: Container(
                           padding: const EdgeInsets.symmetric(
-                            horizontal: 8,
-                            vertical: 4,
-                          ),
+                              horizontal: 8, vertical: 4),
                           decoration: BoxDecoration(
                             color: const Color(0xFFFFD700),
                             borderRadius: BorderRadius.circular(8),
@@ -479,19 +533,14 @@ class _MantenimientosPageState extends State<MantenimientosPage> {
                         const SizedBox(height: 4),
                         Row(
                           children: [
-                            const Icon(
-                              Icons.motorcycle,
-                              size: 14,
-                              color: Color(0xFFFFD700),
-                            ),
+                            const Icon(Icons.motorcycle,
+                                size: 14, color: Color(0xFFFFD700)),
                             const SizedBox(width: 4),
                             Expanded(
                               child: Text(
                                 "${registro.marcaMoto} - ${registro.modeloMoto}",
                                 style: const TextStyle(
-                                  color: Colors.white70,
-                                  fontSize: 13,
-                                ),
+                                    color: Colors.white70, fontSize: 13),
                                 maxLines: 1,
                                 overflow: TextOverflow.ellipsis,
                               ),
@@ -501,11 +550,9 @@ class _MantenimientosPageState extends State<MantenimientosPage> {
                         const SizedBox(height: 8),
                         Row(
                           children: [
-                            Icon(
-                              Icons.calendar_today,
-                              size: 12,
-                              color: Colors.white.withOpacity(0.5),
-                            ),
+                            Icon(Icons.calendar_today,
+                                size: 12,
+                                color: Colors.white.withOpacity(0.5)),
                             const SizedBox(width: 4),
                             Text(
                               registro.fecha,
@@ -520,9 +567,7 @@ class _MantenimientosPageState extends State<MantenimientosPage> {
                         Text(
                           registro.descripcion,
                           style: const TextStyle(
-                            color: Colors.white60,
-                            fontSize: 12,
-                          ),
+                              color: Colors.white60, fontSize: 12),
                           maxLines: 2,
                           overflow: TextOverflow.ellipsis,
                         ),
@@ -530,40 +575,32 @@ class _MantenimientosPageState extends State<MantenimientosPage> {
                         Row(
                           mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           children: [
+                            // Badge de estado
                             Container(
                               padding: const EdgeInsets.symmetric(
-                                horizontal: 12,
-                                vertical: 6,
-                              ),
+                                  horizontal: 12, vertical: 6),
                               decoration: BoxDecoration(
-                                color: enProceso
-                                    ? Colors.green.withOpacity(0.2)
-                                    : Colors.blue.withOpacity(0.2),
+                                color: _colorEstado(registro.estado)
+                                    .withOpacity(0.2),
                                 borderRadius: BorderRadius.circular(8),
                                 border: Border.all(
-                                  color: enProceso
-                                      ? Colors.green.withOpacity(0.5)
-                                      : Colors.blue.withOpacity(0.5),
+                                  color: _colorEstado(registro.estado)
+                                      .withOpacity(0.5),
                                 ),
                               ),
                               child: Row(
                                 mainAxisSize: MainAxisSize.min,
                                 children: [
                                   Icon(
-                                    enProceso
-                                        ? Icons.pending_actions
-                                        : Icons.check_circle,
+                                    _iconoEstado(registro.estado),
                                     size: 14,
-                                    color:
-                                    enProceso ? Colors.green : Colors.blue,
+                                    color: _colorEstado(registro.estado),
                                   ),
                                   const SizedBox(width: 4),
                                   Text(
-                                    enProceso ? "En Proceso" : "Finalizado",
+                                    _textoEstado(registro.estado),
                                     style: TextStyle(
-                                      color: enProceso
-                                          ? Colors.green
-                                          : Colors.blue,
+                                      color: _colorEstado(registro.estado),
                                       fontWeight: FontWeight.bold,
                                       fontSize: 11,
                                     ),

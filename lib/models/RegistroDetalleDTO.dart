@@ -18,6 +18,7 @@ class RegistroDetalleDTO {
   final String? modeloMoto;
   final String? placaMoto;
   final String? rutaImagenMoto;
+  final int? kilometraje;
 
   // TIPO DE MANTENIMIENTO
   final String? tipoMantenimiento;
@@ -40,6 +41,7 @@ class RegistroDetalleDTO {
     this.modeloMoto,
     this.placaMoto,
     this.rutaImagenMoto,
+    this.kilometraje,
     this.tipoMantenimiento,
     this.idFactura,
     this.costoTotal,
@@ -116,6 +118,7 @@ class RegistroDetalleDTO {
       modeloMoto: _parseStringOrList(json['modeloMoto']),
       placaMoto: _parseStringOrList(json['placaMoto']),
       rutaImagenMoto: _parseStringOrList(json['rutaImagenMoto']),
+      kilometraje: _parseIntOrList(json['kilometraje']),
       tipoMantenimiento: _parseStringOrList(json['tipoMantenimiento']),
       idFactura: _parseIntOrList(json['idFactura']),
       costoTotal: _parseDoubleOrList(json['costoTotal']),

@@ -220,6 +220,7 @@ class RegistrosService {
       int idRegistro,
       int nuevoEstado, {
         String? observaciones,
+        int? kilometraje,
       }) async {
     try {
       final baseUrl = await ApiConfig.getBaseUrl();
@@ -228,6 +229,10 @@ class RegistrosService {
       String urlString = '$baseUrl/registros/$idRegistro/estado?estado=$nuevoEstado';
       if (observaciones != null && observaciones.isNotEmpty) {
         urlString += '&observaciones=${Uri.encodeComponent(observaciones)}';
+      }
+
+      if (kilometraje != null) {
+        urlString += '&kilometraje=$kilometraje';
       }
 
       final token = await TokenManager.getToken();
