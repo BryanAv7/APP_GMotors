@@ -215,7 +215,7 @@ class _DetalleMantenimientoPageState extends State<DetalleMantenimientoPage> {
                   _buildObservacionesField(),
                   const SizedBox(height: 32),
 
-                  if (estadoSeleccionado == 1) ...[
+                  if ([1, 2, 3, 4].contains(estadoSeleccionado)) ...[
                     _buildFacturaButton(),
                     const SizedBox(height: 20),
                   ],

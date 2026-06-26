@@ -7,11 +7,11 @@ import '../models/DetalleFacturaDTO.dart';
 
 class PdfFacturaService {
   // ── Colores corporativos ──
-  static const _rojo       = PdfColor.fromInt(0xFFCC0000);
-  static const _rojoClaro  = PdfColor.fromInt(0xFFFFF0F0);
+  static const _rojo = PdfColor.fromInt(0xFFCC0000);
+  static const _rojoClaro = PdfColor.fromInt(0xFFFFF0F0);
   static const _grisOscuro = PdfColor.fromInt(0xFF2C2C2C);
-  static const _grisMedio  = PdfColor.fromInt(0xFF888888);
-  static const _grisLinea  = PdfColor.fromInt(0xFFE0E0E0);
+  static const _grisMedio = PdfColor.fromInt(0xFF888888);
+  static const _grisLinea = PdfColor.fromInt(0xFFE0E0E0);
 
   static Future<void> generarEImprimir({
     required RegistroDetalleDTO registro,
@@ -41,7 +41,6 @@ class PdfFacturaService {
           return pw.Column(
             crossAxisAlignment: pw.CrossAxisAlignment.start,
             children: [
-
               // ── ENCABEZADO ──
               pw.Row(
                 mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
@@ -101,6 +100,8 @@ class PdfFacturaService {
                           color: _grisOscuro,
                         ),
                       ),
+                      pw.SizedBox(height: 8),
+                      _buildEstadoBadge(registro.estado),
                     ],
                   ),
                 ],
@@ -125,7 +126,10 @@ class PdfFacturaService {
                   pw.Expanded(
                     child: _buildBloque(
                       titulo: 'VEHÍCULO',
-                      filas: ['${registro.marcaMoto ?? ''} ${registro.modeloMoto ?? ''}'.trim()],
+                      filas: [
+                        '${registro.marcaMoto ?? ''} ${registro.modeloMoto ?? ''}'
+                            .trim(),
+                      ],
                     ),
                   ),
                   pw.SizedBox(width: 16),
@@ -135,11 +139,14 @@ class PdfFacturaService {
                       filas: [registro.placaMoto ?? 'N/A'],
                     ),
                   ),
-                  pw.SizedBox(width: 16),
                   pw.Expanded(
                     child: _buildBloque(
                       titulo: 'KILOMETRAJE',
-                      filas: [registro.kilometraje != null ? '${registro.kilometraje} km' : 'N/A'],
+                      filas: [
+                        registro.kilometraje != null
+                            ? '${registro.kilometraje} km'
+                            : 'N/A',
+                      ],
                     ),
                   ),
                   pw.SizedBox(width: 16),
@@ -157,7 +164,10 @@ class PdfFacturaService {
               // ── TABLA: cabecera ──
               pw.Container(
                 color: _rojo,
-                padding: const pw.EdgeInsets.symmetric(horizontal: 10, vertical: 7),
+                padding: const pw.EdgeInsets.symmetric(
+                  horizontal: 10,
+                  vertical: 7,
+                ),
                 child: pw.Row(
                   children: [
                     pw.Expanded(
@@ -209,14 +219,20 @@ class PdfFacturaService {
                 final esPar = i % 2 == 0;
                 return pw.Container(
                   color: esPar ? PdfColors.white : _rojoClaro,
-                  padding: const pw.EdgeInsets.symmetric(horizontal: 10, vertical: 7),
+                  padding: const pw.EdgeInsets.symmetric(
+                    horizontal: 10,
+                    vertical: 7,
+                  ),
                   child: pw.Row(
                     children: [
                       pw.Expanded(
                         flex: 5,
                         child: pw.Text(
                           d.descripcion,
-                          style: const pw.TextStyle(fontSize: 9, color: _grisOscuro),
+                          style: const pw.TextStyle(
+                            fontSize: 9,
+                            color: _grisOscuro,
+                          ),
                         ),
                       ),
                       pw.SizedBox(
@@ -224,7 +240,10 @@ class PdfFacturaService {
                         child: pw.Text(
                           '${d.cantidad}',
                           textAlign: pw.TextAlign.center,
-                          style: const pw.TextStyle(fontSize: 9, color: _grisOscuro),
+                          style: const pw.TextStyle(
+                            fontSize: 9,
+                            color: _grisOscuro,
+                          ),
                         ),
                       ),
                       pw.SizedBox(
@@ -232,7 +251,10 @@ class PdfFacturaService {
                         child: pw.Text(
                           '\$${d.subtotal.toStringAsFixed(2)}',
                           textAlign: pw.TextAlign.right,
-                          style: const pw.TextStyle(fontSize: 9, color: _grisOscuro),
+                          style: const pw.TextStyle(
+                            fontSize: 9,
+                            color: _grisOscuro,
+                          ),
                         ),
                       ),
                     ],
@@ -273,7 +295,8 @@ class PdfFacturaService {
               ),
 
               // ── OBSERVACIONES (si existen) ──
-              if (registro.descripcion != null && registro.descripcion!.isNotEmpty) ...[
+              if (registro.descripcion != null &&
+                  registro.descripcion!.isNotEmpty) ...[
                 pw.SizedBox(height: 20),
                 pw.Row(
                   crossAxisAlignment: pw.CrossAxisAlignment.start,
@@ -331,7 +354,6 @@ class PdfFacturaService {
                   ),
                 ],
               ),
-
             ],
           );
         },
@@ -343,6 +365,46 @@ class PdfFacturaService {
     await Printing.sharePdf(
       bytes: bytes,
       filename: 'Factura_${registro.idFactura}_${registro.nombreCliente}.pdf',
+    );
+  }
+
+  static pw.Widget _buildEstadoBadge(int? estado) {
+    PdfColor color;
+    String texto;
+
+    switch (estado) {
+      case 1:
+        color = PdfColors.orange700;
+        texto = 'EN PROCESO';
+        break;
+
+      case 2:
+        color = PdfColors.green700;
+        texto = 'FINALIZADO';
+        break;
+
+      default:
+        return pw.SizedBox();
+    }
+
+    return pw.Container(
+      padding: const pw.EdgeInsets.symmetric(
+        horizontal: 10,
+        vertical: 5,
+      ),
+      decoration: pw.BoxDecoration(
+        color: color,
+        borderRadius: pw.BorderRadius.circular(12),
+      ),
+      child: pw.Text(
+        texto,
+        style: pw.TextStyle(
+          color: PdfColors.white,
+          fontWeight: pw.FontWeight.bold,
+          fontSize: 9,
+          letterSpacing: 1,
+        ),
+      ),
     );
   }
 
@@ -365,7 +427,7 @@ class PdfFacturaService {
         ),
         pw.SizedBox(height: 4),
         ...filas.map(
-              (f) => pw.Text(
+          (f) => pw.Text(
             f,
             style: const pw.TextStyle(fontSize: 10, color: _grisOscuro),
           ),
