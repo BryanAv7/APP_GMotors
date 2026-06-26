@@ -6,6 +6,7 @@ import '../services/registros_service.dart';
 import '../services/tipo_service.dart';
 import '../screens/seleccionar_productos_page.dart';
 import 'package:flutter/services.dart';
+import '../services/pdf_factura_service.dart';
 
 class DetalleMantenimientoPage extends StatefulWidget {
   final int idRegistro;
@@ -214,6 +215,10 @@ class _DetalleMantenimientoPageState extends State<DetalleMantenimientoPage> {
                   _buildObservacionesField(),
                   const SizedBox(height: 32),
 
+                  if (estadoSeleccionado == 1) ...[
+                    _buildFacturaButton(),
+                    const SizedBox(height: 20),
+                  ],
                   _buildGuardarButton(),
                   const SizedBox(height: 20),
                 ],
@@ -835,6 +840,73 @@ class _DetalleMantenimientoPageState extends State<DetalleMantenimientoPage> {
       ),
     );
   }
+
+  Widget _buildFacturaButton() {
+    return Container(
+      width: double.infinity,
+      height: 56,
+      decoration: BoxDecoration(
+        color: const Color(0xFF1E1E1E),
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(
+          color: const Color(0xFFFFD700).withOpacity(0.5),
+          width: 1.5,
+        ),
+      ),
+      child: ElevatedButton.icon(
+        style: ElevatedButton.styleFrom(
+          backgroundColor: Colors.transparent,
+          shadowColor: Colors.transparent,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(16),
+          ),
+        ),
+        onPressed: () async {
+          try {
+            showDialog(
+              context: context,
+              barrierDismissible: false,
+              builder: (_) => const Center(
+                child: CircularProgressIndicator(color: Color(0xFFFFD700)),
+              ),
+            );
+
+            final detalle = await futureDetalle;
+
+            if (detalle.idFactura == null) {
+              Navigator.pop(context);
+              _mostrarError('No hay factura asociada a este registro');
+              return;
+            }
+
+            final detalles = await RegistrosService.obtenerDetallesFactura(
+              detalle.idFactura!,
+            );
+
+            Navigator.pop(context);
+
+            await PdfFacturaService.generarEImprimir(
+              registro: detalle,
+              detalles: detalles,
+            );
+          } catch (e) {
+            Navigator.pop(context);
+            _mostrarError('Error al generar PDF: $e');
+          }
+        },
+        icon: const Icon(Icons.print, color: Color(0xFFFFD700)),
+        label: const Text(
+          'Imprimir / Compartir Factura',
+          style: TextStyle(
+            color: Color(0xFFFFD700),
+            fontSize: 16,
+            fontWeight: FontWeight.bold,
+          ),
+        ),
+      ),
+    );
+  }
+
 
   Widget _buildGuardarButton() {
     return Container(

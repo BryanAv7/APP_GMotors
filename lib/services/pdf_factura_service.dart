@@ -138,6 +138,13 @@ class PdfFacturaService {
                   pw.SizedBox(width: 16),
                   pw.Expanded(
                     child: _buildBloque(
+                      titulo: 'KILOMETRAJE',
+                      filas: [registro.kilometraje != null ? '${registro.kilometraje} km' : 'N/A'],
+                    ),
+                  ),
+                  pw.SizedBox(width: 16),
+                  pw.Expanded(
+                    child: _buildBloque(
                       titulo: 'SERVICIO',
                       filas: [registro.tipoMantenimiento ?? 'N/A'],
                     ),
