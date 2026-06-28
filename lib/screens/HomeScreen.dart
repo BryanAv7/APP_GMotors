@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:motos_app/screens/HistorialFacturasRapidasScreen.dart';
 import 'package:motos_app/screens/VerRutaScreen.dart';
 import 'package:motos_app/screens/ViewProfileScreen.dart';
 import 'package:motos_app/screens/MantenimientosScreen.dart';
@@ -221,6 +222,24 @@ class _HomeScreenState extends State<HomeScreen> {
                   context,
                   MaterialPageRoute(
                     builder: (context) => const QuickAccountCreationScreen(),
+                  ),
+                ).then((_) {
+                  setState(() => _selectedCardIndex = -1);
+                });
+              },
+            ),
+
+            // ============== FACTURAS RAPIDAS ==============
+            _DashboardCard(
+              icon: Icons.receipt_long,
+              label: 'Factura Rapida',
+              selected: _selectedCardIndex == 6,
+              onTap: () {
+                setState(() => _selectedCardIndex = 6);
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => const HistorialFacturasRapidasScreen(),
                   ),
                 ).then((_) {
                   setState(() => _selectedCardIndex = -1);
