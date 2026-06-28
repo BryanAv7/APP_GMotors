@@ -142,27 +142,78 @@ class _FacturasRapidasScreenState extends State<FacturasRapidasScreen> {
       String label,
       IconData icon,
       ) {
+    final bool requerido = label == "Nombre Cliente" || label == "Cédula";
+
+    String? _validator(String? v) {
+      if (requerido && (v == null || v.trim().isEmpty)) {
+        return "Campo obligatorio";
+      }
+
+      // CÉDULA
+      if (label == "Cédula") {
+        if (!RegExp(r'^\d{10}$').hasMatch(v ?? "")) {
+          return "Cédula inválida (10 dígitos)";
+        }
+      }
+
+      // TELÉFONO
+      if (label == "Teléfono") {
+        if (!RegExp(r'^\d{7,10}$').hasMatch(v ?? "")) {
+          return "Teléfono inválido";
+        }
+      }
+
+      // CORREO
+      if (label == "Correo") {
+        if (v != null && v.isNotEmpty) {
+          final emailRegex =
+          RegExp(r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$');
+
+          if (!emailRegex.hasMatch(v)) {
+            return "Ej: ejemplo@gmail.com";
+          }
+        }
+      }
+
+      return null;
+    }
+
+    String? hint;
+    if (label == "Correo") hint = "example@gmail.com";
+    if (label == "Teléfono") hint = "0987654321";
+    if (label == "Cédula") hint = "10 dígitos";
+
     return Container(
       decoration: _boxDecoration(),
       child: TextFormField(
         controller: ctrl,
+        keyboardType: label == "Correo"
+            ? TextInputType.emailAddress
+            : TextInputType.text,
         style: const TextStyle(color: Colors.white),
         decoration: InputDecoration(
-          labelText: label,
+          label: RichText(
+            text: TextSpan(
+              text: label,
+              style: const TextStyle(color: Colors.white54),
+              children: requerido
+                  ? const [
+                TextSpan(text: " "),
+                TextSpan(
+                  text: "*",
+                  style: TextStyle(color: Colors.red),
+                ),
+              ]
+                  : [],
+            ),
+          ),
+          hintText: hint,
+          hintStyle: const TextStyle(color: Colors.white38),
           prefixIcon: Icon(icon, color: Colors.white54),
           border: InputBorder.none,
-          labelStyle: const TextStyle(color: Colors.white54),
           contentPadding: const EdgeInsets.all(10),
         ),
-        validator: (v) {
-          if (label == "Nombre Cliente" && (v == null || v.isEmpty)) {
-            return "Ingrese nombre";
-          }
-          if (label == "Cédula" && (v == null || v.isEmpty)) {
-            return "Ingrese cédula";
-          }
-          return null;
-        },
+        validator: _validator,
       ),
     );
   }
@@ -396,10 +447,6 @@ class _FacturasRapidasScreenState extends State<FacturasRapidasScreen> {
       final res = await VentaService.crearVenta(venta);
 
       if (res != null) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text("Factura creada")),
-        );
-
         Navigator.pushReplacement(
           context,
           MaterialPageRoute(

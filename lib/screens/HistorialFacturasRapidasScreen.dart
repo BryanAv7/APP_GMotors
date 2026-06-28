@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import '../services/venta_service.dart';
 import '../models/venta_listado_model.dart';
 import '../screens/FacturasRapidasScreen.dart';
+import '../screens/EditFacturasRapidasScreen.dart';
 
 class HistorialFacturasRapidasScreen extends StatefulWidget {
   const HistorialFacturasRapidasScreen({super.key});
@@ -226,6 +227,9 @@ class _HistorialFacturasRapidasScreenState
       child: Theme(
         data: Theme.of(context).copyWith(
           dividerColor: Colors.transparent,
+          splashColor: Colors.transparent,
+          highlightColor: Colors.transparent,
+          splashFactory: NoSplash.splashFactory,
         ),
         child: ExpansionTile(
           tilePadding: const EdgeInsets.symmetric(
@@ -305,6 +309,35 @@ class _HistorialFacturasRapidasScreenState
                         ),
                       ],
                     ),
+
+                    // FECHA
+                    Row(
+                      children: [
+                        const Text(
+                          "Fecha:",
+                          style: TextStyle(
+                            color: Colors.white,
+                            fontSize: 13,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+
+                        const SizedBox(width: 6),
+
+                        Expanded(
+                          child: Text(
+                            '${f.fechaEmision.day.toString().padLeft(2, '0')}/'
+                                '${f.fechaEmision.month.toString().padLeft(2, '0')}/'
+                                '${f.fechaEmision.year}',
+                            overflow: TextOverflow.ellipsis,
+                            style: const TextStyle(
+                              color: Colors.white54,
+                              fontSize: 13,
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
                   ],
                 ),
               ),
@@ -341,6 +374,7 @@ class _HistorialFacturasRapidasScreenState
             Wrap(
               spacing: 10,
               runSpacing: 10,
+              crossAxisAlignment: WrapCrossAlignment.center,
               children: [
 
                 Container(
@@ -355,21 +389,18 @@ class _HistorialFacturasRapidasScreenState
                   child: Row(
                     mainAxisSize: MainAxisSize.min,
                     children: [
-
                       const Icon(
                         Icons.phone,
                         size: 16,
                         color: Color(0xFFFFD700),
                       ),
-
                       const SizedBox(width: 6),
-
                       Text(
                         f.telefonoCliente ?? "-",
                         style: const TextStyle(
                           color: Colors.white70,
                         ),
-                      )
+                      ),
                     ],
                   ),
                 ),
@@ -386,15 +417,12 @@ class _HistorialFacturasRapidasScreenState
                   child: Row(
                     mainAxisSize: MainAxisSize.min,
                     children: [
-
                       const Icon(
                         Icons.shopping_bag,
                         size: 16,
                         color: Color(0xFFFFD700),
                       ),
-
                       const SizedBox(width: 6),
-
                       Text(
                         f.detalles.length.toString(),
                         style: const TextStyle(
@@ -402,6 +430,40 @@ class _HistorialFacturasRapidasScreenState
                         ),
                       ),
                     ],
+                  ),
+                ),
+
+                Container(
+                  decoration: const BoxDecoration(
+                    color: Color(0xFFFFD700),
+                    shape: BoxShape.circle,
+                  ),
+                  child: IconButton(
+                    constraints: const BoxConstraints(
+                      minWidth: 32,
+                      minHeight: 32,
+                    ),
+                    padding: EdgeInsets.zero,
+                    iconSize: 16,
+                    splashRadius: 18,
+                    icon: const Icon(
+                      Icons.edit,
+                      color: Colors.black,
+                    ),
+                    onPressed: () async {
+                      final result = await Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (_) => EditFacturasRapidasScreen(
+                            venta: f,
+                          ),
+                        ),
+                      );
+
+                      if (result == true) {
+                        _cargarFacturas();
+                      }
+                    },
                   ),
                 ),
               ],
@@ -418,8 +480,8 @@ class _HistorialFacturasRapidasScreenState
               ),
             ),
 
-            const SizedBox(height: 10),
 
+            const SizedBox(height: 15),
             ...f.detalles.map(
                   (d) => Container(
                 margin: const EdgeInsets.only(bottom: 8),
@@ -430,7 +492,6 @@ class _HistorialFacturasRapidasScreenState
                 ),
                 child: Row(
                   children: [
-
 
                     const SizedBox(width: 10),
 
