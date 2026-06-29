@@ -126,6 +126,49 @@ class VentaService {
   }
 
   // =========================
+  // Actualizar Factura
+  // =========================
+  static Future<dynamic> actualizarVenta(
+      int id, VentaCreateModel venta) async {
+    try {
+      final baseUrl = await ApiConfig.getBaseUrl();
+      if (baseUrl.isEmpty) {
+        throw Exception("Base URL vacía");
+      }
+
+      final url = Uri.parse('$baseUrl/ventas/$id');
+
+      final token = await TokenManager.getToken();
+      if (token == null) {
+        throw Exception("Token no disponible");
+      }
+
+      final response = await http.put(
+        url,
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": "Bearer $token",
+        },
+        body: jsonEncode(venta.toJson()),
+      );
+
+      if (response.statusCode == 200 || response.statusCode == 201) {
+        final decoded = jsonDecode(response.body);
+        return VentaListadoModel.fromJson(decoded);
+      }
+
+      print("ERROR STATUS: ${response.statusCode}");
+      print("BODY: ${response.body}");
+
+      throw Exception("Error al actualizar venta");
+    } catch (e) {
+      print('Error en actualizarVenta: $e');
+      throw Exception('Error actualizando venta: $e');
+    }
+  }
+
+
+  // =========================
   // HISTORIAL CÉDULA
   // =========================
   static Future<List<VentaListadoModel>> historialPorCedula(

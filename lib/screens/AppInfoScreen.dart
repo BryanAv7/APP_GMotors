@@ -6,9 +6,14 @@ class AppInfoScreen extends StatelessWidget {
 
   Future<void> _launchURL(String url) async {
     try {
-      if (await canLaunchUrl(Uri.parse(url))) {
-        await launchUrl(Uri.parse(url));
-      } else {
+      final Uri uri = Uri.parse(url);
+
+      final bool launched = await launchUrl(
+        uri,
+        mode: LaunchMode.externalApplication,
+      );
+
+      if (!launched) {
         throw 'No se pudo abrir: $url';
       }
     } catch (e) {
@@ -87,7 +92,7 @@ class AppInfoScreen extends StatelessWidget {
                   ),
                   const SizedBox(height: 8),
                   const Text(
-                    'Versión 1.0.0',
+                    'Versión 1.5.5',
                     style: TextStyle(
                       color: Colors.white70,
                       fontSize: 14,
@@ -232,15 +237,6 @@ class AppInfoScreen extends StatelessWidget {
                       height: 1.5,
                     ),
                   ),
-                  SizedBox(height: 8),
-                  Text(
-                    'Proyecto de Tesis - Desarrollo de un Sistema Asistente para la Gestión y Automatización de Talleres de Motocicletas',
-                    style: TextStyle(
-                      color: Colors.white70,
-                      fontSize: 12,
-                      fontStyle: FontStyle.italic,
-                    ),
-                  ),
                 ],
               ),
             ),
@@ -252,14 +248,14 @@ class AppInfoScreen extends StatelessWidget {
             _buildContactItem(
               Icons.email,
               'Correo',
-              'bavilag@est.ups.edu.ec',
-                  () => _launchURL('mailto:bavilag@est.ups.edu.ec'),
+              'bryan2244ismael@gmail.com',
+                  () => _launchURL('mailto:bryan2244ismael@gmail.com'),
             ),
             _buildContactItem(
               Icons.phone,
               'Teléfono',
-              '--',
-                  () => _launchURL('tel:--'),
+              'Escribeme',
+                  () => _launchURL("https://wa.me/593987329960"),
             ),
             const SizedBox(height: 24),
 
@@ -301,15 +297,6 @@ class AppInfoScreen extends StatelessWidget {
                       height: 1.5,
                     ),
                   ),
-                  SizedBox(height: 8),
-                  Text(
-                    'Proyecto de Tesis - Desarrollo de un Sistema Asistente para la Gestión y Automatización de Talleres de Motocicletas',
-                    style: TextStyle(
-                      color: Colors.white70,
-                      fontSize: 12,
-                      fontStyle: FontStyle.italic,
-                    ),
-                  ),
                 ],
               ),
             ),
@@ -320,14 +307,14 @@ class AppInfoScreen extends StatelessWidget {
             _buildContactItem(
               Icons.email,
               'Correo',
-              'epautec@est.ups.edu.ec',
-                  () => _launchURL('mailto:epautec@est.ups.edu.ec'),
+              'edwinpau26@hotmail.com',
+                  () => _launchURL('mailto:edwinpau26@hotmail.com'),
             ),
             _buildContactItem(
               Icons.phone,
               'Teléfono',
-              '--',
-                  () => _launchURL('tel:--'),
+              'Escribeme',
+                  () => _launchURL("https://wa.me/593994183558"),
             ),
             const SizedBox(height: 24),
 

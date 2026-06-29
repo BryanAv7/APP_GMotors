@@ -67,7 +67,16 @@ class _HistorialFacturasRapidasScreenState
 
   void _limpiarFiltro() {
     filtroCtrl.clear();
-    _cargarFacturas();
+
+    setState(() {
+      cargando = true;
+    });
+
+    _cargarFacturas().then((_) {
+      if (mounted) {
+        setState(() => cargando = false);
+      }
+    });
   }
 
   Future<void> _eliminarFactura(int id) async {
@@ -87,6 +96,10 @@ class _HistorialFacturasRapidasScreenState
       backgroundColor: const Color(0xFF121212),
 
       appBar: AppBar(
+        automaticallyImplyLeading: true,
+        leading: Navigator.canPop(context)
+            ? const BackButton(color: Colors.black)
+            : null,
         backgroundColor: const Color(0xFFFFD700),
         title: const Text(
           "Historial F.Rápidas",

@@ -158,13 +158,6 @@ class _LoginScreenState extends State<LoginScreen> {
       return;
     }
 
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text("¡Bienvenido, ${response.usuario.nombreUsuario}!"),
-        backgroundColor: Colors.green,
-      ),
-    );
-
     // Obtener Roles y Redireccionamiento
     _redirigirSegunRol(response.usuario.idUsuario);
   }
