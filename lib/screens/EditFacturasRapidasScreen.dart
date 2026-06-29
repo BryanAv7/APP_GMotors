@@ -6,6 +6,7 @@ import '../models/detalle_ui.dart';
 import '../services/venta_service.dart';
 import '../utils/token_manager.dart';
 import '../screens/seleccionar_productos_page.dart';
+import '../services/pdf_factura_venta_service.dart';
 
 class EditFacturasRapidasScreen extends StatefulWidget {
   final VentaListadoModel venta;
@@ -107,6 +108,8 @@ class _EditFacturasRapidasScreenState extends State<EditFacturasRapidasScreen> {
 
               const SizedBox(height: 30),
 
+              _buildFacturaButton(),
+              const SizedBox(height: 12),
               _guardarButton(),
             ],
           ),
@@ -276,6 +279,50 @@ class _EditFacturasRapidasScreenState extends State<EditFacturasRapidasScreen> {
           border: InputBorder.none,
           contentPadding: EdgeInsets.all(12),
         ),
+      ),
+    );
+  }
+
+  // ================= IMPRIMIR FACTURA =================
+
+  Widget _buildFacturaButton() {
+    return Container(
+      width: double.infinity,
+      height: 56,
+      decoration: BoxDecoration(
+        color: const Color(0xFF1E1E1E),
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(
+          color: const Color(0xFFFFD700).withOpacity(0.5),
+          width: 1.5,
+        ),
+      ),
+      child: ElevatedButton.icon(
+        style: ElevatedButton.styleFrom(
+          backgroundColor: Colors.transparent,
+          shadowColor: Colors.transparent,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(16),
+          ),
+        ),
+        icon: const Icon(
+          Icons.print,
+          color: Color(0xFFFFD700),
+        ),
+        label: const Text(
+          "Imprimir / Compartir Factura",
+          style: TextStyle(
+            color: Color(0xFFFFD700),
+            fontSize: 16,
+            fontWeight: FontWeight.bold,
+          ),
+        ),
+        onPressed: () async {
+          await PdfVentaService.generarEImprimir(
+            venta: widget.venta,
+            productos: productos,
+          );
+        },
       ),
     );
   }
