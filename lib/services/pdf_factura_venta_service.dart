@@ -89,7 +89,7 @@ class PdfVentaService {
                     crossAxisAlignment: pw.CrossAxisAlignment.end,
                     children: [
                       pw.Text(
-                        'CONSUMIDOR FINAL',
+                        'FACTURA',
                         style: pw.TextStyle(
                           fontSize: 9,
                           fontWeight: pw.FontWeight.bold,

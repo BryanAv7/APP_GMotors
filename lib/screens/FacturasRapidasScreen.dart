@@ -142,36 +142,36 @@ class _FacturasRapidasScreenState extends State<FacturasRapidasScreen> {
       String label,
       IconData icon,
       ) {
-    final bool requerido = label == "Nombre Cliente" || label == "Cédula";
-
     String? _validator(String? v) {
-      if (requerido && (v == null || v.trim().isEmpty)) {
-        return "Campo obligatorio";
-      }
 
-      // CÉDULA
-      if (label == "Cédula") {
-        if (!RegExp(r'^\d{10}$').hasMatch(v ?? "")) {
+      // Cédula (solo valida si escribió algo)
+      if (label == "Cédula" &&
+          v != null &&
+          v.trim().isNotEmpty) {
+        if (!RegExp(r'^\d{10}$').hasMatch(v.trim())) {
           return "Cédula inválida (10 dígitos)";
         }
       }
 
-      // TELÉFONO
-      if (label == "Teléfono") {
-        if (!RegExp(r'^\d{7,10}$').hasMatch(v ?? "")) {
+      // Teléfono (solo valida si escribió algo)
+      if (label == "Teléfono" &&
+          v != null &&
+          v.trim().isNotEmpty) {
+        if (!RegExp(r'^\d{7,10}$').hasMatch(v.trim())) {
           return "Teléfono inválido";
         }
       }
 
-      // CORREO
-      if (label == "Correo") {
-        if (v != null && v.isNotEmpty) {
-          final emailRegex =
-          RegExp(r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$');
+      // Correo (solo valida si escribió algo)
+      if (label == "Correo" &&
+          v != null &&
+          v.trim().isNotEmpty) {
 
-          if (!emailRegex.hasMatch(v)) {
-            return "Ej: ejemplo@gmail.com";
-          }
+        final emailRegex =
+        RegExp(r'^[\w\-.]+@([\w-]+\.)+[\w-]{2,4}$');
+
+        if (!emailRegex.hasMatch(v.trim())) {
+          return "Ej: ejemplo@gmail.com";
         }
       }
 
@@ -179,9 +179,14 @@ class _FacturasRapidasScreenState extends State<FacturasRapidasScreen> {
     }
 
     String? hint;
-    if (label == "Correo") hint = "example@gmail.com";
-    if (label == "Teléfono") hint = "0987654321";
-    if (label == "Cédula") hint = "10 dígitos";
+
+    if (label == "Correo") {
+      hint = "example@gmail.com";
+    } else if (label == "Teléfono") {
+      hint = "0987654321";
+    } else if (label == "Cédula") {
+      hint = "Opcional";
+    }
 
     return Container(
       decoration: _boxDecoration(),
@@ -192,21 +197,8 @@ class _FacturasRapidasScreenState extends State<FacturasRapidasScreen> {
             : TextInputType.text,
         style: const TextStyle(color: Colors.white),
         decoration: InputDecoration(
-          label: RichText(
-            text: TextSpan(
-              text: label,
-              style: const TextStyle(color: Colors.white54),
-              children: requerido
-                  ? const [
-                TextSpan(text: " "),
-                TextSpan(
-                  text: "*",
-                  style: TextStyle(color: Colors.red),
-                ),
-              ]
-                  : [],
-            ),
-          ),
+          labelText: "$label (Opcional)",
+          labelStyle: const TextStyle(color: Colors.white54),
           hintText: hint,
           hintStyle: const TextStyle(color: Colors.white38),
           prefixIcon: Icon(icon, color: Colors.white54),
