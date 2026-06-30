@@ -19,6 +19,9 @@ class UsuarioService {
       if (usuario.descripcion != null) body['descripcion'] = usuario.descripcion;
       if (usuario.pais != null) body['pais'] = usuario.pais;
       if (usuario.ciudad != null) body['ciudad'] = usuario.ciudad;
+      if (usuario.cedula != null) body['cedula'] = usuario.cedula;
+      if (usuario.direccion != null) body['direccion'] = usuario.direccion;
+      if (usuario.telefono != null) body['telefono'] = usuario.telefono;
       if (usuario.rutaImagen != null) body['rutaimagen'] = usuario.rutaImagen;
 
       final token = await TokenManager.getToken();

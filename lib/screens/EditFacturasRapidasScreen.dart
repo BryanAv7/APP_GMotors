@@ -125,7 +125,7 @@ class _EditFacturasRapidasScreenState extends State<EditFacturasRapidasScreen> {
       children: [
         _input(nombreCtrl, "Nombre Cliente", Icons.person),
         const SizedBox(height: 10),
-        _input(cedulaCtrl, "Cédula", Icons.badge),
+        _input(cedulaCtrl, "Cédula/RUC", Icons.badge),
         const SizedBox(height: 10),
         _input(telefonoCtrl, "Teléfono", Icons.phone),
         const SizedBox(height: 10),
@@ -149,8 +149,33 @@ class _EditFacturasRapidasScreenState extends State<EditFacturasRapidasScreen> {
           border: InputBorder.none,
           contentPadding: const EdgeInsets.all(12),
         ),
-        validator: (v) =>
-        (v == null || v.isEmpty) ? "Campo obligatorio" : null,
+
+        validator: (v) {
+          final value = v?.trim() ?? "";
+
+          // ================= OBLIGATORIOS =================
+          if (label == "Nombre Cliente" || label == "Cédula/RUC") {
+            if (value.isEmpty) {
+              return "Campo obligatorio";
+            }
+          }
+
+          // ================= TELÉFONO =================
+          if (label == "Teléfono" && value.isNotEmpty) {
+            if (!RegExp(r'^\d{7,10}$').hasMatch(value)) {
+              return "Teléfono inválido";
+            }
+          }
+
+          // ================= CORREO =================
+          if (label == "Correo" && value.isNotEmpty) {
+            if (!RegExp(r'^[\w\.-]+@[\w\.-]+\.\w+$').hasMatch(value)) {
+              return "Correo inválido";
+            }
+          }
+
+          return null;
+        },
       ),
     );
   }

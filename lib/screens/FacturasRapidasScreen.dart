@@ -121,18 +121,22 @@ class _FacturasRapidasScreenState extends State<FacturasRapidasScreen> {
     );
   }
 
-  Widget _clienteFields() {
+  _clienteFields() {
     return Column(
       children: [
-        _input(nombreCtrl, "Nombre Cliente", Icons.person),
+        _input(nombreCtrl, "Nombre Cliente", Icons.person, "nombre"),
         const SizedBox(height: 10),
-        _input(cedulaCtrl, "Cédula", Icons.badge),
+
+        _input(cedulaCtrl, "Cédula/RUC", Icons.badge, "cedula"),
         const SizedBox(height: 10),
-        _input(telefonoCtrl, "Teléfono", Icons.phone),
+
+        _input(telefonoCtrl, "Teléfono", Icons.phone, "telefono"),
         const SizedBox(height: 10),
-        _input(direccionCtrl, "Dirección", Icons.home),
+
+        _input(direccionCtrl, "Dirección", Icons.home, "direccion"),
         const SizedBox(height: 10),
-        _input(correoCtrl, "Correo", Icons.email),
+
+        _input(correoCtrl, "Correo", Icons.email, "correo"),
       ],
     );
   }
@@ -141,71 +145,53 @@ class _FacturasRapidasScreenState extends State<FacturasRapidasScreen> {
       TextEditingController ctrl,
       String label,
       IconData icon,
+      String type,
       ) {
-    String? _validator(String? v) {
+    String? validator(String? v) {
+      final value = v?.trim() ?? "";
 
-      // Cédula (solo valida si escribió algo)
-      if (label == "Cédula" &&
-          v != null &&
-          v.trim().isNotEmpty) {
-        if (!RegExp(r'^\d{10}$').hasMatch(v.trim())) {
-          return "Cédula inválida (10 dígitos)";
+      if (type == "nombre") {
+        return null;
+      }
+
+      // Cédula 10-13
+      if (type == "cedula" && value.isNotEmpty) {
+        if (!RegExp(r'^\d{10,13}$').hasMatch(value)) {
+          return "Cédula/RUC debe tener 10 a 13 dígitos";
         }
       }
 
-      // Teléfono (solo valida si escribió algo)
-      if (label == "Teléfono" &&
-          v != null &&
-          v.trim().isNotEmpty) {
-        if (!RegExp(r'^\d{7,10}$').hasMatch(v.trim())) {
-          return "Teléfono inválido";
+      // Teléfono 7-10
+      if (type == "telefono" && value.isNotEmpty) {
+        if (!RegExp(r'^\d{7,10}$').hasMatch(value)) {
+          return "Teléfono inválido (7-10 dígitos)";
         }
       }
 
-      // Correo (solo valida si escribió algo)
-      if (label == "Correo" &&
-          v != null &&
-          v.trim().isNotEmpty) {
-
-        final emailRegex =
-        RegExp(r'^[\w\-.]+@([\w-]+\.)+[\w-]{2,4}$');
-
-        if (!emailRegex.hasMatch(v.trim())) {
-          return "Ej: ejemplo@gmail.com";
+      // Correo válido
+      if (type == "correo" && value.isNotEmpty) {
+        final email = RegExp(r'^[\w\-.]+@([\w-]+\.)+[\w-]{2,4}$');
+        if (!email.hasMatch(value)) {
+          return "Correo inválido";
         }
       }
 
       return null;
     }
 
-    String? hint;
-
-    if (label == "Correo") {
-      hint = "example@gmail.com";
-    } else if (label == "Teléfono") {
-      hint = "0987654321";
-    } else if (label == "Cédula") {
-      hint = "Opcional";
-    }
-
     return Container(
       decoration: _boxDecoration(),
       child: TextFormField(
         controller: ctrl,
-        keyboardType: label == "Correo"
-            ? TextInputType.emailAddress
-            : TextInputType.text,
         style: const TextStyle(color: Colors.white),
+        validator: validator,
         decoration: InputDecoration(
-          labelText: "$label (Opcional)",
+          labelText: label,
           labelStyle: const TextStyle(color: Colors.white54),
-          hintText: hint,
-          hintStyle: const TextStyle(color: Colors.white38),
           prefixIcon: Icon(icon, color: Colors.white54),
           border: InputBorder.none,
           contentPadding: const EdgeInsets.all(10),
         ),
-        validator: _validator,
       ),
     );
   }

@@ -132,7 +132,7 @@ class _HistorialFacturasRapidasScreenState
         icon: const Icon(Icons.add, color: Colors.black),
         label: const Text(
           "Agregar",
-          style: TextStyle(color: Colors.black, fontSize: 18, fontWeight: FontWeight.bold ),
+          style: TextStyle(color: Colors.black, fontSize: 15, fontWeight: FontWeight.bold ),
         ),
       ),
 

@@ -5,6 +5,9 @@ class Usuario {
   final String? descripcion;
   final String? pais;
   final String? ciudad;
+  final String? cedula;
+  final String? direccion;
+  final String? telefono;
   final String? rutaImagen;
 
   Usuario({
@@ -14,6 +17,9 @@ class Usuario {
     this.descripcion,
     this.pais,
     this.ciudad,
+    this.cedula,
+    this.direccion,
+    this.telefono,
     this.rutaImagen,
   });
 
@@ -24,6 +30,9 @@ class Usuario {
     descripcion: json['descripcion'],
     pais: json['pais'],
     ciudad: json['ciudad'],
+    cedula: json['cedula'],
+    direccion: json['direccion'],
+    telefono: json['telefono'],
     rutaImagen: json['rutaimagen'],
   );
 
@@ -34,6 +43,9 @@ class Usuario {
     'descripcion': descripcion,
     'pais': pais,
     'ciudad': ciudad,
+    'cedula': cedula,
+    'direccion': direccion,
+    'telefono': telefono,
     'rutaimagen': rutaImagen,
   };
 }
