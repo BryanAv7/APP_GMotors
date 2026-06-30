@@ -7,6 +7,10 @@ class RegistroDetalleDTO {
   // CLIENTE
   final int? idCliente;
   final String? nombreCliente;
+  final String? cedulaCliente;
+  final String? telefonoCliente;
+  final String? direccionCliente;
+  final String? correoCliente;
 
   // ENCARGADO
   final int? idEncargado;
@@ -34,6 +38,10 @@ class RegistroDetalleDTO {
     this.descripcion,
     this.idCliente,
     this.nombreCliente,
+    this.cedulaCliente,
+    this.telefonoCliente,
+    this.direccionCliente,
+    this.correoCliente,
     this.idEncargado,
     this.nombreEncargado,
     this.idMoto,
@@ -111,6 +119,10 @@ class RegistroDetalleDTO {
       descripcion: _parseStringOrList(json['descripcion']),
       idCliente: _parseIntOrList(json['idCliente']),
       nombreCliente: _parseStringOrList(json['nombreCliente']),
+      cedulaCliente: _parseStringOrList(json['cedulaCliente']),
+      telefonoCliente: _parseStringOrList(json['telefonoCliente']),
+      direccionCliente: _parseStringOrList(json['direccionCliente']),
+      correoCliente: _parseStringOrList(json['correoCliente']),
       idEncargado: _parseIntOrList(json['idEncargado']),
       nombreEncargado: _parseStringOrList(json['nombreEncargado']),
       idMoto: _parseIntOrList(json['idMoto']),

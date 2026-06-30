@@ -113,8 +113,8 @@ class PdfFacturaService {
               pw.SizedBox(height: 20),
 
               // ── INFO CLIENTE, MOTO, PLACA Y SERVICIO ──
+                  // ───────────────────── PRIMERA FILA ─────────────────────
               pw.Row(
-                crossAxisAlignment: pw.CrossAxisAlignment.start,
                 children: [
                   pw.Expanded(
                     child: _buildBloque(
@@ -123,22 +123,63 @@ class PdfFacturaService {
                     ),
                   ),
                   pw.SizedBox(width: 16),
+
+                  pw.Expanded(
+                    child: _buildBloque(
+                      titulo: 'CÉDULA/RUC',
+                      filas: [registro.cedulaCliente ?? 'N/A'],
+                    ),
+                  ),
+                  pw.SizedBox(width: 16),
+
+                  pw.Expanded(
+                    child: _buildBloque(
+                      titulo: 'DIRECCIÓN',
+                      filas: [registro.direccionCliente ?? 'N/A'],
+                    ),
+                  ),
+                  pw.SizedBox(width: 16),
+
+                  pw.Expanded(
+                    child: _buildBloque(
+                      titulo: 'TELÉFONO',
+                      filas: [registro.telefonoCliente ?? 'N/A'],
+                    ),
+                  ),
+                ],
+              ),
+
+              pw.SizedBox(height: 16),
+
+              // ───────────────────── SEGUNDA FILA ─────────────────────
+              pw.Row(
+                children: [
+                  pw.Expanded(
+                    child: _buildBloque(
+                      titulo: 'CORREO',
+                      filas: [registro.correoCliente ?? 'N/A'],
+                    ),
+                  ),
+                  pw.SizedBox(width: 16),
+
                   pw.Expanded(
                     child: _buildBloque(
                       titulo: 'VEHÍCULO',
                       filas: [
-                        '${registro.marcaMoto ?? ''} ${registro.modeloMoto ?? ''}'
-                            .trim(),
+                        '${registro.marcaMoto ?? ''} ${registro.modeloMoto ?? ''}'.trim(),
                       ],
                     ),
                   ),
                   pw.SizedBox(width: 16),
+
                   pw.Expanded(
                     child: _buildBloque(
                       titulo: 'PLACA',
                       filas: [registro.placaMoto ?? 'N/A'],
                     ),
                   ),
+                  pw.SizedBox(width: 16),
+
                   pw.Expanded(
                     child: _buildBloque(
                       titulo: 'KILOMETRAJE',
@@ -149,7 +190,14 @@ class PdfFacturaService {
                       ],
                     ),
                   ),
-                  pw.SizedBox(width: 16),
+                ],
+              ),
+
+              pw.SizedBox(height: 16),
+
+              // ───────────────────── TERCERA FILA ─────────────────────
+              pw.Row(
+                children: [
                   pw.Expanded(
                     child: _buildBloque(
                       titulo: 'SERVICIO',
