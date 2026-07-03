@@ -73,6 +73,26 @@ class RegistroDetalleDTO {
       }
     }
 
+    // Función auxiliar: Fechas
+    String _parseFecha(dynamic value) {
+      if (value == null) return '';
+
+      if (value is String) return value;
+
+      if (value is List) {
+        if (value.length >= 3) {
+          final anio = value[0];
+          final mes = value[1].toString().padLeft(2, '0');
+          final dia = value[2].toString().padLeft(2, '0');
+          return '$anio-$mes-$dia';
+        }
+        if (value.isNotEmpty) return value.first.toString();
+        return '';
+      }
+
+      return value.toString();
+    }
+
     // Función auxiliar para manejar campos numéricos
     int? _parseIntOrList(dynamic value) {
       if (value == null) return null;
@@ -114,7 +134,7 @@ class RegistroDetalleDTO {
 
     return RegistroDetalleDTO(
       idRegistro: json['idRegistro'] as int? ?? 0,
-      fecha: _parseStringOrList(json['fecha']) ?? '',
+      fecha: _parseFecha(json['fecha']),
       estado: _parseIntOrList(json['estado']) ?? 0,
       descripcion: _parseStringOrList(json['descripcion']),
       idCliente: _parseIntOrList(json['idCliente']),

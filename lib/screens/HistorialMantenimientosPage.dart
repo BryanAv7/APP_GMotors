@@ -1072,18 +1072,26 @@ class _HistorialMantenimientosPageState
     Color colorEstado = Colors.orange;
     IconData iconoEstado = Icons.schedule;
 
-    if (estado == 1) {
+    if (estado == 0) {
+      textoEstado = 'Recibido';
+      colorEstado = Colors.orange;
+      iconoEstado = Icons.wallet_travel_sharp;
+    } else if (estado == 1) {
       textoEstado = 'En Proceso';
       colorEstado = Colors.blue;
-      iconoEstado = Icons.check_circle;
+      iconoEstado = Icons.autorenew;
     } else if (estado == 2) {
       textoEstado = 'Finalizado';
       colorEstado = Colors.green;
-      iconoEstado = Icons.schedule;
+      iconoEstado = Icons.check_circle;
     } else if (estado == 3) {
-      textoEstado = 'Reservado';
-      colorEstado = Colors.orange;
-      iconoEstado = Icons.wallet_travel_sharp;
+      textoEstado = 'Entregado';
+      colorEstado = Colors.red;
+      iconoEstado = Icons.motorcycle_outlined;
+    } else if (estado == 4) {
+      textoEstado = 'Facturado';
+      colorEstado = Colors.deepPurple;
+      iconoEstado = Icons.receipt_long;
     }
 
     return Container(

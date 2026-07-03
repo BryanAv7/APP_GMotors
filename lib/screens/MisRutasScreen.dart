@@ -98,7 +98,7 @@ class _MisRutasPageState extends State<MisRutasPage> {
         backgroundColor: const Color(0xFFFFD700),
         icon: const Icon(Icons.add, color: Colors.black),
         label:
-        const Text('Nueva Ruta', style: TextStyle(color: Colors.black)),
+        const Text('Nueva Ruta', style: TextStyle(color: Colors.black, fontWeight: FontWeight.bold, fontSize: 16)),
         onPressed: () async {
           final res = await Navigator.push(
             context,

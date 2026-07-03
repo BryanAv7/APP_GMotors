@@ -6,6 +6,7 @@ import '../services/ruta_service.dart';
 import '../services/locationservice.dart';
 import '../models/ruta.dart';
 import '../utils/token_manager.dart';
+import 'NavegarRutaScreen.dart';
 
 class CrearRutaPage extends StatefulWidget {
   const CrearRutaPage({super.key});
@@ -67,6 +68,29 @@ class _CrearRutaPageState extends State<CrearRutaPage> {
     if (_ubicacionActual != null) {
       setState(() => _origen = _ubicacionActual);
     }
+  }
+
+  void _iniciarNavegacion() {
+    if (_origen == null || _destino == null || _polylinePoints.isEmpty) return;
+
+    final rutaTemporal = Ruta(
+      origenLat: _origen!.latitude,
+      origenLng: _origen!.longitude,
+      destinoLat: _destino!.latitude,
+      destinoLng: _destino!.longitude,
+      distanciaKm: _distanciaKm ?? 0,
+      duracionMinutos: _duracionMinutos ?? 0,
+    );
+
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (_) => NavegarRutaScreen(
+          ruta: rutaTemporal,
+          polylineInicial: _polylinePoints,
+        ),
+      ),
+    );
   }
 
   @override
@@ -297,56 +321,85 @@ class _CrearRutaPageState extends State<CrearRutaPage> {
               bottom: 16,
               left: 16,
               right: 16,
-              child: Row(
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
                 children: [
-                  Expanded(
-                    child: ElevatedButton.icon(
-                      onPressed: _limpiar,
-                      icon: const Icon(Icons.refresh, color: Colors.black),
-                      label: const Text(
-                        'Limpiar',
-                        style: TextStyle(color: Colors.black),
+                  Row(
+                    children: [
+                      Expanded(
+                        child: ElevatedButton.icon(
+                          onPressed: _limpiar,
+                          icon: const Icon(Icons.refresh, color: Colors.black),
+                          label: const Text(
+                            'Limpiar',
+                            style: TextStyle(color: Colors.black),
+                          ),
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: Colors.red[700],
+                            padding: const EdgeInsets.symmetric(vertical: 16),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(12),
+                            ),
+                          ),
+                        ),
                       ),
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: Colors.red[700],
-                        padding: const EdgeInsets.symmetric(vertical: 16),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(12),
+                      const SizedBox(width: 12),
+                      Expanded(
+                        flex: 2,
+                        child: ElevatedButton.icon(
+                          onPressed: _calculando ? null : _calcularRuta,
+                          icon: _calculando
+                              ? const SizedBox(
+                            width: 20,
+                            height: 20,
+                            child: CircularProgressIndicator(
+                              color: Colors.black,
+                              strokeWidth: 2,
+                            ),
+                          )
+                              : const Icon(Icons.route, color: Colors.black),
+                          label: Text(
+                            _calculando ? 'Calculando...' : 'Calcular Ruta',
+                            style: const TextStyle(
+                              color: Colors.black,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: const Color(0xFFFFD700),
+                            padding: const EdgeInsets.symmetric(vertical: 16),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(12),
+                            ),
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                  if (_distanciaKm != null && _duracionMinutos != null) ...[
+                    const SizedBox(height: 12),
+                    SizedBox(
+                      width: double.infinity,
+                      child: ElevatedButton.icon(
+                        onPressed: _iniciarNavegacion,
+                        icon: const Icon(Icons.navigation, color: Colors.black),
+                        label: const Text(
+                          'Iniciar Navegación',
+                          style: TextStyle(
+                            color: Colors.black,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: Colors.greenAccent,
+                          padding: const EdgeInsets.symmetric(vertical: 16),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(12),
+                          ),
                         ),
                       ),
                     ),
-                  ),
-                  const SizedBox(width: 12),
-                  Expanded(
-                    flex: 2,
-                    child: ElevatedButton.icon(
-                      onPressed: _calculando ? null : _calcularRuta,
-                      icon: _calculando
-                          ? const SizedBox(
-                        width: 20,
-                        height: 20,
-                        child: CircularProgressIndicator(
-                          color: Colors.black,
-                          strokeWidth: 2,
-                        ),
-                      )
-                          : const Icon(Icons.route, color: Colors.black),
-                      label: Text(
-                        _calculando ? 'Calculando...' : 'Calcular Ruta',
-                        style: const TextStyle(
-                          color: Colors.black,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: const Color(0xFFFFD700),
-                        padding: const EdgeInsets.symmetric(vertical: 16),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(12),
-                        ),
-                      ),
-                    ),
-                  ),
+                  ],
                 ],
               ),
             ),

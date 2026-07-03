@@ -3,6 +3,7 @@ import 'package:flutter_map/flutter_map.dart';
 import 'package:latlong2/latlong.dart';
 import '../models/ruta.dart';
 import '../services/API_route_service.dart';
+import 'NavegarRutaScreen.dart';
 
 class VerRutaScreen extends StatefulWidget {
   final Ruta ruta;
@@ -60,6 +61,20 @@ class _VerRutaScreenState extends State<VerRutaScreen> {
       print('Error al cargar ruta: $e');
       setState(() => _cargando = false);
     }
+  }
+
+  void _iniciarNavegacion() {
+    if (_polylinePoints.isEmpty) return;
+
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (_) => NavegarRutaScreen(
+          ruta: widget.ruta,
+          polylineInicial: _polylinePoints,
+        ),
+      ),
+    );
   }
 
   @override
@@ -213,6 +228,35 @@ class _VerRutaScreenState extends State<VerRutaScreen> {
                     ],
                   ),
                 ],
+              ),
+            ),
+          ),
+
+          // Botón iniciar navegación
+          Positioned(
+            bottom: 16,
+            left: 16,
+            right: 16,
+            child: SizedBox(
+              width: double.infinity,
+              child: ElevatedButton.icon(
+                onPressed:
+                _polylinePoints.isEmpty ? null : _iniciarNavegacion,
+                icon: const Icon(Icons.navigation, color: Colors.black),
+                label: const Text(
+                  'Iniciar Navegación',
+                  style: TextStyle(
+                    color: Colors.black,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: Colors.greenAccent,
+                  padding: const EdgeInsets.symmetric(vertical: 16),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                ),
               ),
             ),
           ),

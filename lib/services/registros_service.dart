@@ -176,6 +176,7 @@ class RegistrosService {
     }
   }
 
+
   // =====================================================
   // OBTENER DETALLES DE FACTURA
   // =====================================================
@@ -335,10 +336,6 @@ class RegistrosService {
           "Content-Type": "application/json",
           "Authorization": "Bearer $token",
         },
-      );
-
-      print(
-        "[RegistrosService] BUSCAR NOMBRE '$nombreCliente' → ${response.statusCode}",
       );
 
       if (response.statusCode == 200) {
