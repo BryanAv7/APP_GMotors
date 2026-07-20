@@ -85,14 +85,14 @@ class _ViewMotorcycleScreenState extends State<ViewMotorcycleScreen> {
                 child: Text(
                   'Detectar Placa',
                   style: TextStyle(
-                    color: Colors.yellow[700],
+                    color: Color(0xFFFBC02D),
                     fontSize: 18,
                     fontWeight: FontWeight.bold,
                   ),
                 ),
               ),
               ListTile(
-                leading: const Icon(Icons.camera_alt, color: Colors.yellow),
+                leading: const Icon(Icons.camera_alt, color: Color(0xFFFBC02D)),
                 title: const Text('Tomar foto',
                     style: TextStyle(color: Colors.white)),
                 subtitle: const Text('Usa la cámara para detectar la placa',
@@ -103,7 +103,7 @@ class _ViewMotorcycleScreenState extends State<ViewMotorcycleScreen> {
                 },
               ),
               ListTile(
-                leading: const Icon(Icons.photo_library, color: Colors.yellow),
+                leading: const Icon(Icons.photo_library, color: Color(0xFFFBC02D)),
                 title: const Text('Elegir de galería',
                     style: TextStyle(color: Colors.white)),
                 subtitle: const Text('Selecciona una foto existente',
@@ -144,7 +144,7 @@ class _ViewMotorcycleScreenState extends State<ViewMotorcycleScreen> {
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              const CircularProgressIndicator(color: Colors.yellow),
+              const CircularProgressIndicator(color: Color(0xFFFBC02D)),
               const SizedBox(height: 16),
               const Text(
                 'Detectando placa...',
@@ -196,7 +196,7 @@ class _ViewMotorcycleScreenState extends State<ViewMotorcycleScreen> {
             behavior: SnackBarBehavior.floating,
             action: SnackBarAction(
               label: 'Reintentar',
-              textColor: Colors.yellow,
+              textColor: Color(0xFFFBC02D),
               onPressed: abrirCamaraPlaca,
             ),
           ),
@@ -237,7 +237,7 @@ class _ViewMotorcycleScreenState extends State<ViewMotorcycleScreen> {
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              const CircularProgressIndicator(color: Colors.yellow),
+              const CircularProgressIndicator(color: Color(0xFFFBC02D)),
               const SizedBox(height: 16),
               const Text(
                 'Actualizando moto...',
@@ -335,7 +335,7 @@ class _ViewMotorcycleScreenState extends State<ViewMotorcycleScreen> {
     return Scaffold(
       backgroundColor: Colors.black87,
       appBar: AppBar(
-        backgroundColor: Colors.yellow[700],
+        backgroundColor: Color(0xFFFBC02D),
         title: const Text('Editar Motocicleta',
             style: TextStyle(color: Colors.black, fontWeight: FontWeight.normal)),
         leading: IconButton(
@@ -379,7 +379,7 @@ class _ViewMotorcycleScreenState extends State<ViewMotorcycleScreen> {
                         child: Container(
                           padding: const EdgeInsets.all(8),
                           decoration: BoxDecoration(
-                            color: Colors.yellow[700],
+                            color: Color(0xFFFBC02D),
                             shape: BoxShape.circle,
                           ),
                           child: const Icon(Icons.edit,
@@ -434,24 +434,24 @@ class _ViewMotorcycleScreenState extends State<ViewMotorcycleScreen> {
                   filled: true,
                   fillColor: Colors.grey[850],
                   prefixIcon:
-                  const Icon(Icons.credit_card, color: Colors.yellow),
+                  const Icon(Icons.credit_card, color: Color(0xFFFBC02D)),
                   suffixIcon: IconButton(
-                    icon: const Icon(Icons.camera_alt, color: Colors.yellow),
+                    icon: const Icon(Icons.camera_alt, color: Color(0xFFFBC02D)),
                     onPressed: abrirCamaraPlaca,
                     tooltip: 'Detectar placa con cámara',
                   ),
                   border: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(8),
-                    borderSide: const BorderSide(color: Colors.yellow),
+                    borderSide: const BorderSide(color: Color(0xFFFBC02D)),
                   ),
                   enabledBorder: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(8),
-                    borderSide: const BorderSide(color: Colors.yellow),
+                    borderSide: const BorderSide(color: Color(0xFFFBC02D)),
                   ),
                   focusedBorder: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(8),
                     borderSide:
-                    const BorderSide(color: Colors.yellow, width: 2),
+                    const BorderSide(color: Color(0xFFFBC02D), width: 2),
                   ),
                 ),
               ),
@@ -476,7 +476,7 @@ class _ViewMotorcycleScreenState extends State<ViewMotorcycleScreen> {
                 child: ElevatedButton.icon(
                   onPressed: updateMoto,
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: Colors.yellow[700],
+                    backgroundColor: Color(0xFFFBC02D),
                     padding: const EdgeInsets.symmetric(vertical: 16),
                     shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(12)),
@@ -523,15 +523,15 @@ class _ViewMotorcycleScreenState extends State<ViewMotorcycleScreen> {
         fillColor: Colors.grey[850],
         border: OutlineInputBorder(
           borderRadius: BorderRadius.circular(8),
-          borderSide: const BorderSide(color: Colors.yellow),
+          borderSide: const BorderSide(color: Color(0xFFFBC02D)),
         ),
         enabledBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(8),
-          borderSide: const BorderSide(color: Colors.yellow),
+          borderSide: const BorderSide(color: Color(0xFFFBC02D)),
         ),
         focusedBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(8),
-          borderSide: const BorderSide(color: Colors.yellow, width: 2),
+          borderSide: const BorderSide(color: Color(0xFFFBC02D), width: 2),
         ),
       ),
     );

@@ -80,14 +80,14 @@ class _AddMotorcycleScreenState extends State<AddMotorcycleScreen> {
                 child: Text(
                   'Detectar Placa',
                   style: TextStyle(
-                    color: Colors.yellow[700],
+                    color: Color(0xFFFBC02D),
                     fontSize: 18,
                     fontWeight: FontWeight.bold,
                   ),
                 ),
               ),
               ListTile(
-                leading: const Icon(Icons.camera_alt, color: Colors.yellow),
+                leading: const Icon(Icons.camera_alt, color: Color(0xFFFBC02D)),
                 title: const Text('Tomar foto',
                     style: TextStyle(color: Colors.white)),
                 subtitle: const Text('Usa la cámara para detectar la placa',
@@ -98,7 +98,7 @@ class _AddMotorcycleScreenState extends State<AddMotorcycleScreen> {
                 },
               ),
               ListTile(
-                leading: const Icon(Icons.photo_library, color: Colors.yellow),
+                leading: const Icon(Icons.photo_library, color: Color(0xFFFBC02D)),
                 title: const Text('Elegir de galería',
                     style: TextStyle(color: Colors.white)),
                 subtitle: const Text('Selecciona una foto existente',
@@ -140,7 +140,7 @@ class _AddMotorcycleScreenState extends State<AddMotorcycleScreen> {
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              const CircularProgressIndicator(color: Colors.yellow),
+              const CircularProgressIndicator(color: Color(0xFFFBC02D)),
               const SizedBox(height: 16),
               const Text(
                 'Detectando placa...',
@@ -194,7 +194,7 @@ class _AddMotorcycleScreenState extends State<AddMotorcycleScreen> {
             behavior: SnackBarBehavior.floating,
             action: SnackBarAction(
               label: 'Reintentar',
-              textColor: Colors.yellow,
+              textColor: Color(0xFFFBC02D),
               onPressed: abrirCamaraPlaca,
             ),
           ),
@@ -287,7 +287,7 @@ class _AddMotorcycleScreenState extends State<AddMotorcycleScreen> {
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              const CircularProgressIndicator(color: Colors.yellow),
+              const CircularProgressIndicator(color: Color(0xFFFBC02D)),
               const SizedBox(height: 16),
               const Text(
                 'Guardando moto...',
@@ -396,7 +396,7 @@ class _AddMotorcycleScreenState extends State<AddMotorcycleScreen> {
           'Añadir Vehículo',
           style: TextStyle(color: Colors.black, fontWeight: FontWeight.normal),
         ),
-        backgroundColor: Colors.yellow[700],
+        backgroundColor: Color(0xFFFBC02D),
         elevation: 0,
         leading: IconButton(
           icon: const Icon(Icons.arrow_back, color: Colors.black),
@@ -479,23 +479,23 @@ class _AddMotorcycleScreenState extends State<AddMotorcycleScreen> {
                 hintStyle: const TextStyle(color: Colors.grey),
                 filled: true,
                 fillColor: Colors.grey[850],
-                prefixIcon: const Icon(Icons.credit_card, color: Colors.yellow),
+                prefixIcon: const Icon(Icons.credit_card, color: Color(0xFFFBC02D)),
                 suffixIcon: IconButton(
-                  icon: const Icon(Icons.camera_alt, color: Colors.yellow),
+                  icon: const Icon(Icons.camera_alt, color: Color(0xFFFBC02D)),
                   onPressed: abrirCamaraPlaca,
                   tooltip: 'Detectar placa con cámara',
                 ),
                 border: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(8),
-                  borderSide: const BorderSide(color: Colors.yellow),
+                  borderSide: const BorderSide(color: Color(0xFFFBC02D)),
                 ),
                 enabledBorder: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(8),
-                  borderSide: const BorderSide(color: Colors.yellow),
+                  borderSide: const BorderSide(color: Color(0xFFFBC02D)),
                 ),
                 focusedBorder: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(8),
-                  borderSide: const BorderSide(color: Colors.yellow, width: 2),
+                  borderSide: const BorderSide(color: Color(0xFFFBC02D), width: 2),
                 ),
               ),
             ),
@@ -534,13 +534,13 @@ class _AddMotorcycleScreenState extends State<AddMotorcycleScreen> {
               child: ElevatedButton(
                 onPressed: _saveMoto,
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: Colors.yellow[700],
+                  backgroundColor: Color(0xFFFBC02D),
                   padding: const EdgeInsets.symmetric(vertical: 15),
                   shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(12)),
                 ),
-                child: const Text('Guardar',
-                    style: TextStyle(color: Colors.black, fontSize: 16)),
+                child: const Text('Guardar Cambios',
+                    style: TextStyle(color: Colors.black, fontSize: 16, fontWeight: FontWeight.bold)),
               ),
             ),
           ],
@@ -582,15 +582,15 @@ class _AddMotorcycleScreenState extends State<AddMotorcycleScreen> {
         fillColor: Colors.grey[850],
         border: OutlineInputBorder(
           borderRadius: BorderRadius.circular(8),
-          borderSide: const BorderSide(color: Colors.yellow),
+          borderSide: const BorderSide(color: Color(0xFFFBC02D)),
         ),
         enabledBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(8),
-          borderSide: const BorderSide(color: Colors.yellow),
+          borderSide: const BorderSide(color: Color(0xFFFBC02D)),
         ),
         focusedBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(8),
-          borderSide: const BorderSide(color: Colors.yellow, width: 2),
+          borderSide: const BorderSide(color: Color(0xFFFBC02D), width: 2),
         ),
       ),
     );
@@ -630,15 +630,15 @@ class _AddMotorcycleScreenState extends State<AddMotorcycleScreen> {
         fillColor: Colors.grey[850],
         border: OutlineInputBorder(
           borderRadius: BorderRadius.circular(8),
-          borderSide: const BorderSide(color: Colors.yellow),
+          borderSide: const BorderSide(color: Color(0xFFFBC02D)),
         ),
         enabledBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(8),
-          borderSide: const BorderSide(color: Colors.yellow),
+          borderSide: const BorderSide(color: Color(0xFFFBC02D)),
         ),
         focusedBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(8),
-          borderSide: const BorderSide(color: Colors.yellow, width: 2),
+          borderSide: const BorderSide(color: Color(0xFFFBC02D), width: 2),
         ),
       ),
       child: DropdownButtonHideUnderline(

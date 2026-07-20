@@ -92,7 +92,7 @@ class _NavegarRutaScreenState extends State<NavegarRutaScreen> {
       builder: (_) => AlertDialog(
         backgroundColor: const Color(0xFF1E1E1E),
         title: const Text('¡Llegaste!',
-            style: TextStyle(color: Color(0xFFFFD700))),
+            style: TextStyle(color: Color(0xFFFBC02D))),
         content: const Text('Has llegado a tu destino.',
             style: TextStyle(color: Colors.white)),
         actions: [
@@ -101,7 +101,7 @@ class _NavegarRutaScreenState extends State<NavegarRutaScreen> {
               Navigator.pop(context); // cierra el diálogo
               Navigator.pop(context); // sale de la navegación
             },
-            child: const Text('OK', style: TextStyle(color: Color(0xFFFFD700))),
+            child: const Text('OK', style: TextStyle(color: Color(0xFFFBC02D))),
           ),
         ],
       ),
@@ -142,7 +142,7 @@ class _NavegarRutaScreenState extends State<NavegarRutaScreen> {
                 polylines: [
                   Polyline(
                     points: _polyline,
-                    color: const Color(0xFFFFD700),
+                    color: const Color(0xFFFBC02D),
                     strokeWidth: 5,
                   ),
                 ],
@@ -208,7 +208,7 @@ class _NavegarRutaScreenState extends State<NavegarRutaScreen> {
                           width: 12,
                           height: 12,
                           child: CircularProgressIndicator(
-                              strokeWidth: 2, color: Color(0xFFFFD700)),
+                              strokeWidth: 2, color: Color(0xFFFBC02D)),
                         ),
                         SizedBox(width: 8),
                         Text('Calculando..',

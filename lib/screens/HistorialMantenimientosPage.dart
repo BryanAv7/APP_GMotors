@@ -119,14 +119,14 @@ class _HistorialMantenimientosPageState
                 child: Text(
                   'Escanear Placa',
                   style: TextStyle(
-                    color: Colors.yellow[700],
+                    color: Color(0xFFFBC02D),
                     fontSize: 18,
                     fontWeight: FontWeight.bold,
                   ),
                 ),
               ),
               ListTile(
-                leading: const Icon(Icons.camera_alt, color: Colors.yellow),
+                leading: const Icon(Icons.camera_alt, color: Color(0xFFFBC02D)),
                 title: const Text('Tomar foto',
                     style: TextStyle(color: Colors.white)),
                 subtitle: const Text('Usa la cámara para escanear la placa',
@@ -137,7 +137,7 @@ class _HistorialMantenimientosPageState
                 },
               ),
               ListTile(
-                leading: const Icon(Icons.photo_library, color: Colors.yellow),
+                leading: const Icon(Icons.photo_library, color: Color(0xFFFBC02D)),
                 title: const Text('Elegir de galería',
                     style: TextStyle(color: Colors.white)),
                 subtitle: const Text('Selecciona una foto existente',
@@ -184,7 +184,7 @@ class _HistorialMantenimientosPageState
           child: const Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              CircularProgressIndicator(color: Color(0xFFFFD700)),
+              CircularProgressIndicator(color: Color(0xFFFBC02D)),
               SizedBox(height: 16),
               Text(
                 'Escaneando placa...',
@@ -231,7 +231,7 @@ class _HistorialMantenimientosPageState
         context: context,
         barrierDismissible: false,
         builder: (_) => const Center(
-          child: CircularProgressIndicator(color: Color(0xFFFFD700)),
+          child: CircularProgressIndicator(color: Color(0xFFFBC02D)),
         ),
       );
 
@@ -255,7 +255,7 @@ class _HistorialMantenimientosPageState
     return Scaffold(
       backgroundColor: const Color(0xFF121212),
       appBar: AppBar(
-        backgroundColor: const Color(0xFFFFD700),
+        backgroundColor: const Color(0xFFFBC02D),
         elevation: 0,
         leading: IconButton(
           icon: const Icon(Icons.arrow_back, color: Colors.black),
@@ -301,10 +301,10 @@ class _HistorialMantenimientosPageState
           const SizedBox(height: 24),
 
           _buildSectionLabel(
-              'Búsqueda por Nombre', Icons.person_search, const Color(0xFFFFD700)),
+              'Búsqueda por Nombre', Icons.person_search, const Color(0xFFFBC02D)),
           const SizedBox(height: 8),
           Container(
-            decoration: _inputDecoration(const Color(0xFFFFD700)),
+            decoration: _inputDecoration(const Color(0xFFFBC02D)),
             child: TextField(
               controller: _searchController,
               keyboardType: TextInputType.text,
@@ -314,7 +314,7 @@ class _HistorialMantenimientosPageState
                 labelStyle: TextStyle(
                     color: Colors.white.withOpacity(0.6), fontSize: 14),
                 prefixIcon: const Icon(Icons.person_search,
-                    color: Color(0xFFFFD700)),
+                    color: Color(0xFFFBC02D)),
                 border: InputBorder.none,
                 contentPadding: const EdgeInsets.symmetric(
                     horizontal: 16, vertical: 16),
@@ -328,7 +328,7 @@ class _HistorialMantenimientosPageState
               width: 200,
               child: ElevatedButton.icon(
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: const Color(0xFFFFD700),
+                  backgroundColor: const Color(0xFFFBC02D),
                   padding: const EdgeInsets.symmetric(vertical: 16),
                   shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(12)),
@@ -531,7 +531,7 @@ class _HistorialMantenimientosPageState
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          CircularProgressIndicator(color: Color(0xFFFFD700), strokeWidth: 3),
+          CircularProgressIndicator(color: Color(0xFFFBC02D), strokeWidth: 3),
           SizedBox(height: 20),
           Text('Cargando historial...',
               style: TextStyle(color: Colors.white, fontSize: 16)),
@@ -564,7 +564,7 @@ class _HistorialMantenimientosPageState
             ElevatedButton.icon(
               onPressed: _limpiarBusqueda,
               style: ElevatedButton.styleFrom(
-                  backgroundColor: const Color(0xFFFFD700)),
+                  backgroundColor: const Color(0xFFFBC02D)),
               icon: const Icon(Icons.arrow_back, color: Colors.black),
               label: const Text('Volver',
                   style: TextStyle(color: Colors.black)),
@@ -601,7 +601,7 @@ class _HistorialMantenimientosPageState
             ElevatedButton.icon(
               onPressed: _limpiarBusqueda,
               style: ElevatedButton.styleFrom(
-                  backgroundColor: const Color(0xFFFFD700)),
+                  backgroundColor: const Color(0xFFFBC02D)),
               icon: const Icon(Icons.search, color: Colors.black),
               label: const Text('Buscar otro cliente',
                   style: TextStyle(color: Colors.black)),
@@ -623,15 +623,15 @@ class _HistorialMantenimientosPageState
             decoration: BoxDecoration(
               gradient: LinearGradient(
                 colors: [
-                  const Color(0xFFFFD700).withOpacity(0.2),
-                  const Color(0xFFFFD700).withOpacity(0.05),
+                  const Color(0xFFFBC02D).withOpacity(0.2),
+                  const Color(0xFFFBC02D).withOpacity(0.05),
                 ],
                 begin: Alignment.topLeft,
                 end: Alignment.bottomRight,
               ),
               borderRadius: BorderRadius.circular(12),
               border: Border.all(
-                  color: const Color(0xFFFFD700).withOpacity(0.3), width: 1),
+                  color: const Color(0xFFFBC02D).withOpacity(0.3), width: 1),
             ),
             child: Row(
               children: [
@@ -658,13 +658,13 @@ class _HistorialMantenimientosPageState
                   padding: const EdgeInsets.symmetric(
                       horizontal: 12, vertical: 6),
                   decoration: BoxDecoration(
-                    color: const Color(0xFFFFD700).withOpacity(0.2),
+                    color: const Color(0xFFFBC02D).withOpacity(0.2),
                     borderRadius: BorderRadius.circular(8),
                   ),
                   child: Text(
                     '${historialMantenimientos.length} registros',
                     style: const TextStyle(
-                        color: Color(0xFFFFD700),
+                        color: Color(0xFFFBC02D),
                         fontSize: 13,
                         fontWeight: FontWeight.bold),
                   ),
@@ -679,14 +679,14 @@ class _HistorialMantenimientosPageState
             child: OutlinedButton.icon(
               onPressed: _limpiarBusqueda,
               style: OutlinedButton.styleFrom(
-                side: const BorderSide(color: Color(0xFFFFD700), width: 1.5),
+                side: const BorderSide(color: Color(0xFFFBC02D), width: 1.5),
                 padding: const EdgeInsets.symmetric(vertical: 12),
               ),
-              icon: const Icon(Icons.search, color: Color(0xFFFFD700)),
+              icon: const Icon(Icons.search, color: Color(0xFFFBC02D)),
               label: const Text(
                 'Buscar otro cliente',
                 style: TextStyle(
-                    color: Color(0xFFFFD700), fontWeight: FontWeight.bold),
+                    color: Color(0xFFFBC02D), fontWeight: FontWeight.bold),
               ),
             ),
           ),
@@ -736,8 +736,8 @@ class _HistorialMantenimientosPageState
       child: Theme(
         data: Theme.of(context).copyWith(dividerColor: Colors.transparent),
         child: ExpansionTile(
-          iconColor: const Color(0xFFFFD700),
-          collapsedIconColor: const Color(0xFFFFD700),
+          iconColor: const Color(0xFFFBC02D),
+          collapsedIconColor: const Color(0xFFFBC02D),
           backgroundColor: const Color(0xFF1E1E1E),
           collapsedBackgroundColor: const Color(0xFF1E1E1E),
           title: Row(
@@ -750,7 +750,7 @@ class _HistorialMantenimientosPageState
                     Row(
                       children: [
                         const Icon(Icons.calendar_today,
-                            color: Color(0xFFFFD700), size: 18),
+                            color: Color(0xFFFBC02D), size: 18),
                         const SizedBox(width: 8),
                         Expanded(
                           child: Text(
@@ -770,7 +770,7 @@ class _HistorialMantenimientosPageState
                       Text(
                         'Tipo: ${registro.tipoMantenimiento}',
                         style: const TextStyle(
-                            color: Color(0xFFFFD700), fontSize: 12),
+                            color: Color(0xFFFBC02D), fontSize: 12),
                         overflow: TextOverflow.ellipsis,
                       ),
                   ],
@@ -889,7 +889,7 @@ class _HistorialMantenimientosPageState
                       width: double.infinity,
                       child: ElevatedButton.icon(
                         style: ElevatedButton.styleFrom(
-                          backgroundColor: const Color(0xFFFFD700),
+                          backgroundColor: const Color(0xFFFBC02D),
                           foregroundColor: Colors.black,
                           padding: const EdgeInsets.symmetric(vertical: 12),
                           shape: RoundedRectangleBorder(
@@ -1011,7 +1011,7 @@ class _HistorialMantenimientosPageState
                                 Text(
                                     'Subtotal: \$${detalle.subtotal.toStringAsFixed(2)}',
                                     style: const TextStyle(
-                                        color: Colors.yellow,
+                                        color: Color(0xFFFBC02D),
                                         fontSize: 12,
                                         fontWeight: FontWeight.bold)),
                               ],

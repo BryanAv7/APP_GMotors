@@ -1,10 +1,25 @@
 import 'package:flutter/material.dart';
 import 'package:app_links/app_links.dart';
+import 'package:firebase_core/firebase_core.dart';
+import 'package:firebase_messaging/firebase_messaging.dart';
 import 'screens/login_screen.dart';
 import 'screens/HomeScreen.dart';
 import 'screens/reset_password_screen.dart';
 
-void main() {
+// Handler para notificaciones
+@pragma('vm:entry-point')
+Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage message) async {
+  await Firebase.initializeApp();
+  //print('Notificación background: ${message.notification?.title}');
+}
+
+void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+
+  // Inicializar Firebase
+  await Firebase.initializeApp();
+  FirebaseMessaging.onBackgroundMessage(_firebaseMessagingBackgroundHandler);
+
   runApp(const MyApp());
 }
 

@@ -240,16 +240,16 @@ class _LoginScreenState extends State<LoginScreen> {
                 hintText: "XXX.XXX.XX.XXX",
                 hintStyle: TextStyle(color: Colors.grey[400]),
                 labelText: "Dirección IP",
-                labelStyle: const TextStyle(color: Colors.yellow),
+                labelStyle: const TextStyle(color: Color(0xFFFBC02D)),
                 filled: true,
                 fillColor: Colors.grey[900],
                 border: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(8),
-                  borderSide: const BorderSide(color: Colors.yellow),
+                  borderSide: const BorderSide(color: Color(0xFFFBC02D)),
                 ),
                 enabledBorder: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(8),
-                  borderSide: const BorderSide(color: Colors.yellow),
+                  borderSide: const BorderSide(color: Color(0xFFFBC02D)),
                 ),
               ),
             ),
@@ -263,16 +263,16 @@ class _LoginScreenState extends State<LoginScreen> {
                 hintText: "8080",
                 hintStyle: TextStyle(color: Colors.grey[400]),
                 labelText: "Puerto",
-                labelStyle: const TextStyle(color: Colors.yellow),
+                labelStyle: const TextStyle(color: Color(0xFFFBC02D)),
                 filled: true,
                 fillColor: Colors.grey[900],
                 border: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(8),
-                  borderSide: const BorderSide(color: Colors.yellow),
+                  borderSide: const BorderSide(color: Color(0xFFFBC02D)),
                 ),
                 enabledBorder: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(8),
-                  borderSide: const BorderSide(color: Colors.yellow),
+                  borderSide: const BorderSide(color: Color(0xFFFBC02D)),
                 ),
               ),
             ),
@@ -327,7 +327,7 @@ class _LoginScreenState extends State<LoginScreen> {
             child: Text(
               "Buscar automáticamente",
               style: TextStyle(
-                color: _discoveringServer ? Colors.grey : Colors.yellow,
+                color: _discoveringServer ? Colors.grey : Color(0xFFFBC02D),
               ),
             ),
           ),
@@ -348,7 +348,7 @@ class _LoginScreenState extends State<LoginScreen> {
           Padding(
             padding: const EdgeInsets.all(8.0),
             child: IconButton(
-              icon: const Icon(Icons.settings, color: Colors.yellow),
+              icon: const Icon(Icons.settings, color: Color(0xFFFBC02D)),
               onPressed: _showIpDialog,
             ),
           ),
@@ -369,7 +369,7 @@ class _LoginScreenState extends State<LoginScreen> {
 
                         // 5️⃣ Indicador visual "Buscando servidor..."
                         if (_discoveringServer) ...[
-                          const CircularProgressIndicator(color: Colors.yellow),
+                          const CircularProgressIndicator(color: Color(0xFFFBC02D)),
                           const SizedBox(height: 10),
                           const Text(
                             'Buscando servidor en la red local...',
@@ -443,11 +443,11 @@ class _LoginScreenState extends State<LoginScreen> {
                             fillColor: Colors.grey[850],
                             border: OutlineInputBorder(
                               borderRadius: BorderRadius.circular(12),
-                              borderSide: const BorderSide(color: Colors.yellow),
+                              borderSide: const BorderSide(color: Color(0xFFFBC02D)),
                             ),
                             enabledBorder: OutlineInputBorder(
                               borderRadius: BorderRadius.circular(12),
-                              borderSide: const BorderSide(color: Colors.yellow),
+                              borderSide: const BorderSide(color: Color(0xFFFBC02D)),
                             ),
                             disabledBorder: OutlineInputBorder(
                               borderRadius: BorderRadius.circular(12),
@@ -472,11 +472,11 @@ class _LoginScreenState extends State<LoginScreen> {
                             fillColor: Colors.grey[850],
                             border: OutlineInputBorder(
                               borderRadius: BorderRadius.circular(12),
-                              borderSide: const BorderSide(color: Colors.yellow),
+                              borderSide: const BorderSide(color: Color(0xFFFBC02D)),
                             ),
                             enabledBorder: OutlineInputBorder(
                               borderRadius: BorderRadius.circular(12),
-                              borderSide: const BorderSide(color: Colors.yellow),
+                              borderSide: const BorderSide(color: Color(0xFFFBC02D)),
                             ),
                             disabledBorder: OutlineInputBorder(
                               borderRadius: BorderRadius.circular(12),
@@ -523,7 +523,7 @@ class _LoginScreenState extends State<LoginScreen> {
                           child: ElevatedButton(
                             onPressed: (_loading || _discoveringServer) ? null : _login,
                             style: ElevatedButton.styleFrom(
-                              backgroundColor: Colors.yellow[700],
+                              backgroundColor: Color(0xFFFBC02D),
                               padding: const EdgeInsets.symmetric(vertical: 15),
                               shape: RoundedRectangleBorder(
                                 borderRadius: BorderRadius.circular(12),
@@ -556,7 +556,7 @@ class _LoginScreenState extends State<LoginScreen> {
                               );
                             },
                             style: ElevatedButton.styleFrom(
-                              backgroundColor: Colors.yellow[700],
+                              backgroundColor: Color(0xFFFBC02D),
                               padding: const EdgeInsets.symmetric(vertical: 15),
                               shape: RoundedRectangleBorder(
                                 borderRadius: BorderRadius.circular(12),

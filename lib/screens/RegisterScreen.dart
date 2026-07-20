@@ -90,7 +90,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
         content: Text(msg),
-        backgroundColor: Colors.yellow[700],
+        backgroundColor: Color(0xFFFBC02D),
         behavior: SnackBarBehavior.floating,
       ),
     );
@@ -224,15 +224,15 @@ class _RegisterScreenState extends State<RegisterScreen> {
                             fillColor: Colors.grey[850],
                             border: OutlineInputBorder(
                               borderRadius: BorderRadius.circular(12),
-                              borderSide: const BorderSide(color: Colors.yellow),
+                              borderSide: const BorderSide(color: Color(0xFFFBC02D)),
                             ),
                             enabledBorder: OutlineInputBorder(
                               borderRadius: BorderRadius.circular(12),
-                              borderSide: const BorderSide(color: Colors.yellow),
+                              borderSide: const BorderSide(color: Color(0xFFFBC02D)),
                             ),
                             focusedBorder: OutlineInputBorder(
                               borderRadius: BorderRadius.circular(12),
-                              borderSide: const BorderSide(color: Colors.yellow, width: 2),
+                              borderSide: const BorderSide(color: Color(0xFFFBC02D), width: 2),
                             ),
                             suffixIcon: IconButton(
                               icon: Icon(
@@ -258,7 +258,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                           child: ElevatedButton(
                             onPressed: _isLoading ? null : _registrarUsuario,
                             style: ElevatedButton.styleFrom(
-                              backgroundColor: Colors.yellow[700],
+                              backgroundColor: Color(0xFFFBC02D),
                               padding: const EdgeInsets.symmetric(vertical: 15),
                               shape: RoundedRectangleBorder(
                                 borderRadius: BorderRadius.circular(12),
@@ -292,7 +292,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                               child: const Text(
                                 'Iniciar Sesión',
                                 style: TextStyle(
-                                  color: Colors.yellow,
+                                  color: Color(0xFFFBC02D),
                                   fontWeight: FontWeight.bold,
                                 ),
                               ),
@@ -345,15 +345,15 @@ class _RegisterScreenState extends State<RegisterScreen> {
         suffixIcon: isEmail ? _correoSuffix : null,
         border: OutlineInputBorder(
           borderRadius: BorderRadius.circular(12),
-          borderSide: const BorderSide(color: Colors.yellow),
+          borderSide: const BorderSide(color: Color(0xFFFBC02D)),
         ),
         enabledBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(12),
-          borderSide: const BorderSide(color: Colors.yellow),
+          borderSide: const BorderSide(color: Color(0xFFFBC02D)),
         ),
         focusedBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(12),
-          borderSide: const BorderSide(color: Colors.yellow, width: 2),
+          borderSide: const BorderSide(color: Color(0xFFFBC02D), width: 2),
         ),
       ),
     );

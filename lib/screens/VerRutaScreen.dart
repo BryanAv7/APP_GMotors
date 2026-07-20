@@ -85,7 +85,7 @@ class _VerRutaScreenState extends State<VerRutaScreen> {
     return Scaffold(
       backgroundColor: const Color(0xFF121212),
       appBar: AppBar(
-        backgroundColor: const Color(0xFFFFD700),
+        backgroundColor: const Color(0xFFFBC02D),
         title: Text(
           widget.ruta.nombreRuta ?? 'Sin nombre',
           style: const TextStyle(color: Colors.black, fontWeight: FontWeight.normal),
@@ -97,7 +97,7 @@ class _VerRutaScreenState extends State<VerRutaScreen> {
       ),
       body: _cargando
           ? const Center(
-        child: CircularProgressIndicator(color: Color(0xFFFFD700)),
+        child: CircularProgressIndicator(color: Color(0xFFFBC02D)),
       )
           : Stack(
         children: [
@@ -120,7 +120,7 @@ class _VerRutaScreenState extends State<VerRutaScreen> {
                   polylines: [
                     Polyline(
                       points: _polylinePoints,
-                      color: const Color(0xFFFFD700),
+                      color: const Color(0xFFFBC02D),
                       strokeWidth: 4.0,
                     ),
                   ],
@@ -178,7 +178,7 @@ class _VerRutaScreenState extends State<VerRutaScreen> {
                   Text(
                     widget.ruta.nombreRuta ?? 'Sin nombre',
                     style: const TextStyle(
-                      color: Color(0xFFFFD700),
+                      color: Color(0xFFFBC02D),
                       fontSize: 18,
                       fontWeight: FontWeight.bold,
                     ),

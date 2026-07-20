@@ -79,7 +79,7 @@ class _MisRutasPageState extends State<MisRutasPage> {
     return Scaffold(
       backgroundColor: const Color(0xFF121212),
       appBar: AppBar(
-        backgroundColor: const Color(0xFFFFD700),
+        backgroundColor: const Color(0xFFFBC02D),
         title:
         const Text('Mis Rutas', style: TextStyle(color: Colors.black)),
         leading: IconButton(
@@ -89,13 +89,13 @@ class _MisRutasPageState extends State<MisRutasPage> {
       ),
       body: _cargando
           ? const Center(
-        child: CircularProgressIndicator(color: Color(0xFFFFD700)),
+        child: CircularProgressIndicator(color: Color(0xFFFBC02D)),
       )
           : _rutas.isEmpty
           ? _buildEmptyState()
           : _buildListaRutas(),
       floatingActionButton: FloatingActionButton.extended(
-        backgroundColor: const Color(0xFFFFD700),
+        backgroundColor: const Color(0xFFFBC02D),
         icon: const Icon(Icons.add, color: Colors.black),
         label:
         const Text('Nueva Ruta', style: TextStyle(color: Colors.black, fontWeight: FontWeight.bold, fontSize: 16)),
@@ -130,7 +130,7 @@ class _MisRutasPageState extends State<MisRutasPage> {
           color: const Color(0xFF1E1E1E),
           margin: const EdgeInsets.only(bottom: 10),
           child: ListTile(
-            leading: const Icon(Icons.route, color: Color(0xFFFFD700)),
+            leading: const Icon(Icons.route, color: Color(0xFFFBC02D)),
             title: Text(
               ruta.nombreRuta ?? 'Sin nombre',
               style: const TextStyle(color: Colors.white),

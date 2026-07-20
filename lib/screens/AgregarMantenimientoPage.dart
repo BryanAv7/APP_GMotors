@@ -115,7 +115,7 @@ class _AgregarMantenimientoPageState extends State<AgregarMantenimientoPage> {
     return Scaffold(
       backgroundColor: const Color(0xFF121212),
       appBar: AppBar(
-        backgroundColor: const Color(0xFFFFD700),
+        backgroundColor: const Color(0xFFFBC02D),
         elevation: 0,
         leading: IconButton(
           icon: const Icon(Icons.arrow_back, color: Colors.black),
@@ -200,15 +200,15 @@ class _AgregarMantenimientoPageState extends State<AgregarMantenimientoPage> {
       decoration: BoxDecoration(
         gradient: LinearGradient(
           colors: [
-            const Color(0xFFFFD700).withOpacity(0.2),
-            const Color(0xFFFFD700).withOpacity(0.05),
+            const Color(0xFFFBC02D).withOpacity(0.2),
+            const Color(0xFFFBC02D).withOpacity(0.05),
           ],
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
         ),
         borderRadius: BorderRadius.circular(16),
         border: Border.all(
-          color: const Color(0xFFFFD700).withOpacity(0.3),
+          color: const Color(0xFFFBC02D).withOpacity(0.3),
           width: 1,
         ),
       ),
@@ -245,7 +245,7 @@ class _AgregarMantenimientoPageState extends State<AgregarMantenimientoPage> {
     return Expanded(
       child: Column(
         children: [
-          Icon(icon, color: const Color(0xFFFFD700), size: 24),
+          Icon(icon, color: const Color(0xFFFBC02D), size: 24),
           const SizedBox(height: 8),
           Text(label, style: const TextStyle(color: Colors.white54, fontSize: 12)),
           const SizedBox(height: 4),
@@ -268,10 +268,10 @@ class _AgregarMantenimientoPageState extends State<AgregarMantenimientoPage> {
         Container(
           padding: const EdgeInsets.all(8),
           decoration: BoxDecoration(
-            color: const Color(0xFFFFD700).withOpacity(0.2),
+            color: const Color(0xFFFBC02D).withOpacity(0.2),
             borderRadius: BorderRadius.circular(8),
           ),
-          child: Icon(icon, color: const Color(0xFFFFD700), size: 20),
+          child: Icon(icon, color: const Color(0xFFFBC02D), size: 20),
         ),
         const SizedBox(width: 12),
         Text(
@@ -294,7 +294,7 @@ class _AgregarMantenimientoPageState extends State<AgregarMantenimientoPage> {
         borderRadius: BorderRadius.circular(12),
         border: Border.all(
           color: idClienteSeleccionado != null && intentoGuardar == false
-              ? const Color(0xFFFFD700).withOpacity(0.5)
+              ? const Color(0xFFFBC02D).withOpacity(0.5)
               : Colors.white24,
           width: 1.5,
         ),
@@ -322,7 +322,7 @@ class _AgregarMantenimientoPageState extends State<AgregarMantenimientoPage> {
                 prefixIcon: Icon(
                   Icons.person_outline,
                   color: idClienteSeleccionado != null
-                      ? const Color(0xFFFFD700)
+                      ? const Color(0xFFFBC02D)
                       : Colors.white54,
                 ),
                 border: InputBorder.none,
@@ -344,7 +344,7 @@ class _AgregarMantenimientoPageState extends State<AgregarMantenimientoPage> {
             decoration: BoxDecoration(
               color: clienteSeleccionadoPorOCR
                   ? Colors.grey
-                  : const Color(0xFFFFD700),
+                  : const Color(0xFFFBC02D),
               borderRadius: BorderRadius.circular(8),
             ),
             child: IconButton(
@@ -403,7 +403,7 @@ class _AgregarMantenimientoPageState extends State<AgregarMantenimientoPage> {
           Container(
             margin: const EdgeInsets.only(right: 8),
             decoration: BoxDecoration(
-              color: const Color(0xFFFFD700),
+              color: const Color(0xFFFBC02D),
               borderRadius: BorderRadius.circular(8),
             ),
             child: IconButton(
@@ -442,7 +442,7 @@ class _AgregarMantenimientoPageState extends State<AgregarMantenimientoPage> {
           child: const Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              CircularProgressIndicator(color: Color(0xFFFFD700), strokeWidth: 3),
+              CircularProgressIndicator(color: Color(0xFFFBC02D), strokeWidth: 3),
               SizedBox(height: 20),
               Text(
                 'Buscando placa...',
@@ -513,7 +513,7 @@ class _AgregarMantenimientoPageState extends State<AgregarMantenimientoPage> {
                 ),
               ),
               ListTile(
-                leading: const Icon(Icons.camera_alt, color: Colors.yellow),
+                leading: const Icon(Icons.camera_alt, color: Color(0xFFFBC02D)),
                 title: const Text('Tomar foto', style: TextStyle(color: Colors.white)),
                 subtitle: const Text('Detecta Placa',
                     style: TextStyle(color: Colors.grey, fontSize: 12)),
@@ -523,7 +523,7 @@ class _AgregarMantenimientoPageState extends State<AgregarMantenimientoPage> {
                 },
               ),
               ListTile(
-                leading: const Icon(Icons.photo_library, color: Colors.yellow),
+                leading: const Icon(Icons.photo_library, color: Color(0xFFFBC02D)),
                 title: const Text('Elegir de galería',
                     style: TextStyle(color: Colors.white)),
                 subtitle: const Text('Selecciona una foto de la placa',
@@ -564,7 +564,7 @@ class _AgregarMantenimientoPageState extends State<AgregarMantenimientoPage> {
           child: const Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              CircularProgressIndicator(color: Color(0xFFFFD700), strokeWidth: 3),
+              CircularProgressIndicator(color: Color(0xFFFBC02D), strokeWidth: 3),
               SizedBox(height: 20),
               Text(
                 'Detectando placa y\nbuscando dueño...',
@@ -628,7 +628,7 @@ class _AgregarMantenimientoPageState extends State<AgregarMantenimientoPage> {
             shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
             action: SnackBarAction(
               label: 'Reintentar',
-              textColor: Colors.yellow,
+              textColor: Color(0xFFFBC02D),
               onPressed: () => _abrirCamaraCliente(),
             ),
             duration: const Duration(seconds: 4),
@@ -680,7 +680,7 @@ class _AgregarMantenimientoPageState extends State<AgregarMantenimientoPage> {
             Container(
               margin: const EdgeInsets.only(right: 8),
               decoration: BoxDecoration(
-                color: const Color(0xFFFFD700),
+                color: const Color(0xFFFBC02D),
                 borderRadius: BorderRadius.circular(8),
               ),
               child: IconButton(
@@ -700,7 +700,7 @@ class _AgregarMantenimientoPageState extends State<AgregarMantenimientoPage> {
           color: const Color(0xFF1E1E1E),
           borderRadius: BorderRadius.circular(12),
           border: Border.all(
-            color: const Color(0xFFFFD700).withOpacity(0.3),
+            color: const Color(0xFFFBC02D).withOpacity(0.3),
             width: 1.5,
           ),
         ),
@@ -717,7 +717,7 @@ class _AgregarMantenimientoPageState extends State<AgregarMantenimientoPage> {
                       child: CircularProgressIndicator(
                         strokeWidth: 2,
                         valueColor:
-                        AlwaysStoppedAnimation<Color>(Color(0xFFFFD700)),
+                        AlwaysStoppedAnimation<Color>(Color(0xFFFBC02D)),
                       ),
                     ),
                     SizedBox(width: 16),
@@ -733,7 +733,7 @@ class _AgregarMantenimientoPageState extends State<AgregarMantenimientoPage> {
               margin: const EdgeInsets.only(right: 8),
               decoration: BoxDecoration(
                 color: clienteSeleccionadoPorOCR
-                    ? const Color(0xFFFFD700)
+                    ? const Color(0xFFFBC02D)
                     : Colors.grey,
                 borderRadius: BorderRadius.circular(8),
               ),
@@ -790,7 +790,7 @@ class _AgregarMantenimientoPageState extends State<AgregarMantenimientoPage> {
               margin: const EdgeInsets.only(right: 8),
               decoration: BoxDecoration(
                 color: clienteSeleccionadoPorOCR
-                    ? const Color(0xFFFFD700)
+                    ? const Color(0xFFFBC02D)
                     : Colors.grey,
                 borderRadius: BorderRadius.circular(8),
               ),
@@ -814,7 +814,7 @@ class _AgregarMantenimientoPageState extends State<AgregarMantenimientoPage> {
         borderRadius: BorderRadius.circular(12),
         border: Border.all(
           color: idMotoSeleccionada != null
-              ? const Color(0xFFFFD700).withOpacity(0.5)
+              ? const Color(0xFFFBC02D).withOpacity(0.5)
               : Colors.white24,
           width: 1.5,
         ),
@@ -841,7 +841,7 @@ class _AgregarMantenimientoPageState extends State<AgregarMantenimientoPage> {
                 prefixIcon: Icon(
                   Icons.motorcycle,
                   color: idMotoSeleccionada != null
-                      ? const Color(0xFFFFD700)
+                      ? const Color(0xFFFBC02D)
                       : Colors.white54,
                 ),
                 border: InputBorder.none,
@@ -874,7 +874,7 @@ class _AgregarMantenimientoPageState extends State<AgregarMantenimientoPage> {
             margin: const EdgeInsets.only(right: 8),
             decoration: BoxDecoration(
               color: clienteSeleccionadoPorOCR
-                  ? const Color(0xFFFFD700)
+                  ? const Color(0xFFFBC02D)
                   : Colors.grey,
               borderRadius: BorderRadius.circular(8),
             ),
@@ -910,7 +910,7 @@ class _AgregarMantenimientoPageState extends State<AgregarMantenimientoPage> {
         borderRadius: BorderRadius.circular(12),
         border: Border.all(
           color: idTipoSeleccionado != null
-              ? const Color(0xFFFFD700).withOpacity(0.5)
+              ? const Color(0xFFFBC02D).withOpacity(0.5)
               : Colors.white24,
           width: 1.5,
         ),
@@ -934,7 +934,7 @@ class _AgregarMantenimientoPageState extends State<AgregarMantenimientoPage> {
           prefixIcon: Icon(
             Icons.build_circle,
             color: idTipoSeleccionado != null
-                ? const Color(0xFFFFD700)
+                ? const Color(0xFFFBC02D)
                 : Colors.white54,
           ),
           border: InputBorder.none,
@@ -1038,7 +1038,7 @@ class _AgregarMantenimientoPageState extends State<AgregarMantenimientoPage> {
             color: error
                 ? Colors.red.withOpacity(0.8)
                 : hayDetalles
-                ? const Color(0xFFFFD700).withOpacity(0.5)
+                ? const Color(0xFFFBC02D).withOpacity(0.5)
                 : Colors.white24,
             width: 1.5,
           ),
@@ -1061,14 +1061,14 @@ class _AgregarMantenimientoPageState extends State<AgregarMantenimientoPage> {
                     Container(
                       padding: const EdgeInsets.all(8),
                       decoration: BoxDecoration(
-                        color: const Color(0xFFFFD700).withOpacity(0.2),
+                        color: const Color(0xFFFBC02D).withOpacity(0.2),
                         borderRadius: BorderRadius.circular(8),
                       ),
                       child: Icon(
                         hayDetalles
                             ? Icons.check_circle
                             : Icons.add_shopping_cart,
-                        color: const Color(0xFFFFD700),
+                        color: const Color(0xFFFBC02D),
                         size: 20,
                       ),
                     ),
@@ -1086,7 +1086,7 @@ class _AgregarMantenimientoPageState extends State<AgregarMantenimientoPage> {
                   ],
                 ),
                 const Icon(Icons.arrow_forward_ios,
-                    color: Color(0xFFFFD700), size: 16),
+                    color: Color(0xFFFBC02D), size: 16),
               ],
             ),
             if (hayDetalles) ...[
@@ -1094,10 +1094,10 @@ class _AgregarMantenimientoPageState extends State<AgregarMantenimientoPage> {
               Container(
                 padding: const EdgeInsets.all(16),
                 decoration: BoxDecoration(
-                  color: const Color(0xFFFFD700).withOpacity(0.1),
+                  color: const Color(0xFFFBC02D).withOpacity(0.1),
                   borderRadius: BorderRadius.circular(8),
                   border: Border.all(
-                    color: const Color(0xFFFFD700).withOpacity(0.3),
+                    color: const Color(0xFFFBC02D).withOpacity(0.3),
                   ),
                 ),
                 child: Row(
@@ -1109,7 +1109,7 @@ class _AgregarMantenimientoPageState extends State<AgregarMantenimientoPage> {
                     Text(
                       "\$${_calcularTotal().toStringAsFixed(2)}",
                       style: const TextStyle(
-                        color: Color(0xFFFFD700),
+                        color: Color(0xFFFBC02D),
                         fontSize: 24,
                         fontWeight: FontWeight.bold,
                       ),
@@ -1145,7 +1145,7 @@ class _AgregarMantenimientoPageState extends State<AgregarMantenimientoPage> {
         borderRadius: BorderRadius.circular(12),
         border: Border.all(
           color: kilometrajeCtrl.text.isNotEmpty
-              ? const Color(0xFFFFD700).withOpacity(0.5)
+              ? const Color(0xFFFBC02D).withOpacity(0.5)
               : Colors.white24,
           width: 1.5,
         ),
@@ -1242,14 +1242,14 @@ class _AgregarMantenimientoPageState extends State<AgregarMantenimientoPage> {
       height: 56,
       decoration: BoxDecoration(
         gradient: const LinearGradient(
-          colors: [Color(0xFFFFD700), Color(0xFFFFC107)],
+          colors: [Color(0xFFFBC02D), Color(0xFFFFC107)],
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
         ),
         borderRadius: BorderRadius.circular(16),
         boxShadow: [
           BoxShadow(
-            color: const Color(0xFFFFD700).withOpacity(0.4),
+            color: const Color(0xFFFBC02D).withOpacity(0.4),
             blurRadius: 12,
             offset: const Offset(0, 4),
           ),
@@ -1312,7 +1312,7 @@ class _AgregarMantenimientoPageState extends State<AgregarMantenimientoPage> {
         color: const Color(0xFF1E1E1E),
         borderRadius: BorderRadius.circular(12),
         border: Border.all(
-          color: const Color(0xFFFFD700).withOpacity(0.3),
+          color: const Color(0xFFFBC02D).withOpacity(0.3),
           width: 1.5,
         ),
       ),
@@ -1324,7 +1324,7 @@ class _AgregarMantenimientoPageState extends State<AgregarMantenimientoPage> {
             child: CircularProgressIndicator(
               strokeWidth: 2,
               valueColor:
-              AlwaysStoppedAnimation<Color>(Color(0xFFFFD700)),
+              AlwaysStoppedAnimation<Color>(Color(0xFFFBC02D)),
             ),
           ),
           const SizedBox(width: 16),
@@ -1406,12 +1406,12 @@ class _AgregarMantenimientoPageState extends State<AgregarMantenimientoPage> {
             Container(
               padding: const EdgeInsets.all(8),
               decoration: BoxDecoration(
-                color: const Color(0xFFFFD700).withOpacity(0.2),
+                color: const Color(0xFFFBC02D).withOpacity(0.2),
                 borderRadius: BorderRadius.circular(8),
               ),
               child: const Icon(
                 Icons.check_circle_outline,
-                color: Color(0xFFFFD700),
+                color: Color(0xFFFBC02D),
                 size: 28,
               ),
             ),
@@ -1434,10 +1434,10 @@ class _AgregarMantenimientoPageState extends State<AgregarMantenimientoPage> {
             Container(
               padding: const EdgeInsets.all(16),
               decoration: BoxDecoration(
-                color: const Color(0xFFFFD700).withOpacity(0.1),
+                color: const Color(0xFFFBC02D).withOpacity(0.1),
                 borderRadius: BorderRadius.circular(12),
                 border: Border.all(
-                  color: const Color(0xFFFFD700).withOpacity(0.3),
+                  color: const Color(0xFFFBC02D).withOpacity(0.3),
                 ),
               ),
               child: Row(
@@ -1448,7 +1448,7 @@ class _AgregarMantenimientoPageState extends State<AgregarMantenimientoPage> {
                   Text(
                     "\$${_calcularTotal().toStringAsFixed(2)}",
                     style: const TextStyle(
-                      color: Color(0xFFFFD700),
+                      color: Color(0xFFFBC02D),
                       fontSize: 24,
                       fontWeight: FontWeight.bold,
                     ),
@@ -1475,7 +1475,7 @@ class _AgregarMantenimientoPageState extends State<AgregarMantenimientoPage> {
               await _guardarMantenimiento();
             },
             style: ElevatedButton.styleFrom(
-              backgroundColor: const Color(0xFFFFD700),
+              backgroundColor: const Color(0xFFFBC02D),
               padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
               shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(8)),
@@ -1507,7 +1507,7 @@ class _AgregarMantenimientoPageState extends State<AgregarMantenimientoPage> {
           child: const Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              CircularProgressIndicator(color: Color(0xFFFFD700), strokeWidth: 3),
+              CircularProgressIndicator(color: Color(0xFFFBC02D), strokeWidth: 3),
               SizedBox(height: 20),
               Text(
                 'Guardando mantenimiento...',

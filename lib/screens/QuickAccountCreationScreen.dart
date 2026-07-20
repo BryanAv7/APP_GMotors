@@ -96,14 +96,14 @@ class _QuickAccountCreationScreenState
                 child: Text(
                   'Detectar Placa',
                   style: TextStyle(
-                    color: Colors.yellow[700],
+                    color: Color(0xFFFBC02D),
                     fontSize: 18,
                     fontWeight: FontWeight.bold,
                   ),
                 ),
               ),
               ListTile(
-                leading: const Icon(Icons.camera_alt, color: Colors.yellow),
+                leading: const Icon(Icons.camera_alt, color: Color(0xFFFBC02D)),
                 title: const Text('Tomar foto',
                     style: TextStyle(color: Colors.white)),
                 subtitle: const Text('Usa la cámara para detectar la placa',
@@ -114,7 +114,7 @@ class _QuickAccountCreationScreenState
                 },
               ),
               ListTile(
-                leading: const Icon(Icons.photo_library, color: Colors.yellow),
+                leading: const Icon(Icons.photo_library, color: Color(0xFFFBC02D)),
                 title: const Text('Elegir de galería',
                     style: TextStyle(color: Colors.white)),
                 subtitle: const Text('Selecciona una foto existente',
@@ -156,7 +156,7 @@ class _QuickAccountCreationScreenState
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              const CircularProgressIndicator(color: Colors.yellow),
+              const CircularProgressIndicator(color: Color(0xFFFBC02D)),
               const SizedBox(height: 16),
               const Text(
                 'Detectando placa...',
@@ -210,7 +210,7 @@ class _QuickAccountCreationScreenState
             behavior: SnackBarBehavior.floating,
             action: SnackBarAction(
               label: 'Reintentar',
-              textColor: Colors.yellow,
+              textColor: Color(0xFFFBC02D),
               onPressed: abrirCamaraPlaca,
             ),
           ),
@@ -328,14 +328,14 @@ class _QuickAccountCreationScreenState
               Container(
                 padding: const EdgeInsets.all(12),
                 decoration: BoxDecoration(
-                  color: Colors.yellow[700]?.withOpacity(0.2),
+                  color: Color(0xFFFBC02D).withOpacity(0.2),
                   borderRadius: BorderRadius.circular(8),
-                  border: Border.all(color: Colors.yellow[700]!),
+                  border: Border.all(color: Color(0xFFFBC02D)),
                 ),
                 child: const Text(
                   '⚠️ Guarda estos datos temporales. El usuario DEBE cambiar la contraseña cuando solicite su cuenta.',
                   style: TextStyle(
-                    color: Colors.yellow,
+                    color: Color(0xFFFBC02D),
                     fontSize: 12,
                     fontWeight: FontWeight.w500,
                   ),
@@ -349,7 +349,7 @@ class _QuickAccountCreationScreenState
             onPressed: () => Navigator.pop(context),
             child: const Text(
               'Cerrar',
-              style: TextStyle(color: Colors.yellow, fontWeight: FontWeight.bold),
+              style: TextStyle(color: Color(0xFFFBC02D), fontWeight: FontWeight.bold),
             ),
           ),
         ],
@@ -397,7 +397,7 @@ class _QuickAccountCreationScreenState
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
         content: Text(msg),
-        backgroundColor: Colors.yellow[700],
+        backgroundColor: Color(0xFFFBC02D),
         behavior: SnackBarBehavior.floating,
       ),
     );
@@ -408,7 +408,7 @@ class _QuickAccountCreationScreenState
     return Scaffold(
       backgroundColor: Colors.black87,
       appBar: AppBar(
-        backgroundColor: Colors.yellow[700],
+        backgroundColor: Color(0xFFFBC02D),
         elevation: 0,
         title: const Text(
           'Crear Cuenta Rápida',
@@ -463,23 +463,23 @@ class _QuickAccountCreationScreenState
                   hintStyle: const TextStyle(color: Colors.grey),
                   filled: true,
                   fillColor: Colors.grey[850],
-                  prefixIcon: const Icon(Icons.credit_card, color: Colors.yellow),
+                  prefixIcon: const Icon(Icons.credit_card, color: Color(0xFFFBC02D)),
                   suffixIcon: IconButton(
-                    icon: const Icon(Icons.camera_alt, color: Colors.yellow),
+                    icon: const Icon(Icons.camera_alt, color: Color(0xFFFBC02D)),
                     onPressed: abrirCamaraPlaca,
                     tooltip: 'Detectar placa con cámara',
                   ),
                   border: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(12),
-                    borderSide: const BorderSide(color: Colors.yellow),
+                    borderSide: const BorderSide(color: Color(0xFFFBC02D)),
                   ),
                   enabledBorder: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(12),
-                    borderSide: const BorderSide(color: Colors.yellow),
+                    borderSide: const BorderSide(color: Color(0xFFFBC02D)),
                   ),
                   focusedBorder: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(12),
-                    borderSide: const BorderSide(color: Colors.yellow, width: 2),
+                    borderSide: const BorderSide(color: Color(0xFFFBC02D), width: 2),
                   ),
                 ),
               ),
@@ -492,7 +492,7 @@ class _QuickAccountCreationScreenState
                 child: ElevatedButton(
                   onPressed: _isLoading ? null : _crearCuentaRapida,
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: Colors.yellow[700],
+                    backgroundColor: Color(0xFFFBC02D),
                     padding: const EdgeInsets.symmetric(vertical: 15),
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(12),
@@ -574,15 +574,15 @@ class _QuickAccountCreationScreenState
         fillColor: Colors.grey[850],
         border: OutlineInputBorder(
           borderRadius: BorderRadius.circular(12),
-          borderSide: const BorderSide(color: Colors.yellow),
+          borderSide: const BorderSide(color: Color(0xFFFBC02D)),
         ),
         enabledBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(12),
-          borderSide: const BorderSide(color: Colors.yellow),
+          borderSide: const BorderSide(color: Color(0xFFFBC02D)),
         ),
         focusedBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(12),
-          borderSide: const BorderSide(color: Colors.yellow, width: 2),
+          borderSide: const BorderSide(color: Color(0xFFFBC02D), width: 2),
         ),
       ),
     );

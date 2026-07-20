@@ -129,7 +129,7 @@ class _DetalleMantenimientoPageState extends State<DetalleMantenimientoPage> {
     return Scaffold(
       backgroundColor: const Color(0xFF121212),
       appBar: AppBar(
-        backgroundColor: const Color(0xFFFFD700),
+        backgroundColor: const Color(0xFFFBC02D),
         elevation: 0,
         leading: IconButton(
           icon: const Icon(Icons.arrow_back, color: Colors.black),
@@ -150,7 +150,7 @@ class _DetalleMantenimientoPageState extends State<DetalleMantenimientoPage> {
           if (snapshot.connectionState == ConnectionState.waiting) {
             return const Center(
               child: CircularProgressIndicator(
-                color: Color(0xFFFFD700),
+                color: Color(0xFFFBC02D),
               ),
             );
           }
@@ -236,15 +236,15 @@ class _DetalleMantenimientoPageState extends State<DetalleMantenimientoPage> {
       decoration: BoxDecoration(
         gradient: LinearGradient(
           colors: [
-            const Color(0xFFFFD700).withOpacity(0.2),
-            const Color(0xFFFFD700).withOpacity(0.05),
+            const Color(0xFFFBC02D).withOpacity(0.2),
+            const Color(0xFFFBC02D).withOpacity(0.05),
           ],
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
         ),
         borderRadius: BorderRadius.circular(16),
         border: Border.all(
-          color: const Color(0xFFFFD700).withOpacity(0.3),
+          color: const Color(0xFFFBC02D).withOpacity(0.3),
           width: 1,
         ),
       ),
@@ -279,7 +279,7 @@ class _DetalleMantenimientoPageState extends State<DetalleMantenimientoPage> {
     return Expanded(
       child: Column(
         children: [
-          Icon(icon, color: const Color(0xFFFFD700), size: 24),
+          Icon(icon, color: const Color(0xFFFBC02D), size: 24),
           const SizedBox(height: 8),
           Text(
             label,
@@ -308,12 +308,12 @@ class _DetalleMantenimientoPageState extends State<DetalleMantenimientoPage> {
         Container(
           padding: const EdgeInsets.all(8),
           decoration: BoxDecoration(
-            color: const Color(0xFFFFD700).withOpacity(0.2),
+            color: const Color(0xFFFBC02D).withOpacity(0.2),
             borderRadius: BorderRadius.circular(8),
           ),
           child: Icon(
             icon,
-            color: const Color(0xFFFFD700),
+            color: const Color(0xFFFBC02D),
             size: 20,
           ),
         ),
@@ -337,7 +337,7 @@ class _DetalleMantenimientoPageState extends State<DetalleMantenimientoPage> {
         color: const Color(0xFF1E1E1E),
         borderRadius: BorderRadius.circular(12),
         border: Border.all(
-          color: const Color(0xFFFFD700).withOpacity(0.3),
+          color: const Color(0xFFFBC02D).withOpacity(0.3),
           width: 1.5,
         ),
       ),
@@ -345,7 +345,7 @@ class _DetalleMantenimientoPageState extends State<DetalleMantenimientoPage> {
         children: [
           Icon(
             Icons.person_outline,
-            color: const Color(0xFFFFD700),
+            color: const Color(0xFFFBC02D),
             size: 24,
           ),
           const SizedBox(width: 16),
@@ -384,7 +384,7 @@ class _DetalleMantenimientoPageState extends State<DetalleMantenimientoPage> {
         color: const Color(0xFF1E1E1E),
         borderRadius: BorderRadius.circular(12),
         border: Border.all(
-          color: const Color(0xFFFFD700).withOpacity(0.3),
+          color: const Color(0xFFFBC02D).withOpacity(0.3),
           width: 1.5,
         ),
       ),
@@ -392,7 +392,7 @@ class _DetalleMantenimientoPageState extends State<DetalleMantenimientoPage> {
         children: [
           Icon(
             Icons.motorcycle,
-            color: const Color(0xFFFFD700),
+            color: const Color(0xFFFBC02D),
             size: 24,
           ),
           const SizedBox(width: 16),
@@ -434,7 +434,7 @@ class _DetalleMantenimientoPageState extends State<DetalleMantenimientoPage> {
           border: Border.all(color: Colors.white24, width: 1.5),
         ),
         child: const Center(
-          child: CircularProgressIndicator(color: Color(0xFFFFD700)),
+          child: CircularProgressIndicator(color: Color(0xFFFBC02D)),
         ),
       );
     }
@@ -450,7 +450,7 @@ class _DetalleMantenimientoPageState extends State<DetalleMantenimientoPage> {
         borderRadius: BorderRadius.circular(12),
         border: Border.all(
           color: idTipoSeleccionado != null
-              ? const Color(0xFFFFD700).withOpacity(0.5)
+              ? const Color(0xFFFBC02D).withOpacity(0.5)
               : Colors.white24,
           width: 1.5,
         ),
@@ -465,7 +465,7 @@ class _DetalleMantenimientoPageState extends State<DetalleMantenimientoPage> {
           prefixIcon: Icon(
             Icons.build_circle,
             color: idTipoSeleccionado != null
-                ? const Color(0xFFFFD700)
+                ? const Color(0xFFFBC02D)
                 : Colors.white54,
           ),
           border: InputBorder.none,
@@ -650,7 +650,7 @@ class _DetalleMantenimientoPageState extends State<DetalleMantenimientoPage> {
             color: error
                 ? Colors.red.withOpacity(0.8)
                 : hayDetalles
-                ? const Color(0xFFFFD700).withOpacity(0.5)
+                ? const Color(0xFFFBC02D).withOpacity(0.5)
                 : Colors.white24,
             width: 1.5,
           ),
@@ -666,12 +666,12 @@ class _DetalleMantenimientoPageState extends State<DetalleMantenimientoPage> {
                     Container(
                       padding: const EdgeInsets.all(8),
                       decoration: BoxDecoration(
-                        color: const Color(0xFFFFD700).withOpacity(0.2),
+                        color: const Color(0xFFFBC02D).withOpacity(0.2),
                         borderRadius: BorderRadius.circular(8),
                       ),
                       child: Icon(
                         hayDetalles ? Icons.check_circle : Icons.edit,
-                        color: const Color(0xFFFFD700),
+                        color: const Color(0xFFFBC02D),
                         size: 20,
                       ),
                     ),
@@ -690,7 +690,7 @@ class _DetalleMantenimientoPageState extends State<DetalleMantenimientoPage> {
                 ),
                 Icon(
                   Icons.arrow_forward_ios,
-                  color: const Color(0xFFFFD700),
+                  color: const Color(0xFFFBC02D),
                   size: 16,
                 ),
               ],
@@ -700,10 +700,10 @@ class _DetalleMantenimientoPageState extends State<DetalleMantenimientoPage> {
               Container(
                 padding: const EdgeInsets.all(16),
                 decoration: BoxDecoration(
-                  color: const Color(0xFFFFD700).withOpacity(0.1),
+                  color: const Color(0xFFFBC02D).withOpacity(0.1),
                   borderRadius: BorderRadius.circular(8),
                   border: Border.all(
-                    color: const Color(0xFFFFD700).withOpacity(0.3),
+                    color: const Color(0xFFFBC02D).withOpacity(0.3),
                   ),
                 ),
                 child: Row(
@@ -719,7 +719,7 @@ class _DetalleMantenimientoPageState extends State<DetalleMantenimientoPage> {
                     Text(
                       "\$${_calcularTotal().toStringAsFixed(2)}",
                       style: const TextStyle(
-                        color: Color(0xFFFFD700),
+                        color: Color(0xFFFBC02D),
                         fontSize: 24,
                         fontWeight: FontWeight.bold,
                       ),
@@ -757,7 +757,7 @@ class _DetalleMantenimientoPageState extends State<DetalleMantenimientoPage> {
         borderRadius: BorderRadius.circular(12),
         border: Border.all(
           color: kilometrajeCtrl.text.isNotEmpty
-              ? const Color(0xFFFFD700).withOpacity(0.5)
+              ? const Color(0xFFFBC02D).withOpacity(0.5)
               : Colors.white24,
           width: 1.5,
         ),
@@ -849,7 +849,7 @@ class _DetalleMantenimientoPageState extends State<DetalleMantenimientoPage> {
         color: const Color(0xFF1E1E1E),
         borderRadius: BorderRadius.circular(16),
         border: Border.all(
-          color: const Color(0xFFFFD700).withOpacity(0.5),
+          color: const Color(0xFFFBC02D).withOpacity(0.5),
           width: 1.5,
         ),
       ),
@@ -867,7 +867,7 @@ class _DetalleMantenimientoPageState extends State<DetalleMantenimientoPage> {
               context: context,
               barrierDismissible: false,
               builder: (_) => const Center(
-                child: CircularProgressIndicator(color: Color(0xFFFFD700)),
+                child: CircularProgressIndicator(color: Color(0xFFFBC02D)),
               ),
             );
 
@@ -894,11 +894,11 @@ class _DetalleMantenimientoPageState extends State<DetalleMantenimientoPage> {
             _mostrarError('Error al generar PDF: $e');
           }
         },
-        icon: const Icon(Icons.print, color: Color(0xFFFFD700)),
+        icon: const Icon(Icons.print, color: Color(0xFFFBC02D)),
         label: const Text(
           'Imprimir / Compartir Factura',
           style: TextStyle(
-            color: Color(0xFFFFD700),
+            color: Color(0xFFFBC02D),
             fontSize: 16,
             fontWeight: FontWeight.bold,
           ),
@@ -914,7 +914,7 @@ class _DetalleMantenimientoPageState extends State<DetalleMantenimientoPage> {
       height: 56,
       decoration: BoxDecoration(
         gradient: const LinearGradient(
-          colors: [Color(0xFFFFD700), Color(0xFFFFC107)],
+          colors: [Color(0xFFFBC02D), Color(0xFFFFC107)],
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
         ),
@@ -988,7 +988,7 @@ class _DetalleMantenimientoPageState extends State<DetalleMantenimientoPage> {
             mainAxisSize: MainAxisSize.min,
             children: const [
               CircularProgressIndicator(
-                color: Color(0xFFFFD700),
+                color: Color(0xFFFBC02D),
                 strokeWidth: 3,
               ),
               SizedBox(height: 20),

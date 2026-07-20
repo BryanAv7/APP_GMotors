@@ -25,6 +25,12 @@ dependencies:
   # Para conectarte al backend
   http: ^1.2.0
 
+  # Inicialización básica de Firebase
+  flutter_local_notifications: ^17.2.2
+  firebase_core: ^3.0.0
+  firebase_messaging: ^15.0.0
+  path_provider: ^2.1.2
+
   # Animaciones de carga
   flutter_spinkit: ^5.2.0
 

@@ -192,7 +192,7 @@ class _SeleccionarProductosPageState extends State<SeleccionarProductosPage> {
               Navigator.pop(ctx);
               _mostrarSnackbar('Concepto agregado', Colors.green);
             },
-            child: const Text('Agregar', style: TextStyle(color: Colors.yellow)),
+            child: const Text('Agregar', style: TextStyle(color: Color(0xFFFBC02D))),
           ),
         ],
       ),
@@ -229,7 +229,7 @@ class _SeleccionarProductosPageState extends State<SeleccionarProductosPage> {
     return Scaffold(
       backgroundColor: const Color(0xFF1E1E1E),
       appBar: AppBar(
-        backgroundColor: const Color(0xFFFFD700),
+        backgroundColor: const Color(0xFFFBC02D),
         leading: IconButton(
           icon: const Icon(Icons.arrow_back, color: Colors.black),
           onPressed: () => Navigator.pop(context),
@@ -259,7 +259,7 @@ class _SeleccionarProductosPageState extends State<SeleccionarProductosPage> {
                   const Text(
                     'PRODUCTOS AGREGADOS',
                     style: TextStyle(
-                      color: Colors.yellow,
+                      color: Color(0xFFFBC02D),
                       fontSize: 16,
                       fontWeight: FontWeight.bold,
                     ),
@@ -280,7 +280,7 @@ class _SeleccionarProductosPageState extends State<SeleccionarProductosPage> {
                 const Text(
                   'BUSCAR PRODUCTO',
                   style: TextStyle(
-                    color: Colors.yellow,
+                    color: Color(0xFFFBC02D),
                     fontSize: 16,
                     fontWeight: FontWeight.bold,
                   ),
@@ -298,7 +298,7 @@ class _SeleccionarProductosPageState extends State<SeleccionarProductosPage> {
                 // Lista de productos
                 if (cargandoProductos)
                   const Center(
-                    child: CircularProgressIndicator(color: Colors.yellow),
+                    child: CircularProgressIndicator(color: Color(0xFFFBC02D)),
                   )
                 else if (productosFiltrados.isEmpty)
                   const Center(
@@ -364,7 +364,7 @@ class _SeleccionarProductosPageState extends State<SeleccionarProductosPage> {
               Text(
                 '\$${totalGeneral.toStringAsFixed(2)}',
                 style: const TextStyle(
-                  color: Colors.yellow,
+                  color: Color(0xFFFBC02D),
                   fontSize: 22,
                   fontWeight: FontWeight.bold,
                 ),
@@ -389,12 +389,12 @@ class _SeleccionarProductosPageState extends State<SeleccionarProductosPage> {
         width: double.infinity,
         child: ElevatedButton.icon(
           style: ElevatedButton.styleFrom(
-            backgroundColor: Colors.yellow.withOpacity(0.2),
-            foregroundColor: Colors.yellow,
+            backgroundColor: Color(0xFFFBC02D).withOpacity(0.2),
+            foregroundColor: Color(0xFFFBC02D),
             padding: const EdgeInsets.symmetric(vertical: 14),
             shape: RoundedRectangleBorder(
               borderRadius: BorderRadius.circular(12),
-              side: const BorderSide(color: Colors.yellow),
+              side: const BorderSide(color: Color(0xFFFBC02D)),
             ),
           ),
           onPressed: _mostrarDialogoConceptoManual,
@@ -414,11 +414,11 @@ class _SeleccionarProductosPageState extends State<SeleccionarProductosPage> {
       labelText: label,
       labelStyle: const TextStyle(color: Colors.white70),
       enabledBorder: OutlineInputBorder(
-        borderSide: const BorderSide(color: Colors.yellow),
+        borderSide: const BorderSide(color: Color(0xFFFBC02D)),
         borderRadius: BorderRadius.circular(12),
       ),
       focusedBorder: OutlineInputBorder(
-        borderSide: const BorderSide(color: Colors.yellow, width: 2),
+        borderSide: const BorderSide(color: Color(0xFFFBC02D), width: 2),
         borderRadius: BorderRadius.circular(12),
       ),
     );

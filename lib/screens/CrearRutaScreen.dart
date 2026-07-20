@@ -98,7 +98,7 @@ class _CrearRutaPageState extends State<CrearRutaPage> {
     return Scaffold(
       backgroundColor: const Color(0xFF121212),
       appBar: AppBar(
-        backgroundColor: const Color(0xFFFFD700),
+        backgroundColor: const Color(0xFFFBC02D),
         title: const Text(
           'Crear Ruta',
           style: TextStyle(color: Colors.black, fontWeight: FontWeight.normal),
@@ -144,7 +144,7 @@ class _CrearRutaPageState extends State<CrearRutaPage> {
                   polylines: [
                     Polyline(
                       points: _polylinePoints,
-                      color: const Color(0xFFFFD700),
+                      color: const Color(0xFFFBC02D),
                       strokeWidth: 4.0,
                     ),
                   ],
@@ -160,7 +160,7 @@ class _CrearRutaPageState extends State<CrearRutaPage> {
                       child: Container(
                         decoration: BoxDecoration(
                           shape: BoxShape.circle,
-                          color: const Color(0xFFFFD700),
+                          color: const Color(0xFFFBC02D),
                           border: Border.all(color: Colors.white, width: 2),
                         ),
                         child: const Icon(
@@ -222,7 +222,7 @@ class _CrearRutaPageState extends State<CrearRutaPage> {
                   const Text(
                     'Toca el mapa para marcar:',
                     style: TextStyle(
-                      color: Color(0xFFFFD700),
+                      color: Color(0xFFFBC02D),
                       fontSize: 14,
                       fontWeight: FontWeight.bold,
                     ),
@@ -262,7 +262,7 @@ class _CrearRutaPageState extends State<CrearRutaPage> {
                       children: [
                         Column(
                           children: [
-                            const Icon(Icons.straighten, color: Color(0xFFFFD700)),
+                            const Icon(Icons.straighten, color: Color(0xFFFBC02D)),
                             const SizedBox(height: 4),
                             Text(
                               '${_distanciaKm!.toStringAsFixed(2)} km',
@@ -275,7 +275,7 @@ class _CrearRutaPageState extends State<CrearRutaPage> {
                         ),
                         Column(
                           children: [
-                            const Icon(Icons.schedule, color: Color(0xFFFFD700)),
+                            const Icon(Icons.schedule, color: Color(0xFFFBC02D)),
                             const SizedBox(height: 4),
                             Text(
                               '$_duracionMinutos min',
@@ -299,7 +299,7 @@ class _CrearRutaPageState extends State<CrearRutaPage> {
             bottom: 160,
             right: 16,
             child: FloatingActionButton(
-              backgroundColor: const Color(0xFFFFD700),
+              backgroundColor: const Color(0xFFFBC02D),
               onPressed: _cargandoUbicacion ? null : _establecerOrigenActual,
               tooltip: 'Usar ubicación actual',
               child: _cargandoUbicacion
@@ -366,7 +366,7 @@ class _CrearRutaPageState extends State<CrearRutaPage> {
                             ),
                           ),
                           style: ElevatedButton.styleFrom(
-                            backgroundColor: const Color(0xFFFFD700),
+                            backgroundColor: const Color(0xFFFBC02D),
                             padding: const EdgeInsets.symmetric(vertical: 16),
                             shape: RoundedRectangleBorder(
                               borderRadius: BorderRadius.circular(12),
@@ -464,7 +464,7 @@ class _CrearRutaPageState extends State<CrearRutaPage> {
         backgroundColor: const Color(0xFF1E1E1E),
         title: const Text(
           'Guardar Ruta',
-          style: TextStyle(color: Color(0xFFFFD700)),
+          style: TextStyle(color: Color(0xFFFBC02D)),
         ),
         content: Column(
           mainAxisSize: MainAxisSize.min,
@@ -515,7 +515,7 @@ class _CrearRutaPageState extends State<CrearRutaPage> {
               _guardarRuta();
             },
             style: ElevatedButton.styleFrom(
-              backgroundColor: const Color(0xFFFFD700),
+              backgroundColor: const Color(0xFFFBC02D),
             ),
             child: const Text(
               'Guardar',

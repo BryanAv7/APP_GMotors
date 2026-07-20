@@ -77,7 +77,7 @@ class _EditFacturasRapidasScreenState extends State<EditFacturasRapidasScreen> {
     return Scaffold(
       backgroundColor: const Color(0xFF121212),
       appBar: AppBar(
-        backgroundColor: const Color(0xFFFFD700),
+        backgroundColor: const Color(0xFFFBC02D),
         title: const Text(
           "Editar Factura",
           style: TextStyle(color: Colors.black),
@@ -207,7 +207,7 @@ class _EditFacturasRapidasScreenState extends State<EditFacturasRapidasScreen> {
           borderRadius: BorderRadius.circular(12),
           border: Border.all(
             color: hayProductos
-                ? const Color(0xFFFFD700).withOpacity(0.5)
+                ? const Color(0xFFFBC02D).withOpacity(0.5)
                 : Colors.white24,
             width: 1.5,
           ),
@@ -224,12 +224,12 @@ class _EditFacturasRapidasScreenState extends State<EditFacturasRapidasScreen> {
                     Container(
                       padding: const EdgeInsets.all(8),
                       decoration: BoxDecoration(
-                        color: const Color(0xFFFFD700).withOpacity(0.2),
+                        color: const Color(0xFFFBC02D).withOpacity(0.2),
                         borderRadius: BorderRadius.circular(8),
                       ),
                       child: Icon(
                         hayProductos ? Icons.check_circle : Icons.edit,
-                        color: const Color(0xFFFFD700),
+                        color: const Color(0xFFFBC02D),
                         size: 20,
                       ),
                     ),
@@ -248,7 +248,7 @@ class _EditFacturasRapidasScreenState extends State<EditFacturasRapidasScreen> {
                 ),
                 const Icon(
                   Icons.arrow_forward_ios,
-                  color: Color(0xFFFFD700),
+                  color: Color(0xFFFBC02D),
                   size: 16,
                 ),
               ],
@@ -260,10 +260,10 @@ class _EditFacturasRapidasScreenState extends State<EditFacturasRapidasScreen> {
               Container(
                 padding: const EdgeInsets.all(16),
                 decoration: BoxDecoration(
-                  color: const Color(0xFFFFD700).withOpacity(0.1),
+                  color: const Color(0xFFFBC02D).withOpacity(0.1),
                   borderRadius: BorderRadius.circular(10),
                   border: Border.all(
-                    color: const Color(0xFFFFD700).withOpacity(0.3),
+                    color: const Color(0xFFFBC02D).withOpacity(0.3),
                   ),
                 ),
                 child: Row(
@@ -276,7 +276,7 @@ class _EditFacturasRapidasScreenState extends State<EditFacturasRapidasScreen> {
                     Text(
                       "\$${total.toStringAsFixed(2)}",
                       style: const TextStyle(
-                        color: Color(0xFFFFD700),
+                        color: Color(0xFFFBC02D),
                         fontSize: 22,
                         fontWeight: FontWeight.bold,
                       ),
@@ -318,7 +318,7 @@ class _EditFacturasRapidasScreenState extends State<EditFacturasRapidasScreen> {
         color: const Color(0xFF1E1E1E),
         borderRadius: BorderRadius.circular(16),
         border: Border.all(
-          color: const Color(0xFFFFD700).withOpacity(0.5),
+          color: const Color(0xFFFBC02D).withOpacity(0.5),
           width: 1.5,
         ),
       ),
@@ -332,12 +332,12 @@ class _EditFacturasRapidasScreenState extends State<EditFacturasRapidasScreen> {
         ),
         icon: const Icon(
           Icons.print,
-          color: Color(0xFFFFD700),
+          color: Color(0xFFFBC02D),
         ),
         label: const Text(
           "Imprimir / Compartir Factura",
           style: TextStyle(
-            color: Color(0xFFFFD700),
+            color: Color(0xFFFBC02D),
             fontSize: 16,
             fontWeight: FontWeight.bold,
           ),
@@ -360,7 +360,7 @@ class _EditFacturasRapidasScreenState extends State<EditFacturasRapidasScreen> {
       height: 55,
       child: ElevatedButton(
         style: ElevatedButton.styleFrom(
-          backgroundColor: const Color(0xFFFFD700),
+          backgroundColor: const Color(0xFFFBC02D),
         ),
         onPressed: _guardar,
         child: const Text(
@@ -423,10 +423,10 @@ class _EditFacturasRapidasScreenState extends State<EditFacturasRapidasScreen> {
         Container(
           padding: const EdgeInsets.all(8),
           decoration: BoxDecoration(
-            color: const Color(0xFFFFD700).withOpacity(0.2),
+            color: const Color(0xFFFBC02D).withOpacity(0.2),
             borderRadius: BorderRadius.circular(8),
           ),
-          child: Icon(icon, color: const Color(0xFFFFD700)),
+          child: Icon(icon, color: const Color(0xFFFBC02D)),
         ),
         const SizedBox(width: 10),
         Text(

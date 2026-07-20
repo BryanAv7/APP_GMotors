@@ -100,7 +100,7 @@ class _HistorialFacturasRapidasScreenState
         leading: Navigator.canPop(context)
             ? const BackButton(color: Colors.black)
             : null,
-        backgroundColor: const Color(0xFFFFD700),
+        backgroundColor: const Color(0xFFFBC02D),
         title: const Text(
           "Historial F.Rápidas",
           style: TextStyle(color: Colors.black),
@@ -116,7 +116,7 @@ class _HistorialFacturasRapidasScreenState
 
       // Agregar
       floatingActionButton: FloatingActionButton.extended(
-        backgroundColor: const Color(0xFFFFD700),
+        backgroundColor: const Color(0xFFFBC02D),
         onPressed: () async {
           final result = await Navigator.push(
             context,
@@ -144,7 +144,7 @@ class _HistorialFacturasRapidasScreenState
             child: cargando
                 ? const Center(
               child: CircularProgressIndicator(
-                color: Color(0xFFFFD700),
+                color: Color(0xFFFBC02D),
               ),
             )
                 : facturas.isEmpty
@@ -212,7 +212,7 @@ class _HistorialFacturasRapidasScreenState
             IconButton(
               onPressed: _buscar,
               icon: const Icon(Icons.arrow_forward,
-                  color: Color(0xFFFFD700)),
+                  color: Color(0xFFFBC02D)),
             )
           ],
         ),
@@ -227,7 +227,7 @@ class _HistorialFacturasRapidasScreenState
         color: const Color(0xFF1D1D1D),
         borderRadius: BorderRadius.circular(18),
         border: Border.all(
-          color: const Color(0xFFFFD700).withOpacity(.35),
+          color: const Color(0xFFFBC02D).withOpacity(.35),
         ),
         boxShadow: [
           BoxShadow(
@@ -250,15 +250,15 @@ class _HistorialFacturasRapidasScreenState
             vertical: 10,
           ),
           childrenPadding: const EdgeInsets.fromLTRB(18, 0, 18, 18),
-          iconColor: const Color(0xFFFFD700),
-          collapsedIconColor: const Color(0xFFFFD700),
+          iconColor: const Color(0xFFFBC02D),
+          collapsedIconColor: const Color(0xFFFBC02D),
 
           title: Row(
             crossAxisAlignment: CrossAxisAlignment.center,
             children: [
               const Icon(
                 Icons.production_quantity_limits_outlined,
-                color: Color(0xFFFFD700),
+                color: Color(0xFFFBC02D),
                 size: 34,
               ),
 
@@ -372,7 +372,7 @@ class _HistorialFacturasRapidasScreenState
               Text(
                 "\$${f.costoTotal.toStringAsFixed(2)}",
                 style: const TextStyle(
-                  color: Color(0xFFFFD700),
+                  color: Color(0xFFFBC02D),
                   fontWeight: FontWeight.bold,
                   fontSize: 20,
                 ),
@@ -405,7 +405,7 @@ class _HistorialFacturasRapidasScreenState
                       const Icon(
                         Icons.phone,
                         size: 16,
-                        color: Color(0xFFFFD700),
+                        color: Color(0xFFFBC02D),
                       ),
                       const SizedBox(width: 6),
                       Text(
@@ -433,7 +433,7 @@ class _HistorialFacturasRapidasScreenState
                       const Icon(
                         Icons.shopping_bag,
                         size: 16,
-                        color: Color(0xFFFFD700),
+                        color: Color(0xFFFBC02D),
                       ),
                       const SizedBox(width: 6),
                       Text(
@@ -448,7 +448,7 @@ class _HistorialFacturasRapidasScreenState
 
                 Container(
                   decoration: const BoxDecoration(
-                    color: Color(0xFFFFD700),
+                    color: Color(0xFFFBC02D),
                     shape: BoxShape.circle,
                   ),
                   child: IconButton(
@@ -523,7 +523,7 @@ class _HistorialFacturasRapidasScreenState
                         vertical: 4,
                       ),
                       decoration: BoxDecoration(
-                        color: const Color(0xFFFFD700),
+                        color: const Color(0xFFFBC02D),
                         borderRadius: BorderRadius.circular(20),
                       ),
                       child: Text(

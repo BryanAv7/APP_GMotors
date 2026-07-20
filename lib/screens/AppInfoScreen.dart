@@ -26,7 +26,7 @@ class AppInfoScreen extends StatelessWidget {
     return Scaffold(
       backgroundColor: const Color(0xFF121212),
       appBar: AppBar(
-        backgroundColor: Colors.yellow[700],
+        backgroundColor: Color(0xFFFBC02D),
         elevation: 0,
         title: const Text(
           'Información de la App',
@@ -56,12 +56,12 @@ class AppInfoScreen extends StatelessWidget {
                     decoration: BoxDecoration(
                       shape: BoxShape.circle,
                       border: Border.all(
-                        color: Colors.yellow[700]!,
+                        color: Color(0xFFFBC02D),
                         width: 3,
                       ),
                       boxShadow: [
                         BoxShadow(
-                          color: Colors.yellow[700]!.withOpacity(0.2),
+                          color: Color(0xFFFBC02D).withOpacity(0.2),
                           blurRadius: 12,
                           spreadRadius: 2,
                         ),
@@ -74,7 +74,7 @@ class AppInfoScreen extends StatelessWidget {
                         errorBuilder: (context, error, stackTrace) {
                           return Icon(
                             Icons.motorcycle,
-                            color: Colors.yellow[700],
+                            color: Color(0xFFFBC02D),
                             size: 60,
                           );
                         },
@@ -144,7 +144,7 @@ class AppInfoScreen extends StatelessWidget {
                   Text(
                     'Especialistas en Servicio automotor y Reparación de Motocicletas',
                     style: TextStyle(
-                      color: Colors.yellow,
+                      color: Color(0xFFFBC02D),
                       fontSize: 14,
                     ),
                   ),
@@ -224,7 +224,7 @@ class AppInfoScreen extends StatelessWidget {
                   Text(
                     'Desarrollador Full Stack',
                     style: TextStyle(
-                      color: Colors.yellow,
+                      color: Color(0xFFFBC02D),
                       fontSize: 14,
                     ),
                   ),
@@ -284,7 +284,7 @@ class AppInfoScreen extends StatelessWidget {
                   Text(
                     'Desarrollador Full Stack',
                     style: TextStyle(
-                      color: Colors.yellow,
+                      color: Color(0xFFFBC02D),
                       fontSize: 14,
                     ),
                   ),
@@ -349,7 +349,7 @@ class AppInfoScreen extends StatelessWidget {
             width: 4,
             height: 24,
             decoration: BoxDecoration(
-              color: Colors.yellow[700],
+              color: Color(0xFFFBC02D),
               borderRadius: BorderRadius.circular(2),
             ),
           ),
@@ -431,7 +431,7 @@ class AppInfoScreen extends StatelessWidget {
             Container(
               padding: const EdgeInsets.all(10),
               decoration: BoxDecoration(
-                color: Colors.yellow[700],
+                color: Color(0xFFFBC02D),
                 borderRadius: BorderRadius.circular(8),
               ),
               child: Icon(icon, color: Colors.black, size: 20),
@@ -475,7 +475,7 @@ class AppInfoScreen extends StatelessWidget {
           Container(
             padding: const EdgeInsets.all(12),
             decoration: BoxDecoration(
-              color: Colors.yellow[700],
+              color: Color(0xFFFBC02D),
               borderRadius: BorderRadius.circular(50),
             ),
             child: Icon(icon, color: Colors.black, size: 20),

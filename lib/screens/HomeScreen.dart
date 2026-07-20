@@ -11,6 +11,8 @@ import '../screens/HistorialMantenimientosPage.dart';
 import '../screens/RutasMenuScreen.dart';
 import '../screens/AppInfoScreen.dart';
 import '../screens/QuickAccountCreationScreen.dart';
+import '../screens/CrearOfertaScreen.dart';
+import '../services/NotificacionService.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -28,6 +30,12 @@ class _HomeScreenState extends State<HomeScreen> {
   void initState() {
     super.initState();
     _loadUserName();
+
+    // Inicializar notificaciones FCM
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      NotificacionService.inicializar(context);
+    });
+
   }
 
   // ========================================================
@@ -246,6 +254,25 @@ class _HomeScreenState extends State<HomeScreen> {
                 });
               },
             ),
+
+            // ============== ENVIAR NOTIFICACIONES ==============
+            _DashboardCard(
+              icon: Icons.notifications,
+              label: 'Enviar Notificaciones',
+              selected: _selectedCardIndex == 7,
+              onTap: () {
+                setState(() => _selectedCardIndex = 7);
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => const CrearOfertaScreen(),
+                  ),
+                ).then((_) {
+                  setState(() => _selectedCardIndex = -1);
+                });
+              },
+            ),
+
           ],
         ),
       )
@@ -256,7 +283,7 @@ class _HomeScreenState extends State<HomeScreen> {
       // ------------------------------------------------
       bottomNavigationBar: BottomNavigationBar(
         currentIndex: _selectedIndex,
-        backgroundColor: Colors.yellow[700],
+        backgroundColor: Color(0xFFFBC02D),
         selectedItemColor: Colors.black,
         unselectedItemColor: Colors.black54,
         type: BottomNavigationBarType.fixed,

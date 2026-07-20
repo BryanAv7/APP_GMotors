@@ -169,7 +169,7 @@ class _InventarioScreenState extends State<InventarioScreen> {
             child: isLoading
                 ? const Center(
               child: CircularProgressIndicator(
-                color: Colors.yellow,
+                color: Color(0xFFFBC02D),
               ),
             )
                 : productosFiltrados.isEmpty
@@ -220,7 +220,7 @@ class _InventarioScreenState extends State<InventarioScreen> {
             await _cargarProductos();
           }
         },
-        backgroundColor: Colors.yellow[700],
+        backgroundColor: Color(0xFFFBC02D),
         label: const Text(
           'Editar',
           style:
@@ -248,7 +248,7 @@ class _InventarioScreenState extends State<InventarioScreen> {
         _filtrarPorCategoria(idCategoria);
       },
       backgroundColor: Colors.grey[800],
-      selectedColor: Colors.yellow[700],
+      selectedColor: Color(0xFFFBC02D),
       checkmarkColor: Colors.black,
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(20),
@@ -282,7 +282,7 @@ class _InventarioScreenState extends State<InventarioScreen> {
           boxShadow: isSelected
               ? [
             BoxShadow(
-              color: Colors.yellow[700]!.withOpacity(0.5),
+              color: Color(0xFFFBC02D).withOpacity(0.5),
               blurRadius: 10,
               spreadRadius: 2,
             ),

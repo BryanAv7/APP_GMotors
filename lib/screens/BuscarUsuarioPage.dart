@@ -39,7 +39,7 @@ class _BuscarUsuarioPageState extends State<BuscarUsuarioPage> {
       backgroundColor: const Color(0xFF1E1E1E),
 
       appBar: AppBar(
-        backgroundColor: const Color(0xFFFFD700),
+        backgroundColor: const Color(0xFFFBC02D),
         leading: IconButton(
           icon: const Icon(Icons.arrow_back, color: Colors.black),
           onPressed: () => Navigator.pop(context),
@@ -94,7 +94,7 @@ class _BuscarUsuarioPageState extends State<BuscarUsuarioPage> {
         decoration: InputDecoration(
           hintText: 'Buscar por nombre',
           hintStyle: const TextStyle(color: Colors.white54),
-          prefixIcon: const Icon(Icons.search, color: Colors.yellow),
+          prefixIcon: const Icon(Icons.search, color: Color(0xFFFBC02D)),
           filled: true,
           fillColor: const Color(0xFF2B2B2B),
           border: OutlineInputBorder(
@@ -126,7 +126,7 @@ class _BuscarUsuarioPageState extends State<BuscarUsuarioPage> {
         final usuario = usuariosFiltrados[index];
 
         return ListTile(
-          leading: const Icon(Icons.person, color: Colors.yellow),
+          leading: const Icon(Icons.person, color: Color(0xFFFBC02D)),
           title: Text(
             usuario.nombreCompleto ?? 'Sin nombre',
             style: const TextStyle(color: Colors.white),

@@ -113,7 +113,7 @@ class _MantenimientosPageState extends State<MantenimientosPage> {
     return Scaffold(
       backgroundColor: const Color(0xFF121212),
       appBar: AppBar(
-        backgroundColor: const Color(0xFFFFD700),
+        backgroundColor: const Color(0xFFFBC02D),
         elevation: 0,
         leading: IconButton(
           icon: const Icon(Icons.arrow_back, color: Colors.black),
@@ -230,7 +230,7 @@ class _MantenimientosPageState extends State<MantenimientosPage> {
           );
           if (resultado == true) _recargarLista();
         },
-        backgroundColor: const Color(0xFFFFD700),
+        backgroundColor: const Color(0xFFFBC02D),
         icon: const Icon(Icons.add, color: Colors.black),
         label: const Text(
           'Agregar',
@@ -295,15 +295,15 @@ class _MantenimientosPageState extends State<MantenimientosPage> {
       decoration: BoxDecoration(
         gradient: LinearGradient(
           colors: [
-            const Color(0xFFFFD700).withOpacity(0.2),
-            const Color(0xFFFFD700).withOpacity(0.05),
+            const Color(0xFFFBC02D).withOpacity(0.2),
+            const Color(0xFFFBC02D).withOpacity(0.05),
           ],
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
         ),
         borderRadius: BorderRadius.circular(16),
         border: Border.all(
-          color: const Color(0xFFFFD700).withOpacity(0.3),
+          color: const Color(0xFFFBC02D).withOpacity(0.3),
           width: 1,
         ),
       ),

@@ -45,7 +45,7 @@ class _HistorialMisMantenimientosPageState
     return Scaffold(
       backgroundColor: const Color(0xFF121212),
       appBar: AppBar(
-        backgroundColor: const Color(0xFFFFD700),
+        backgroundColor: const Color(0xFFFBC02D),
         elevation: 0,
         leading: IconButton(
           icon: const Icon(Icons.arrow_back, color: Colors.black),
@@ -85,7 +85,7 @@ class _HistorialMisMantenimientosPageState
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
           const CircularProgressIndicator(
-            color: Color(0xFFFFD700),
+            color: Color(0xFFFBC02D),
             strokeWidth: 3,
           ),
           const SizedBox(height: 20),
@@ -135,7 +135,7 @@ class _HistorialMisMantenimientosPageState
             ElevatedButton.icon(
               onPressed: () => Navigator.pop(context),
               style: ElevatedButton.styleFrom(
-                backgroundColor: const Color(0xFFFFD700),
+                backgroundColor: const Color(0xFFFBC02D),
               ),
               icon: const Icon(Icons.arrow_back, color: Colors.black),
               label: const Text(
@@ -183,7 +183,7 @@ class _HistorialMisMantenimientosPageState
             ElevatedButton.icon(
               onPressed: () => Navigator.pop(context),
               style: ElevatedButton.styleFrom(
-                backgroundColor: const Color(0xFFFFD700),
+                backgroundColor: const Color(0xFFFBC02D),
               ),
               icon: const Icon(Icons.arrow_back, color: Colors.black),
               label: const Text(
@@ -209,15 +209,15 @@ class _HistorialMisMantenimientosPageState
             decoration: BoxDecoration(
               gradient: LinearGradient(
                 colors: [
-                  const Color(0xFFFFD700).withOpacity(0.2),
-                  const Color(0xFFFFD700).withOpacity(0.05),
+                  const Color(0xFFFBC02D).withOpacity(0.2),
+                  const Color(0xFFFBC02D).withOpacity(0.05),
                 ],
                 begin: Alignment.topLeft,
                 end: Alignment.bottomRight,
               ),
               borderRadius: BorderRadius.circular(12),
               border: Border.all(
-                color: const Color(0xFFFFD700).withOpacity(0.3),
+                color: const Color(0xFFFBC02D).withOpacity(0.3),
                 width: 1,
               ),
             ),
@@ -253,13 +253,13 @@ class _HistorialMisMantenimientosPageState
                     vertical: 6,
                   ),
                   decoration: BoxDecoration(
-                    color: const Color(0xFFFFD700).withOpacity(0.2),
+                    color: const Color(0xFFFBC02D).withOpacity(0.2),
                     borderRadius: BorderRadius.circular(8),
                   ),
                   child: Text(
                     '${historialMantenimientos.length} registros',
                     style: const TextStyle(
-                      color: Color(0xFFFFD700),
+                      color: Color(0xFFFBC02D),
                       fontSize: 13,
                       fontWeight: FontWeight.bold,
                     ),
@@ -321,8 +321,8 @@ class _HistorialMisMantenimientosPageState
           dividerColor: Colors.transparent,
         ),
         child: ExpansionTile(
-          iconColor: const Color(0xFFFFD700),
-          collapsedIconColor: const Color(0xFFFFD700),
+          iconColor: const Color(0xFFFBC02D),
+          collapsedIconColor: const Color(0xFFFBC02D),
           backgroundColor: const Color(0xFF1E1E1E),
           collapsedBackgroundColor: const Color(0xFF1E1E1E),
           title: Row(
@@ -336,7 +336,7 @@ class _HistorialMisMantenimientosPageState
                       children: [
                         const Icon(
                           Icons.calendar_today,
-                          color: Color(0xFFFFD700),
+                          color: Color(0xFFFBC02D),
                           size: 18,
                         ),
                         const SizedBox(width: 8),
@@ -359,7 +359,7 @@ class _HistorialMisMantenimientosPageState
                       Text(
                         'Tipo: ${registro.tipoMantenimiento}',
                         style: const TextStyle(
-                          color: Color(0xFFFFD700),
+                          color: Color(0xFFFBC02D),
                           fontSize: 12,
                         ),
                         overflow: TextOverflow.ellipsis,
@@ -589,7 +589,7 @@ class _HistorialMisMantenimientosPageState
                                 Text(
                                   'Subtotal: \$${detalle.subtotal.toStringAsFixed(2)}',
                                   style: const TextStyle(
-                                    color: Colors.yellow,
+                                    color: Color(0xFFFBC02D),
                                     fontSize: 12,
                                     fontWeight: FontWeight.bold,
                                   ),

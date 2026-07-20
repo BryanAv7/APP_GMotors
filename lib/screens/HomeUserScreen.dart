@@ -94,7 +94,7 @@ class _HomeUserScreenState extends State<HomeUserScreen> {
     return Scaffold(
       backgroundColor: Colors.black87,
       appBar: AppBar(
-        backgroundColor: Colors.yellow[700],
+        backgroundColor: Color(0xFFFBC02D),
         title: Text(
           '¡Bienvenido, $nombreUsuario!',
           style: const TextStyle(color: Colors.black),
@@ -172,7 +172,7 @@ class _HomeUserScreenState extends State<HomeUserScreen> {
           : const SizedBox(),
       bottomNavigationBar: BottomNavigationBar(
         currentIndex: _selectedIndex,
-        backgroundColor: Colors.yellow[700],
+        backgroundColor: Color(0xFFFBC02D),
         selectedItemColor: Colors.black,
         unselectedItemColor: Colors.black54,
         type: BottomNavigationBarType.fixed,
@@ -211,7 +211,7 @@ class _DashboardCard extends StatelessWidget {
           color: Colors.grey[850],
           borderRadius: BorderRadius.circular(12),
           border: Border.all(
-            color: selected ? Colors.yellow : Colors.transparent,
+            color: selected ? Color(0xFFFBC02D) : Colors.transparent,
             width: 3,
           ),
         ),

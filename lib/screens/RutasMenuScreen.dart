@@ -10,7 +10,7 @@ class RutasMenuPage extends StatelessWidget {
     return Scaffold(
       backgroundColor: const Color(0xFF121212),
       appBar: AppBar(
-        backgroundColor: const Color(0xFFFFD700),
+        backgroundColor: const Color(0xFFFBC02D),
         title: const Text(
           'Gestor de Rutas',
           style: TextStyle(color: Colors.black, fontWeight: FontWeight.normal),
@@ -32,7 +32,7 @@ class RutasMenuPage extends StatelessWidget {
               icon: Icons.route,
               title: 'Crear una Ruta',
               subtitle: 'Crear una nueva ruta en el mapa',
-              color: const Color(0xFFFFD700),
+              color: const Color(0xFFFBC02D),
               onTap: () {
                 Navigator.push(
                   context,
@@ -51,7 +51,7 @@ class RutasMenuPage extends StatelessWidget {
               icon: Icons.list_alt,
               title: 'Gestión de Rutas',
               subtitle: 'Ver y administrar tus rutas guardadas',
-              color: const Color(0xFFFFD700),
+              color: const Color(0xFFFBC02D),
               onTap: () {
                 Navigator.push(
                   context,
@@ -135,7 +135,7 @@ class RutasMenuPage extends StatelessWidget {
             ),
             const Icon(
               Icons.arrow_forward_ios,
-              color: Color(0xFFFFD700),
+              color: Color(0xFFFBC02D),
               size: 20,
             ),
           ],

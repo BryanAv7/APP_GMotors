@@ -112,7 +112,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
       appBar: AppBar(
         title:
         const Text('Editar Perfil', style: TextStyle(color: Colors.black)),
-        backgroundColor: Colors.yellow[700],
+        backgroundColor: Color(0xFFFBC02D),
         leading: IconButton(
           icon: const Icon(Icons.arrow_back, color: Colors.black),
           onPressed: () => Navigator.pop(context),
@@ -153,7 +153,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                       backgroundColor: Colors.black45,
                       child: const CircularProgressIndicator(
                         valueColor:
-                        AlwaysStoppedAnimation<Color>(Colors.yellow),
+                        AlwaysStoppedAnimation<Color>(Color(0xFFFBC02D)),
                       ),
                     ),
                   ),
@@ -175,12 +175,12 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                 Container(
                   padding: const EdgeInsets.all(8),
                   decoration: BoxDecoration(
-                    color: const Color(0xFFFFD700).withOpacity(0.2),
+                    color: const Color(0xFFFBC02D).withOpacity(0.2),
                     borderRadius: BorderRadius.circular(8),
                   ),
                   child: const Icon(
                     Icons.person,
-                    color: Color(0xFFFFD700),
+                    color: Color(0xFFFBC02D),
                   ),
                 ),
                 const SizedBox(width: 10),
@@ -259,12 +259,12 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                 Container(
                   padding: const EdgeInsets.all(8),
                   decoration: BoxDecoration(
-                    color: const Color(0xFFFFD700).withOpacity(0.2),
+                    color: const Color(0xFFFBC02D).withOpacity(0.2),
                     borderRadius: BorderRadius.circular(8),
                   ),
                   child: const Icon(
                     Icons.receipt_long,
-                    color: Color(0xFFFFD700),
+                    color: Color(0xFFFBC02D),
                   ),
                 ),
                 const SizedBox(width: 10),
@@ -343,12 +343,12 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                 Container(
                   padding: const EdgeInsets.all(8),
                   decoration: BoxDecoration(
-                    color: const Color(0xFFFFD700).withOpacity(0.2),
+                    color: const Color(0xFFFBC02D).withOpacity(0.2),
                     borderRadius: BorderRadius.circular(8),
                   ),
                   child: const Icon(
                     Icons.location_city,
-                    color: Color(0xFFFFD700),
+                    color: Color(0xFFFBC02D),
                   ),
                 ),
                 const SizedBox(width: 10),
@@ -482,7 +482,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                   }
                 },
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: Colors.yellow[700],
+                  backgroundColor: Color(0xFFFBC02D),
                   disabledBackgroundColor: Colors.grey[600],
                   padding: const EdgeInsets.symmetric(vertical: 15),
                   shape: RoundedRectangleBorder(

@@ -59,7 +59,7 @@ class _EditProductosScreenState extends State<EditProductosScreen> {
           child: Wrap(
             children: [
               ListTile(
-                leading: const Icon(Icons.photo_camera, color: Colors.yellow),
+                leading: const Icon(Icons.photo_camera, color: Color(0xFFFBC02D)),
                 title: const Text(
                   'Tomar foto',
                   style: TextStyle(color: Colors.white),
@@ -70,7 +70,7 @@ class _EditProductosScreenState extends State<EditProductosScreen> {
                 },
               ),
               ListTile(
-                leading: const Icon(Icons.photo_library, color: Colors.yellow),
+                leading: const Icon(Icons.photo_library, color: Color(0xFFFBC02D)),
                 title: const Text(
                   'Seleccionar de galería',
                   style: TextStyle(color: Colors.white),
@@ -307,7 +307,7 @@ class _EditProductosScreenState extends State<EditProductosScreen> {
     return Scaffold(
       backgroundColor: Colors.grey[850],
       appBar: AppBar(
-        backgroundColor: Colors.yellow[700],
+        backgroundColor: Color(0xFFFBC02D),
         elevation: 0,
         title: const Text(
           'Actualizar Foto',
@@ -323,7 +323,7 @@ class _EditProductosScreenState extends State<EditProductosScreen> {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            CircularProgressIndicator(color: Colors.yellow),
+            CircularProgressIndicator(color: Color(0xFFFBC02D)),
             SizedBox(height: 16),
             Text(
               'Actualizando foto...',
@@ -530,12 +530,12 @@ class _EditProductosScreenState extends State<EditProductosScreen> {
                         color: Colors.grey[800],
                         borderRadius: BorderRadius.circular(12),
                         border: Border.all(
-                          color: Colors.yellow[700]!,
+                          color: Color(0xFFFBC02D),
                           width: 3,
                         ),
                         boxShadow: [
                           BoxShadow(
-                            color: Colors.yellow[700]!.withOpacity(0.3),
+                            color: Color(0xFFFBC02D).withOpacity(0.3),
                             blurRadius: 15,
                             spreadRadius: 2,
                           ),
@@ -570,7 +570,7 @@ class _EditProductosScreenState extends State<EditProductosScreen> {
                   ),
                 ),
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: Colors.yellow[700],
+                  backgroundColor: Color(0xFFFBC02D),
                   padding: const EdgeInsets.symmetric(vertical: 16),
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(12),

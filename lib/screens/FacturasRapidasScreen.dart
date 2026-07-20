@@ -47,7 +47,7 @@ class _FacturasRapidasScreenState extends State<FacturasRapidasScreen> {
     return Scaffold(
       backgroundColor: const Color(0xFF121212),
       appBar: AppBar(
-        backgroundColor: const Color(0xFFFFD700),
+        backgroundColor: const Color(0xFFFBC02D),
         title: const Text(
           "Factura Rápida",
           style: TextStyle(color: Colors.black),
@@ -103,10 +103,10 @@ class _FacturasRapidasScreenState extends State<FacturasRapidasScreen> {
         Container(
           padding: const EdgeInsets.all(8),
           decoration: BoxDecoration(
-            color: const Color(0xFFFFD700).withOpacity(0.2),
+            color: const Color(0xFFFBC02D).withOpacity(0.2),
             borderRadius: BorderRadius.circular(8),
           ),
-          child: Icon(icon, color: const Color(0xFFFFD700)),
+          child: Icon(icon, color: const Color(0xFFFBC02D)),
         ),
         const SizedBox(width: 10),
         Text(
@@ -223,7 +223,7 @@ class _FacturasRapidasScreenState extends State<FacturasRapidasScreen> {
           borderRadius: BorderRadius.circular(12),
           border: Border.all(
             color: hayProductos
-                ? const Color(0xFFFFD700).withOpacity(0.5)
+                ? const Color(0xFFFBC02D).withOpacity(0.5)
                 : Colors.white24,
             width: 1.5,
           ),
@@ -240,12 +240,12 @@ class _FacturasRapidasScreenState extends State<FacturasRapidasScreen> {
                     Container(
                       padding: const EdgeInsets.all(8),
                       decoration: BoxDecoration(
-                        color: const Color(0xFFFFD700).withOpacity(0.2),
+                        color: const Color(0xFFFBC02D).withOpacity(0.2),
                         borderRadius: BorderRadius.circular(8),
                       ),
                       child: const Icon(
                         Icons.shopping_cart,
-                        color: Color(0xFFFFD700),
+                        color: Color(0xFFFBC02D),
                         size: 20,
                       ),
                     ),
@@ -264,7 +264,7 @@ class _FacturasRapidasScreenState extends State<FacturasRapidasScreen> {
                 ),
                 const Icon(
                   Icons.arrow_forward_ios,
-                  color: Color(0xFFFFD700),
+                  color: Color(0xFFFBC02D),
                   size: 16,
                 ),
               ],
@@ -276,10 +276,10 @@ class _FacturasRapidasScreenState extends State<FacturasRapidasScreen> {
               Container(
                 padding: const EdgeInsets.all(12),
                 decoration: BoxDecoration(
-                  color: const Color(0xFFFFD700).withOpacity(0.1),
+                  color: const Color(0xFFFBC02D).withOpacity(0.1),
                   borderRadius: BorderRadius.circular(10),
                   border: Border.all(
-                    color: const Color(0xFFFFD700).withOpacity(0.3),
+                    color: const Color(0xFFFBC02D).withOpacity(0.3),
                   ),
                 ),
                 child: Row(
@@ -292,7 +292,7 @@ class _FacturasRapidasScreenState extends State<FacturasRapidasScreen> {
                     Text(
                       "\$${total.toStringAsFixed(2)}",
                       style: const TextStyle(
-                        color: Color(0xFFFFD700),
+                        color: Color(0xFFFBC02D),
                         fontSize: 22,
                         fontWeight: FontWeight.bold,
                       ),
@@ -328,9 +328,9 @@ class _FacturasRapidasScreenState extends State<FacturasRapidasScreen> {
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: const Color(0xFFFFD700).withOpacity(0.1),
+        color: const Color(0xFFFBC02D).withOpacity(0.1),
         borderRadius: BorderRadius.circular(10),
-        border: Border.all(color: const Color(0xFFFFD700)),
+        border: Border.all(color: const Color(0xFFFBC02D)),
       ),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -342,7 +342,7 @@ class _FacturasRapidasScreenState extends State<FacturasRapidasScreen> {
           Text(
             "\$${total.toStringAsFixed(2)}",
             style: const TextStyle(
-              color: Color(0xFFFFD700),
+              color: Color(0xFFFBC02D),
               fontSize: 22,
               fontWeight: FontWeight.bold,
             ),
@@ -358,7 +358,7 @@ class _FacturasRapidasScreenState extends State<FacturasRapidasScreen> {
       height: 55,
       child: ElevatedButton(
         style: ElevatedButton.styleFrom(
-          backgroundColor: const Color(0xFFFFD700),
+          backgroundColor: const Color(0xFFFBC02D),
         ),
         onPressed: _guardar,
         child: const Text(
