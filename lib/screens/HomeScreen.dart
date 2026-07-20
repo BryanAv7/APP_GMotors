@@ -13,6 +13,7 @@ import '../screens/AppInfoScreen.dart';
 import '../screens/QuickAccountCreationScreen.dart';
 import '../screens/CrearOfertaScreen.dart';
 import '../services/NotificacionService.dart';
+import '../screens/VerMisNotificacionesScreen.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -92,7 +93,7 @@ class _HomeScreenState extends State<HomeScreen> {
   ];
 
   void _onItemTapped(int index) {
-    if (index == 3) {
+    if (index == 4) {
       // Perfil
       Navigator.push(
         context,
@@ -105,6 +106,12 @@ class _HomeScreenState extends State<HomeScreen> {
         MaterialPageRoute(builder: (context) => const RutasMenuPage()),
       );
     } else if (index == 2) {
+      // Notificaciones
+      Navigator.push(
+        context,
+        MaterialPageRoute(builder: (context) => const VerNotificacionesScreen()),
+      );
+    } else if (index == 3) {
       // INFORMACIÓN
       Navigator.push(
         context,
@@ -290,9 +297,9 @@ class _HomeScreenState extends State<HomeScreen> {
         items: const [
           BottomNavigationBarItem(icon: Icon(Icons.home), label: ''),
           BottomNavigationBarItem(icon: Icon(Icons.map), label: ''),
+          BottomNavigationBarItem(icon: Icon(Icons.notifications), label: ''),
           BottomNavigationBarItem(icon: Icon(Icons.help_outline), label: ''),
           BottomNavigationBarItem(icon: Icon(Icons.person), label: ''),
-          //BottomNavigationBarItem(icon: Icon(Icons.notifications), label: ''),
         ],
         onTap: _onItemTapped,
       ),

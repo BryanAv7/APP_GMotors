@@ -115,6 +115,32 @@ class OfertaService {
     }
   }
 
+  // ── Listar todas las ofertas(Activas) ──
+
+  static Future<List<Oferta>> listarOfertasActivas() async {
+    try {
+      final baseUrl = await ApiConfig.getBaseUrl();
+      if (baseUrl.isEmpty) return [];
+
+      final token = await TokenManager.getToken();
+      if (token == null) return [];
+
+      final response = await http.get(
+        Uri.parse('$baseUrl/ofertas/activas'),
+        headers: {'Authorization': 'Bearer $token'},
+      );
+
+      if (response.statusCode == 200) {
+        final List<dynamic> data = jsonDecode(response.body);
+        return data.map((e) => Oferta.fromJson(e)).toList();
+      }
+      return [];
+    } catch (e) {
+      print('Error listarOfertasActivas: $e');
+      return [];
+    }
+  }
+
   // Agregar este método en OfertaService
   static Future<void> registrarToken(String fcmToken) async {
     try {

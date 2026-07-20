@@ -9,6 +9,7 @@ import 'VerMisMantenimientos.dart';
 import '../screens/CrearRutaScreen.dart';
 import '../screens/AppInfoScreen.dart';
 import '../models/usuario.dart';
+import '../screens/VerMisNotificacionesScreen.dart';
 
 class HomeUserScreen extends StatefulWidget {
   const HomeUserScreen({super.key});
@@ -66,7 +67,7 @@ class _HomeUserScreenState extends State<HomeUserScreen> {
   ];
 
   void _onItemTapped(int index) {
-    if (index == 3) {
+    if (index == 4) {
       // Perfil
       Navigator.push(
         context,
@@ -77,10 +78,16 @@ class _HomeUserScreenState extends State<HomeUserScreen> {
         context,
         MaterialPageRoute(builder: (context) => const CrearRutaPage()),
       );
-    } else if (index == 2) {  // Información de la APP
+    } else if (index == 3) {  // Información de la APP
       Navigator.push(
         context,
         MaterialPageRoute(builder: (context) => const AppInfoScreen()),
+      );
+    } else if (index == 2) {
+      // Notificaciones
+      Navigator.push(
+        context,
+        MaterialPageRoute(builder: (context) => const VerNotificacionesScreen()),
       );
     } else {
       setState(() {
@@ -179,8 +186,8 @@ class _HomeUserScreenState extends State<HomeUserScreen> {
         items: const [
           BottomNavigationBarItem(icon: Icon(Icons.home), label: ''),
           BottomNavigationBarItem(icon: Icon(Icons.map), label: ''),
+          BottomNavigationBarItem(icon: Icon(Icons.notifications), label: ''),
           BottomNavigationBarItem(icon: Icon(Icons.help_outline), label: ''),
-          //BottomNavigationBarItem(icon: Icon(Icons.notifications), label: ''),
           BottomNavigationBarItem(icon: Icon(Icons.person), label: ''),
         ],
         onTap: _onItemTapped,
