@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import '../models/oferta.dart';
 import '../services/oferta_service.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 class VerNotificacionesScreen extends StatefulWidget {
   const VerNotificacionesScreen({super.key});
@@ -400,6 +401,48 @@ class _DetalleOfertaScreen extends StatelessWidget {
                           ],
                         ),
                       ],
+                    ),
+                  ),
+                  const SizedBox(height: 16),
+
+                  //Botón WhatsApp
+                  GestureDetector(
+                    onTap: () async {
+                      const telefono = '593980834367';
+                      final mensaje = '¡Hola! Vi la oferta "${oferta.titulo}" en la app de GorilaMotos y me interesa. ¿Puedes darme más información?';
+                      final url = Uri.parse(
+                          'https://wa.me/$telefono?text=${Uri.encodeComponent(mensaje)}'
+                      );
+
+                      if (await canLaunchUrl(url)) {
+                        await launchUrl(url, mode: LaunchMode.externalApplication);
+                      }
+                    },
+                    child: Container(
+                      width: double.infinity,
+                      padding: const EdgeInsets.all(16),
+                      decoration: BoxDecoration(
+                        color: const Color(0xFF25D366).withOpacity(0.15),
+                        borderRadius: BorderRadius.circular(12),
+                        border: Border.all(
+                          color: const Color(0xFF25D366).withOpacity(0.5),
+                        ),
+                      ),
+                      child: const Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Icon(Icons.chat, color: Color(0xFF25D366), size: 24),
+                          SizedBox(width: 10),
+                          Text(
+                            'Consultar por WhatsApp',
+                            style: TextStyle(
+                              color: Color(0xFF25D366),
+                              fontSize: 16,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                        ],
+                      ),
                     ),
                   ),
                 ],
