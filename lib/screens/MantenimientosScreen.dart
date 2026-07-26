@@ -16,6 +16,10 @@ class _MantenimientosPageState extends State<MantenimientosPage> {
   String _filtroSeleccionado = 'todos';
   bool _ordenReciente = true;
   List<RegistroDTO> _registrosCache = [];
+  // Filtro de fecha
+  int? _diaFiltro;
+  int? _mesFiltro;
+  int? _anioFiltro;
 
   @override
   void initState() {
@@ -28,6 +32,37 @@ class _MantenimientosPageState extends State<MantenimientosPage> {
       registrosFuture = RegistrosService.listarRegistros();
       _registrosCache = [];
     });
+  }
+
+  // Convierte el string de fecha a DateTime
+  DateTime? _parsearFecha(String fecha) {
+    try {
+      final partes = fecha.split(',').map((p) => p.trim()).toList();
+      if (partes.length == 3) {
+        return DateTime(
+          int.parse(partes[0]), // año
+          int.parse(partes[1]), // mes
+          int.parse(partes[2]), // día
+        );
+      }
+    } catch (_) {}
+
+    try {
+      return DateTime.parse(fecha); // Formato ISO: 2026-07-25
+    } catch (_) {}
+
+    try {
+      final partes = fecha.split('/'); // Formato: 25/07/2026
+      if (partes.length == 3) {
+        return DateTime(
+          int.parse(partes[2]),
+          int.parse(partes[1]),
+          int.parse(partes[0]),
+        );
+      }
+    } catch (_) {}
+
+    return null;
   }
 
   // ================= HELPERS DE ESTADO =================
@@ -89,6 +124,17 @@ class _MantenimientosPageState extends State<MantenimientosPage> {
         resultado = List.from(registros);
     }
 
+    if (_diaFiltro != null || _mesFiltro != null || _anioFiltro != null) {
+      resultado = resultado.where((r) {
+        final fecha = _parsearFecha(r.fecha);
+        if (fecha == null) return false;
+        if (_anioFiltro != null && fecha.year != _anioFiltro) return false;
+        if (_mesFiltro != null && fecha.month != _mesFiltro) return false;
+        if (_diaFiltro != null && fecha.day != _diaFiltro) return false;
+        return true;
+      }).toList();
+    }
+
     resultado.sort((a, b) => _ordenReciente
         ? b.fecha.compareTo(a.fecha)
         : a.fecha.compareTo(b.fecha));
@@ -108,6 +154,243 @@ class _MantenimientosPageState extends State<MantenimientosPage> {
     }
   }
 
+  // 🆕 Bottom sheet con 3 selectores: día, mes, año
+  void _mostrarFiltroFecha() {
+    int? diaTemp = _diaFiltro;
+    int? mesTemp = _mesFiltro;
+    int? anioTemp = _anioFiltro;
+
+    final meses = [
+      'Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio',
+      'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre'
+    ];
+
+    final aniosDisponibles = _registrosCache
+        .map((r) => _parsearFecha(r.fecha)?.year)
+        .whereType<int>()
+        .toSet()
+        .toList()
+      ..sort((a, b) => b.compareTo(a));
+
+    if (aniosDisponibles.isEmpty) {
+      aniosDisponibles.add(DateTime.now().year);
+    }
+
+    showModalBottomSheet(
+      context: context,
+      backgroundColor: const Color(0xFF1E1E1E),
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+      ),
+      builder: (context) {
+        return StatefulBuilder(
+          builder: (context, setModalState) {
+            return Padding(
+              padding: EdgeInsets.only(
+                left: 20,
+                right: 20,
+                top: 20,
+                bottom: MediaQuery.of(context).viewInsets.bottom + 20,
+              ),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      const Text(
+                        'Filtrar por fecha',
+                        style: TextStyle(
+                          color: Colors.white,
+                          fontSize: 18,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                      IconButton(
+                        icon: const Icon(Icons.close, color: Colors.white54),
+                        onPressed: () => Navigator.pop(context),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 4),
+                  const Text(
+                    'Puedes elegir por año-mes-dia, o una fecha exacta',
+                    style: TextStyle(color: Colors.white54, fontSize: 12),
+                  ),
+                  const SizedBox(height: 20),
+
+                  _buildDropdownFiltro<int>(
+                    label: 'Año',
+                    value: anioTemp,
+                    items: aniosDisponibles,
+                    itemLabel: (a) => a.toString(),
+                    onChanged: (v) => setModalState(() => anioTemp = v),
+                  ),
+                  const SizedBox(height: 14),
+
+                  _buildDropdownFiltro<int>(
+                    label: 'Mes',
+                    value: mesTemp,
+                    items: List.generate(12, (i) => i + 1),
+                    itemLabel: (m) => meses[m - 1],
+                    onChanged: (v) => setModalState(() => mesTemp = v),
+                  ),
+                  const SizedBox(height: 14),
+
+                  _buildDropdownFiltro<int>(
+                    label: 'Día',
+                    value: diaTemp,
+                    items: List.generate(31, (i) => i + 1),
+                    itemLabel: (d) => d.toString(),
+                    onChanged: (v) => setModalState(() => diaTemp = v),
+                  ),
+
+                  const SizedBox(height: 24),
+
+                  Row(
+                    children: [
+                      Expanded(
+                        child: OutlinedButton(
+                          onPressed: () {
+                            setModalState(() {
+                              diaTemp = null;
+                              mesTemp = null;
+                              anioTemp = null;
+                            });
+                          },
+                          style: OutlinedButton.styleFrom(
+                            side: const BorderSide(color: Colors.white38),
+                            padding: const EdgeInsets.symmetric(vertical: 14),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(10),
+                            ),
+                          ),
+                          child: const Text(
+                            'Limpiar',
+                            style: TextStyle(color: Colors.white70),
+                          ),
+                        ),
+                      ),
+                      const SizedBox(width: 12),
+                      Expanded(
+                        child: ElevatedButton(
+                          onPressed: () {
+                            setState(() {
+                              _diaFiltro = diaTemp;
+                              _mesFiltro = mesTemp;
+                              _anioFiltro = anioTemp;
+                            });
+                            Navigator.pop(context);
+                          },
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: const Color(0xFFFBC02D),
+                            padding: const EdgeInsets.symmetric(vertical: 14),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(10),
+                            ),
+                          ),
+                          child: const Text(
+                            'Aplicar',
+                            style: TextStyle(
+                              color: Colors.black,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ],
+              ),
+            );
+          },
+        );
+      },
+    );
+  }
+
+  // 🆕 Dropdown reutilizable para el bottom sheet, con opción "Todos"
+  Widget _buildDropdownFiltro<T>({
+    required String label,
+    required T? value,
+    required List<T> items,
+    required String Function(T) itemLabel,
+    required void Function(T?) onChanged,
+  }) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 14),
+      decoration: BoxDecoration(
+        color: Colors.grey[900],
+        borderRadius: BorderRadius.circular(10),
+        border: Border.all(color: const Color(0xFFFBC02D).withOpacity(0.4)),
+      ),
+      child: DropdownButtonHideUnderline(
+        child: DropdownButton<T?>(
+          isExpanded: true,
+          value: value,
+          dropdownColor: Colors.grey[900],
+          hint: Text(label, style: const TextStyle(color: Colors.white54)),
+          icon: const Icon(Icons.arrow_drop_down, color: Color(0xFFFBC02D)),
+          style: const TextStyle(color: Colors.white, fontSize: 14),
+          items: [
+            DropdownMenuItem<T?>(
+              value: null,
+              child: Text('$label: Todos', style: const TextStyle(color: Colors.white54)),
+            ),
+            ...items.map(
+                  (item) => DropdownMenuItem<T?>(
+                value: item,
+                child: Text(itemLabel(item)),
+              ),
+            ),
+          ],
+          onChanged: (v) => onChanged(v),
+        ),
+      ),
+    );
+  }
+
+  // fecha activa
+  Widget _buildChipFiltroFecha() {
+    if (_diaFiltro == null && _mesFiltro == null && _anioFiltro == null) {
+      return const SizedBox.shrink();
+    }
+
+    final meses = [
+      'Ene', 'Feb', 'Mar', 'Abr', 'May', 'Jun',
+      'Jul', 'Ago', 'Sep', 'Oct', 'Nov', 'Dic'
+    ];
+
+    final partes = <String>[];
+    if (_diaFiltro != null) partes.add(_diaFiltro.toString().padLeft(2, '0'));
+    if (_mesFiltro != null) partes.add(meses[_mesFiltro! - 1]);
+    if (_anioFiltro != null) partes.add(_anioFiltro.toString());
+
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 16),
+      child: Align(
+        alignment: Alignment.centerLeft,
+        child: Chip(
+          avatar: const Icon(Icons.event, size: 16, color: Colors.black),
+          label: Text(
+            partes.join(' '),
+            style: const TextStyle(color: Colors.black, fontWeight: FontWeight.w600),
+          ),
+          backgroundColor: const Color(0xFFFBC02D),
+          deleteIcon: const Icon(Icons.close, size: 16, color: Colors.black),
+          onDeleted: () {
+            setState(() {
+              _diaFiltro = null;
+              _mesFiltro = null;
+              _anioFiltro = null;
+            });
+          },
+        ),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -124,10 +407,20 @@ class _MantenimientosPageState extends State<MantenimientosPage> {
           style: TextStyle(
             color: Colors.black,
             fontWeight: FontWeight.normal,
-            fontSize: 22,
+            fontSize: 21,
           ),
         ),
         actions: [
+          IconButton(
+            icon: Icon(
+              Icons.calendar_month,
+              color: (_diaFiltro != null || _mesFiltro != null || _anioFiltro != null)
+                  ? Colors.black
+                  : Colors.black54,
+            ),
+            tooltip: 'Filtrar por Fecha',
+            onPressed: _mostrarFiltroFecha,
+          ),
           IconButton(
             icon: Icon(
               _ordenReciente ? Icons.arrow_downward : Icons.arrow_upward,
@@ -213,9 +506,14 @@ class _MantenimientosPageState extends State<MantenimientosPage> {
           final registros = snapshot.data!;
           _registrosCache = registros;
 
+          //if (registros.isNotEmpty) {
+            //debugPrint('FECHA REAL: "${registros.first.fecha}"');
+          //}
+
           return Column(
             children: [
               _buildHeaderStats(registros),
+              _buildChipFiltroFecha(),
               Expanded(child: _buildListaMantenimientos(registros)),
             ],
           );

@@ -18,35 +18,34 @@ class _LoginScreenState extends State<LoginScreen> {
   final TextEditingController correoController = TextEditingController();
   final TextEditingController contrasenaController = TextEditingController();
 
+  // formulario para validación
+  final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
+  bool _autoValidate = false;
+
   bool _loading = false;
   bool _obscurePassword = true;
-  bool _discoveringServer = false; // 1️⃣ Flag para discovery
-  Widget? _correoSuffix;
+  bool _discoveringServer = false;
 
   String? _savedIp;
 
-  final ServerDiscoveryService _discoveryService = ServerDiscoveryService(); // 1️⃣ Instancia del servicio
+  final ServerDiscoveryService _discoveryService = ServerDiscoveryService();
 
   @override
   void initState() {
     super.initState();
-    _correoSuffix = const Icon(Icons.close, color: Colors.red);
-    correoController.addListener(_validarCorreo);
-    _initializeApp(); // 2️⃣ Inicialización con discovery automático
+    _initializeApp();
   }
 
   @override
   void dispose() {
-    correoController.removeListener(_validarCorreo);
-    _discoveryService.stopDiscovery(); // Limpiar discovery al salir
+    _discoveryService.stopDiscovery();
+    correoController.dispose();
+    contrasenaController.dispose();
     super.dispose();
   }
 
-  // 2️⃣ Discovery automático al iniciar
   Future<void> _initializeApp() async {
     await _loadSavedIp();
-
-    // Si no hay IP guardada, iniciar descubrimiento automático
     if (_savedIp == null || _savedIp!.isEmpty) {
       _startAutoDiscovery();
     }
@@ -61,7 +60,6 @@ class _LoginScreenState extends State<LoginScreen> {
     }
   }
 
-  // 2️⃣ Método para iniciar discovery automático
   void _startAutoDiscovery() {
     if (_discoveringServer) return;
 
@@ -71,7 +69,7 @@ class _LoginScreenState extends State<LoginScreen> {
       onServerFound: (ip, port) async {
         final ipPuerto = '$ip:$port';
         await ApiConfig.setServerIp(ipPuerto);
-        await _loadSavedIp(); // 6️⃣ Refrescar estado después de guardar
+        await _loadSavedIp();
 
         if (mounted) {
           setState(() => _discoveringServer = false);
@@ -86,7 +84,6 @@ class _LoginScreenState extends State<LoginScreen> {
       },
     );
 
-    // Timeout de 10 segundos
     Future.delayed(const Duration(seconds: 10), () {
       if (_discoveringServer) {
         _discoveryService.stopDiscovery();
@@ -104,24 +101,39 @@ class _LoginScreenState extends State<LoginScreen> {
     });
   }
 
-  void _validarCorreo() {
-    final email = correoController.text.trim();
-
-    if (email.endsWith('@gmail.com') || email.endsWith('@outlook.com')) {
-      setState(() => _correoSuffix = const Icon(Icons.check_circle, color: Colors.green));
-    } else {
-      setState(() => _correoSuffix = const Icon(Icons.close, color: Colors.red));
+  // Validadores
+  String? _validarCorreoField(String? value) {
+    final correo = value?.trim() ?? '';
+    if (correo.isEmpty) {
+      return 'El correo es requerido';
     }
+    final emailRegex = RegExp(r'^[\w\.\-]+@[\w\-]+\.[\w\.\-]+$');
+    if (!emailRegex.hasMatch(correo)) {
+      return 'Ingresa un correo válido';
+    }
+    return null;
+  }
+
+  String? _validarContrasenaField(String? value) {
+    final pass = value?.trim() ?? '';
+    if (pass.isEmpty) {
+      return 'La contraseña es requerida';
+    }
+    if (pass.length < 4) {
+      return 'Muy corta (mínimo 4 caracteres)';
+    }
+    return null;
   }
 
   Future<void> _login() async {
-    // 4️⃣ Protección: no permitir login durante discovery
     if (_discoveringServer) return;
 
-    final correo = correoController.text.trim();
-    final contrasena = contrasenaController.text.trim();
+    // Validación visual y valida el formulario
+    setState(() => _autoValidate = true);
 
-    // Verificar si la IP está configurada
+    final isValid = _formKey.currentState?.validate() ?? false;
+    if (!isValid) return;
+
     if (_savedIp == null || _savedIp!.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
@@ -132,15 +144,8 @@ class _LoginScreenState extends State<LoginScreen> {
       return;
     }
 
-    if (correo.isEmpty || contrasena.isEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text("Completa todos los campos"),
-          backgroundColor: Colors.red,
-        ),
-      );
-      return;
-    }
+    final correo = correoController.text.trim();
+    final contrasena = contrasenaController.text.trim();
 
     setState(() => _loading = true);
 
@@ -158,14 +163,12 @@ class _LoginScreenState extends State<LoginScreen> {
       return;
     }
 
-    // Obtener Roles y Redireccionamiento
     _redirigirSegunRol(response.usuario.idUsuario);
   }
 
   Future<void> _redirigirSegunRol(dynamic idUsuario) async {
     try {
       final userId = idUsuario is int ? idUsuario : int.parse(idUsuario.toString());
-
       final roles = await AuthService.obtenerRolesUsuario(userId);
 
       if (!mounted) return;
@@ -175,25 +178,11 @@ class _LoginScreenState extends State<LoginScreen> {
         final idRol = rolPrincipal['idRol'] as int?;
 
         if (idRol == 2) {
-          // CLIENTE
           Navigator.pushReplacement(
             context,
             MaterialPageRoute(builder: (context) => const HomeUserScreen()),
           );
-        } else if (idRol == 3) {
-          // MECANICO
-          Navigator.pushReplacement(
-            context,
-            MaterialPageRoute(builder: (context) => const HomeScreen()),
-          );
-        } else if (idRol == 1) {
-          // ADMIN
-          Navigator.pushReplacement(
-            context,
-            MaterialPageRoute(builder: (context) => const HomeScreen()),
-          );
         } else {
-          // Rol desconocido
           Navigator.pushReplacement(
             context,
             MaterialPageRoute(builder: (context) => const HomeScreen()),
@@ -215,7 +204,6 @@ class _LoginScreenState extends State<LoginScreen> {
     }
   }
 
-  // 3️⃣ Diálogo con discovery manual y guardado manual
   void _showIpDialog() {
     final ipPuerto = _savedIp?.split(':') ?? ['', ''];
     final ipController = TextEditingController(text: ipPuerto[0]);
@@ -225,14 +213,10 @@ class _LoginScreenState extends State<LoginScreen> {
       context: context,
       builder: (context) => AlertDialog(
         backgroundColor: Colors.grey[850],
-        title: const Text(
-          "Configurar Servidor",
-          style: TextStyle(color: Colors.white),
-        ),
+        title: const Text("Configurar Servidor", style: TextStyle(color: Colors.white)),
         content: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            // Campo IP
             TextField(
               controller: ipController,
               style: const TextStyle(color: Colors.white),
@@ -254,7 +238,6 @@ class _LoginScreenState extends State<LoginScreen> {
               ),
             ),
             const SizedBox(height: 12),
-            // Campo Puerto
             TextField(
               controller: puertoController,
               style: const TextStyle(color: Colors.white),
@@ -283,8 +266,6 @@ class _LoginScreenState extends State<LoginScreen> {
             onPressed: () => Navigator.pop(context),
             child: const Text("Cancelar", style: TextStyle(color: Colors.red)),
           ),
-
-          // 3️⃣ Botón Guardar Manual
           TextButton(
             onPressed: () async {
               final ip = ipController.text.trim();
@@ -293,7 +274,7 @@ class _LoginScreenState extends State<LoginScreen> {
               if (ip.isNotEmpty && puerto.isNotEmpty) {
                 final ipPuertoCompleta = '$ip:$puerto';
                 await ApiConfig.setServerIp(ipPuertoCompleta);
-                await _loadSavedIp(); // 6️⃣ Refrescar estado
+                await _loadSavedIp();
 
                 if (mounted) {
                   Navigator.pop(context);
@@ -315,8 +296,6 @@ class _LoginScreenState extends State<LoginScreen> {
             },
             child: const Text("Guardar manual", style: TextStyle(color: Colors.green)),
           ),
-
-          // 3️⃣ Botón Buscar Automáticamente
           TextButton(
             onPressed: _discoveringServer
                 ? null
@@ -326,13 +305,50 @@ class _LoginScreenState extends State<LoginScreen> {
             },
             child: Text(
               "Buscar automáticamente",
-              style: TextStyle(
-                color: _discoveringServer ? Colors.grey : Color(0xFFFBC02D),
-              ),
+              style: TextStyle(color: _discoveringServer ? Colors.grey : const Color(0xFFFBC02D)),
             ),
           ),
         ],
       ),
+    );
+  }
+
+  // 🆕 Decoración reutilizable para inputs, con soporte de error
+  InputDecoration _inputDecoration({
+    required String hint,
+    Widget? suffixIcon,
+  }) {
+    return InputDecoration(
+      hintText: hint,
+      hintStyle: TextStyle(color: Colors.grey[400]),
+      filled: true,
+      fillColor: Colors.grey[850],
+      suffixIcon: suffixIcon,
+      border: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(12),
+        borderSide: const BorderSide(color: Color(0xFFFBC02D)),
+      ),
+      enabledBorder: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(12),
+        borderSide: const BorderSide(color: Color(0xFFFBC02D)),
+      ),
+      disabledBorder: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(12),
+        borderSide: BorderSide(color: Colors.grey[700]!),
+      ),
+      errorBorder: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(12),
+        borderSide: const BorderSide(color: Colors.redAccent, width: 1.5),
+      ),
+      focusedErrorBorder: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(12),
+        borderSide: const BorderSide(color: Colors.redAccent, width: 2),
+      ),
+      focusedBorder: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(12),
+        borderSide: const BorderSide(color: Color(0xFFFBC02D), width: 2),
+      ),
+      errorStyle: const TextStyle(color: Colors.redAccent, fontSize: 12),
     );
   }
 
@@ -363,247 +379,211 @@ class _LoginScreenState extends State<LoginScreen> {
                 child: IntrinsicHeight(
                   child: Padding(
                     padding: const EdgeInsets.all(20.0),
-                    child: Column(
-                      children: [
-                        const Spacer(),
+                    child: Form(
+                      key: _formKey,
+                      autovalidateMode: _autoValidate
+                          ? AutovalidateMode.onUserInteraction
+                          : AutovalidateMode.disabled,
+                      child: Column(
+                        children: [
+                          const Spacer(),
 
-                        // 5️⃣ Indicador visual "Buscando servidor..."
-                        if (_discoveringServer) ...[
-                          const CircularProgressIndicator(color: Color(0xFFFBC02D)),
-                          const SizedBox(height: 10),
-                          const Text(
-                            'Buscando servidor en la red local...',
-                            style: TextStyle(color: Colors.white, fontSize: 14),
-                            textAlign: TextAlign.center,
-                          ),
-                          const SizedBox(height: 20),
-                        ],
-
-                        Center(
-                          child: Container(
-                            width: 120,
-                            height: 120,
-                            decoration: BoxDecoration(
-                              shape: BoxShape.circle,
-                              border: Border.all(
-                                color: Colors.red,
-                                width: 3,
-                              ),
-                              boxShadow: [
-                                BoxShadow(
-                                  color: Colors.red.withOpacity(0.3),
-                                  blurRadius: 12,
-                                  spreadRadius: 2,
-                                ),
-                              ],
+                          if (_discoveringServer) ...[
+                            const CircularProgressIndicator(color: Color(0xFFFBC02D)),
+                            const SizedBox(height: 10),
+                            const Text(
+                              'Buscando servidor en la red local...',
+                              style: TextStyle(color: Colors.white, fontSize: 14),
+                              textAlign: TextAlign.center,
                             ),
-                            child: ClipOval(
-                              child: Image.asset(
-                                'assets/images/logoMotors.png',
-                                width: 120,
-                                height: 120,
-                                fit: BoxFit.cover,
-                                errorBuilder: (context, error, stackTrace) {
-                                  return Container(
-                                    color: Colors.grey[850],
-                                    child: Icon(
-                                      Icons.motorcycle,
-                                      color: Colors.grey[400],
-                                      size: 60,
-                                    ),
-                                  );
+                            const SizedBox(height: 20),
+                          ],
+
+                          Center(
+                            child: Container(
+                              width: 120,
+                              height: 120,
+                              decoration: BoxDecoration(
+                                shape: BoxShape.circle,
+                                border: Border.all(color: const Color(0xFFFBC02D), width: 3),
+                                boxShadow: [
+                                  BoxShadow(
+                                    color: const Color(0xFFFBC02D).withOpacity(0.35),
+                                    blurRadius: 16,
+                                    spreadRadius: 2,
+                                  ),
+                                ],
+                              ),
+                              child: ClipOval(
+                                child: Image.asset(
+                                  'assets/images/logoMotors.png',
+                                  width: 120,
+                                  height: 120,
+                                  fit: BoxFit.cover,
+                                  errorBuilder: (context, error, stackTrace) {
+                                    return Container(
+                                      color: Colors.grey[850],
+                                      child: Icon(
+                                        Icons.motorcycle,
+                                        color: Colors.grey[400],
+                                        size: 60,
+                                      ),
+                                    );
+                                  },
+                                ),
+                              ),
+                            ),
+                          ),
+
+                          const SizedBox(height: 24),
+
+                          const Text(
+                            '¡Bienvenido!',
+                            style: TextStyle(
+                              color: Colors.white,
+                              fontSize: 24,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                          const SizedBox(height: 4),
+                          Text(
+                            'Inicia sesión para continuar',
+                            style: TextStyle(color: Colors.grey[400], fontSize: 13),
+                          ),
+
+                          const SizedBox(height: 28),
+
+                          // Correo con validación
+                          TextFormField(
+                            controller: correoController,
+                            enabled: !_discoveringServer,
+                            style: const TextStyle(color: Colors.white),
+                            keyboardType: TextInputType.emailAddress,
+                            validator: _validarCorreoField,
+                            decoration: _inputDecoration(hint: 'Correo'),
+                          ),
+
+                          const SizedBox(height: 15),
+
+                          // Contraseña con validación
+                          TextFormField(
+                            controller: contrasenaController,
+                            enabled: !_discoveringServer,
+                            obscureText: _obscurePassword,
+                            style: const TextStyle(color: Colors.white),
+                            validator: _validarContrasenaField,
+                            decoration: _inputDecoration(
+                              hint: 'Contraseña',
+                              suffixIcon: IconButton(
+                                icon: Icon(
+                                  _obscurePassword ? Icons.visibility_off : Icons.visibility,
+                                  color: Colors.grey[400],
+                                ),
+                                onPressed: _discoveringServer
+                                    ? null
+                                    : () {
+                                  setState(() {
+                                    _obscurePassword = !_obscurePassword;
+                                  });
                                 },
                               ),
                             ),
                           ),
-                        ),
 
-                        const SizedBox(height: 20),
+                          const SizedBox(height: 8),
 
-                        const Text(
-                          'Login',
-                          style: TextStyle(
-                            color: Colors.white,
-                            fontSize: 28,
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
-
-                        const SizedBox(height: 20),
-
-                        // CAMPO CORREO - 4️⃣ Deshabilitado durante discovery
-                        TextField(
-                          controller: correoController,
-                          enabled: !_discoveringServer,
-                          style: const TextStyle(color: Colors.white),
-                          decoration: InputDecoration(
-                            hintText: 'Correo',
-                            hintStyle: TextStyle(color: Colors.grey[400]),
-                            filled: true,
-                            fillColor: Colors.grey[850],
-                            border: OutlineInputBorder(
-                              borderRadius: BorderRadius.circular(12),
-                              borderSide: const BorderSide(color: Color(0xFFFBC02D)),
-                            ),
-                            enabledBorder: OutlineInputBorder(
-                              borderRadius: BorderRadius.circular(12),
-                              borderSide: const BorderSide(color: Color(0xFFFBC02D)),
-                            ),
-                            disabledBorder: OutlineInputBorder(
-                              borderRadius: BorderRadius.circular(12),
-                              borderSide: BorderSide(color: Colors.grey[700]!),
-                            ),
-                            suffixIcon: _correoSuffix,
-                          ),
-                        ),
-
-                        const SizedBox(height: 15),
-
-                        // CAMPO CONTRASEÑA - 4️⃣ Deshabilitado durante discovery
-                        TextField(
-                          controller: contrasenaController,
-                          enabled: !_discoveringServer,
-                          obscureText: _obscurePassword,
-                          style: const TextStyle(color: Colors.white),
-                          decoration: InputDecoration(
-                            hintText: 'Contraseña',
-                            hintStyle: TextStyle(color: Colors.grey[400]),
-                            filled: true,
-                            fillColor: Colors.grey[850],
-                            border: OutlineInputBorder(
-                              borderRadius: BorderRadius.circular(12),
-                              borderSide: const BorderSide(color: Color(0xFFFBC02D)),
-                            ),
-                            enabledBorder: OutlineInputBorder(
-                              borderRadius: BorderRadius.circular(12),
-                              borderSide: const BorderSide(color: Color(0xFFFBC02D)),
-                            ),
-                            disabledBorder: OutlineInputBorder(
-                              borderRadius: BorderRadius.circular(12),
-                              borderSide: BorderSide(color: Colors.grey[700]!),
-                            ),
-                            suffixIcon: IconButton(
-                              icon: Icon(
-                                _obscurePassword
-                                    ? Icons.visibility_off
-                                    : Icons.visibility,
-                                color: Colors.grey[400],
-                              ),
-                              onPressed: _discoveringServer ? null : () {
-                                setState(() {
-                                  _obscurePassword = !_obscurePassword;
-                                });
+                          Align(
+                            alignment: Alignment.centerRight,
+                            child: TextButton(
+                              onPressed: _discoveringServer
+                                  ? null
+                                  : () {
+                                Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                    builder: (context) => const OlvideContrasenaScreen(),
+                                  ),
+                                );
                               },
+                              child: const Text(
+                                '¿Olvidaste tu contraseña?',
+                                style: TextStyle(color: Colors.redAccent),
+                              ),
                             ),
                           ),
-                        ),
 
-                        const SizedBox(height: 10),
+                          const SizedBox(height: 12),
 
-                        Align(
-                          alignment: Alignment.centerRight,
-                          child: TextButton(
-                            onPressed: _discoveringServer ? null : () {
-                              Navigator.push(
-                                context,
-                                MaterialPageRoute(
-                                  builder: (context) => const OlvideContrasenaScreen(),
+                          // BOTÓN LOGIN
+                          SizedBox(
+                            width: double.infinity,
+                            child: ElevatedButton(
+                              onPressed: (_loading || _discoveringServer) ? null : _login,
+                              style: ElevatedButton.styleFrom(
+                                backgroundColor: const Color(0xFFFBC02D),
+                                padding: const EdgeInsets.symmetric(vertical: 15),
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(12),
                                 ),
-                              );
-                            },
-                            child: const Text('¿Olvidaste tu contraseña?', style: TextStyle(color: Colors.red)),
-                          ),
-                        ),
-
-                        const SizedBox(height: 15),
-
-                        // 4️⃣ BOTÓN LOGIN - Deshabilitado durante discovery
-                        SizedBox(
-                          width: double.infinity,
-                          child: ElevatedButton(
-                            onPressed: (_loading || _discoveringServer) ? null : _login,
-                            style: ElevatedButton.styleFrom(
-                              backgroundColor: Color(0xFFFBC02D),
-                              padding: const EdgeInsets.symmetric(vertical: 15),
-                              shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(12),
+                                elevation: 3,
                               ),
-                            ),
-                            child: _loading
-                                ? const CircularProgressIndicator(
-                              color: Colors.black,
-                            )
-                                : const Text(
-                              'Iniciar Sesión',
-                              style: TextStyle(
-                                  color: Colors.black, fontSize: 16),
-                            ),
-                          ),
-                        ),
-
-                        const SizedBox(height: 10),
-
-                        // BOTÓN REGISTRO
-                        SizedBox(
-                          width: double.infinity,
-                          child: ElevatedButton(
-                            onPressed: _discoveringServer ? null : () {
-                              Navigator.push(
-                                context,
-                                MaterialPageRoute(
-                                  builder: (context) => const RegisterScreen(),
+                              child: _loading
+                                  ? const SizedBox(
+                                width: 22,
+                                height: 22,
+                                child: CircularProgressIndicator(
+                                  color: Colors.black,
+                                  strokeWidth: 2.5,
                                 ),
-                              );
-                            },
-                            style: ElevatedButton.styleFrom(
-                              backgroundColor: Color(0xFFFBC02D),
-                              padding: const EdgeInsets.symmetric(vertical: 15),
-                              shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(12),
-                              ),
-                            ),
-                            child: const Text(
-                              'Registrarse',
-                              style: TextStyle(
-                                  color: Colors.black, fontSize: 16),
-                            ),
-                          ),
-                        ),
-/*
-                        const SizedBox(height: 20),
-
-                        const Text(
-                          'O continúa con:',
-                          style: TextStyle(color: Colors.white),
-                        ),
-
-                        const SizedBox(height: 10),
-
-                        SizedBox(
-                          width: double.infinity,
-                          child: ElevatedButton.icon(
-                            onPressed: _discoveringServer ? null : () {},
-                            icon: Image.asset(
-                              'assets/images/logoGoogle.png',
-                              height: 24,
-                              width: 24,
-                            ),
-                            label: const Text(
-                              'Google',
-                              style: TextStyle(color: Colors.black),
-                            ),
-                            style: ElevatedButton.styleFrom(
-                              backgroundColor: Colors.white,
-                              padding: const EdgeInsets.symmetric(vertical: 12),
-                              shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(12),
+                              )
+                                  : const Text(
+                                'Iniciar Sesión',
+                                style: TextStyle(
+                                  color: Colors.black,
+                                  fontSize: 16,
+                                  fontWeight: FontWeight.bold,
+                                ),
                               ),
                             ),
                           ),
-                        ),
-*/
-                        const Spacer(),
-                      ],
+
+                          const SizedBox(height: 12),
+
+                          // BOTÓN REGISTRO
+                          SizedBox(
+                            width: double.infinity,
+                            child: OutlinedButton(
+                              onPressed: _discoveringServer
+                                  ? null
+                                  : () {
+                                Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                    builder: (context) => const RegisterScreen(),
+                                  ),
+                                );
+                              },
+                              style: OutlinedButton.styleFrom(
+                                side: const BorderSide(color: Color(0xFFFBC02D), width: 1.5),
+                                padding: const EdgeInsets.symmetric(vertical: 15),
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(12),
+                                ),
+                              ),
+                              child: const Text(
+                                'Registrarse',
+                                style: TextStyle(
+                                  color: Color(0xFFFBC02D),
+                                  fontSize: 16,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
+                            ),
+                          ),
+
+                          const Spacer(),
+                        ],
+                      ),
                     ),
                   ),
                 ),
