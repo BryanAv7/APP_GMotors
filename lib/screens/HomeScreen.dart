@@ -140,7 +140,7 @@ class _HomeScreenState extends State<HomeScreen> {
         ),
         actions: [
           IconButton(
-            icon: const Icon(Icons.logout, color: Colors.black),
+            icon: const Icon(Icons.logout_rounded, color: Colors.black),
             tooltip: "Cerrar sesión",
             onPressed: () async {
               await AuthService.logout();
@@ -148,7 +148,14 @@ class _HomeScreenState extends State<HomeScreen> {
 
               Navigator.pushReplacementNamed(context, "/login");
             },
+            style: IconButton.styleFrom(
+              backgroundColor: Colors.black.withOpacity(0.08),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(10),
+              ),
+            ),
           ),
+          const SizedBox(width: 8),
         ],
       ),
 

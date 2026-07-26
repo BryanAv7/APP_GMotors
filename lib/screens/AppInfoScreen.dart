@@ -156,62 +156,72 @@ class AppInfoScreen extends StatelessWidget {
                   Container(
                     padding: const EdgeInsets.all(16),
                     decoration: _cardDeco(),
-                    child: Row(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        ClipRRect(
-                          borderRadius: BorderRadius.circular(10),
-                          child: Image.asset(
-                            'assets/images/taller.jpg',
-                            width: 70,
-                            height: 70,
-                            fit: BoxFit.cover,
-                            errorBuilder: (_, __, ___) => Container(
-                              width: 70,
-                              height: 70,
-                              decoration: BoxDecoration(
-                                color: const Color(0xFFFBC02D).withOpacity(0.15),
-                                borderRadius: BorderRadius.circular(10),
-                              ),
-                              child: const Icon(
-                                Icons.build,
-                                color: Color(0xFFFBC02D),
-                                size: 28,
+                        Row(
+                          children: [
+                            ClipRRect(
+                              borderRadius: BorderRadius.circular(10),
+                              child: Image.asset(
+                                'assets/images/taller.jpg',
+                                width: 70,
+                                height: 70,
+                                fit: BoxFit.cover,
+                                errorBuilder: (_, __, ___) => Container(
+                                  width: 70,
+                                  height: 70,
+                                  decoration: BoxDecoration(
+                                    color: const Color(0xFFFBC02D).withOpacity(0.15),
+                                    borderRadius: BorderRadius.circular(10),
+                                  ),
+                                  child: const Icon(
+                                    Icons.build,
+                                    color: Color(0xFFFBC02D),
+                                    size: 28,
+                                  ),
+                                ),
                               ),
                             ),
-                          ),
+                            const SizedBox(width: 14),
+                            const Expanded(
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text(
+                                    'Gorila Motos',
+                                    style: TextStyle(
+                                      color: Colors.white,
+                                      fontSize: 16,
+                                      fontWeight: FontWeight.bold,
+                                    ),
+                                  ),
+                                  SizedBox(height: 4),
+                                  Text(
+                                    'Especialistas en Servicio automotriz',
+                                    style: TextStyle(
+                                      color: Color(0xFFFBC02D),
+                                      fontSize: 12,
+                                    ),
+                                  ),
+                                  SizedBox(height: 6),
+                                  Text(
+                                    'Más de 5 años de experiencia en reparación y mantenimiento de motocicletas.',
+                                    style: TextStyle(
+                                      color: Colors.white54,
+                                      fontSize: 12,
+                                      height: 1.4,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ],
                         ),
-                        const SizedBox(width: 14),
-                        const Expanded(
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text(
-                                'Gorila Motos',
-                                style: TextStyle(
-                                  color: Colors.white,
-                                  fontSize: 16,
-                                  fontWeight: FontWeight.bold,
-                                ),
-                              ),
-                              SizedBox(height: 4),
-                              Text(
-                                'Especialistas en Servicio automotriz',
-                                style: TextStyle(
-                                  color: Color(0xFFFBC02D),
-                                  fontSize: 12,
-                                ),
-                              ),
-                              SizedBox(height: 6),
-                              Text(
-                                'Más de 5 años de experiencia en reparación y mantenimiento de motocicletas.',
-                                style: TextStyle(
-                                  color: Colors.white54,
-                                  fontSize: 12,
-                                  height: 1.4,
-                                ),
-                              ),
-                            ],
-                          ),
+                        const SizedBox(height: 14),
+                        _contactButtons(
+                          correo: 'gorilamotos@gmail.com',
+                          whatsapp: 'https://wa.me/593980834367',
                         ),
                       ],
                     ),
@@ -289,6 +299,63 @@ class AppInfoScreen extends StatelessWidget {
           ],
         ),
       ),
+    );
+  }
+
+  // Botones Correo-WhatsApp
+  Widget _contactButtons({required String correo, required String whatsapp}) {
+    return Row(
+      children: [
+        Expanded(
+          child: GestureDetector(
+            onTap: () => _launchURL('mailto:$correo'),
+            child: Container(
+              padding: const EdgeInsets.symmetric(vertical: 10),
+              decoration: BoxDecoration(
+                color: const Color(0xFFFBC02D).withOpacity(0.1),
+                borderRadius: BorderRadius.circular(8),
+                border: Border.all(
+                    color: const Color(0xFFFBC02D).withOpacity(0.3)),
+              ),
+              child: const Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Icon(Icons.email, color: Color(0xFFFBC02D), size: 16),
+                  SizedBox(width: 6),
+                  Text('Correo',
+                      style: TextStyle(
+                          color: Color(0xFFFBC02D), fontSize: 12)),
+                ],
+              ),
+            ),
+          ),
+        ),
+        const SizedBox(width: 10),
+        Expanded(
+          child: GestureDetector(
+            onTap: () => _launchURL(whatsapp),
+            child: Container(
+              padding: const EdgeInsets.symmetric(vertical: 10),
+              decoration: BoxDecoration(
+                color: const Color(0xFF25D366).withOpacity(0.1),
+                borderRadius: BorderRadius.circular(8),
+                border: Border.all(
+                    color: const Color(0xFF25D366).withOpacity(0.3)),
+              ),
+              child: const Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Icon(Icons.chat, color: Color(0xFF25D366), size: 16),
+                  SizedBox(width: 6),
+                  Text('WhatsApp',
+                      style: TextStyle(
+                          color: Color(0xFF25D366), fontSize: 12)),
+                ],
+              ),
+            ),
+          ),
+        ),
+      ],
     );
   }
 
