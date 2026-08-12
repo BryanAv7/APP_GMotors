@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'package:http/http.dart' as http;
 import '../config/api.dart';
+import '../utils/token_manager.dart';
 
 class QuickAccountResponse {
   final bool success;
@@ -62,6 +63,13 @@ class QuickAccountService {
         return QuickAccountResponse.error("IP del servidor no configurada");
       }
 
+      // Obtener el token guardado tras el login
+      final token = await TokenManager.getToken();
+
+      if (token == null || token.isEmpty) {
+        return QuickAccountResponse.error("No hay sesión activa. Inicia sesión nuevamente.");
+      }
+
       final url = Uri.parse('$baseUrl/quick-accounts/create');
 
       final body = {
@@ -71,6 +79,7 @@ class QuickAccountService {
 
       final headers = {
         'Content-Type': 'application/json',
+        'Authorization': 'Bearer $token', // 🆕 esto es lo que faltaba
       };
 
       final response = await http.post(
@@ -82,9 +91,9 @@ class QuickAccountService {
       // Manejar respuesta vacía
       if (response.body.isEmpty) {
         if (response.statusCode == 403) {
-          return QuickAccountResponse.error("Acceso denegado (403) - Verifica la configuración CORS del servidor");
+          return QuickAccountResponse.error("No tienes permisos para esta acción (403)");
         } else if (response.statusCode == 401) {
-          return QuickAccountResponse.error("No autorizado (401)");
+          return QuickAccountResponse.error("Sesión expirada, inicia sesión de nuevo (401)");
         } else {
           return QuickAccountResponse.error("Error ${response.statusCode}: Respuesta vacía");
         }
@@ -101,11 +110,9 @@ class QuickAccountService {
           return QuickAccountResponse.error(errorMsg);
         }
       } catch (e) {
-
         return QuickAccountResponse.error('Error al procesar respuesta del servidor');
       }
     } catch (e) {
-
       return QuickAccountResponse.error('Error de conexión: $e');
     }
   }
