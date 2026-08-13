@@ -12,6 +12,7 @@ import '../services/moto_service.dart';
 import '../services/tipo_service.dart';
 import '../services/registros_service.dart';
 import '../screens/seleccionar_productos_page.dart';
+import '../screens/Seleccionar_TipoScreen.dart';
 import '../utils/token_manager.dart';
 
 class AgregarMantenimientoPage extends StatefulWidget {
@@ -34,6 +35,7 @@ class _AgregarMantenimientoPageState extends State<AgregarMantenimientoPage> {
   // ── NUEVO: controller para búsqueda por placa texto ──
   final TextEditingController placaCtrl = TextEditingController();
   final TextEditingController kilometrajeCtrl = TextEditingController();
+  final TextEditingController tipoCtrl = TextEditingController();
 
   // ---------------- DATA ----------------
   int? idClienteSeleccionado;
@@ -74,6 +76,7 @@ class _AgregarMantenimientoPageState extends State<AgregarMantenimientoPage> {
     descripcionCtrl.dispose();
     placaCtrl.dispose();
     kilometrajeCtrl.dispose();
+    tipoCtrl.dispose();
     super.dispose();
   }
 
@@ -104,6 +107,7 @@ class _AgregarMantenimientoPageState extends State<AgregarMantenimientoPage> {
       descripcionCtrl.clear();
       placaCtrl.clear();
       kilometrajeCtrl.clear();
+      tipoCtrl.clear();
       motosCliente = [];
       clienteSeleccionadoPorOCR = false;
       intentoGuardar = false;
@@ -167,7 +171,7 @@ class _AgregarMantenimientoPageState extends State<AgregarMantenimientoPage> {
 
               _buildSectionTitle('Tipo de Servicio', Icons.build),
               const SizedBox(height: 12),
-              _dropdownTipo(),
+              _searchTipoField(),
               const SizedBox(height: 20),
 
               _buildSectionTitle('Productos y Repuestos', Icons.shopping_cart),
@@ -892,7 +896,8 @@ class _AgregarMantenimientoPageState extends State<AgregarMantenimientoPage> {
     );
   }
 
-  Widget _dropdownTipo() {
+  // ── NUEVO: Campo tipo "buscador" que abre la pantalla de selección ──
+  Widget _searchTipoField() {
     if (cargandoTipos) {
       return _buildLoadingField("Cargando tipos de servicio...");
     }
@@ -922,90 +927,116 @@ class _AgregarMantenimientoPageState extends State<AgregarMantenimientoPage> {
           ),
         ],
       ),
-      child: DropdownButtonFormField<int>(
-        dropdownColor: const Color(0xFF2B2B2B),
-        style: const TextStyle(color: Colors.white, fontSize: 15),
-        decoration: InputDecoration(
-          labelText: "Tipo de mantenimiento",
-          labelStyle: TextStyle(
-            color: Colors.white.withOpacity(0.6),
-            fontSize: 14,
-          ),
-          prefixIcon: Icon(
-            Icons.build_circle,
-            color: idTipoSeleccionado != null
-                ? const Color(0xFFFBC02D)
-                : Colors.white54,
-          ),
-          border: InputBorder.none,
-          contentPadding: const EdgeInsets.symmetric(
-            horizontal: 16,
-            vertical: 16,
-          ),
-        ),
-        value: idTipoSeleccionado,
-        items: tiposMantenimiento.map((tipo) {
-          return DropdownMenuItem<int>(
-            value: tipo.idTipo,
-            child: Text(tipo.nombre),
-          );
-        }).toList(),
-        onChanged: (value) async {
-          if (value != null) {
-            final tipoSeleccionado = await TipoService.obtenerPorId(value);
-
-            setState(() {
-              idTipoSeleccionado = value;
-              detallesSeleccionados.clear();
-
-              if (tipoSeleccionado != null) {
-                // -------- PRODUCTO (si existe) --------
-                if (tipoSeleccionado.producto != null &&
-                    tipoSeleccionado.productoPvp != null) {
-                  final detalleAutomatico = DetalleUI(
-                    idProducto: tipoSeleccionado.producto!.id_producto,
-                    nombre: tipoSeleccionado.producto!.nombre,
-                    cantidad: 1,
-                    precioUnitario: tipoSeleccionado.productoPvp!,
-                    esProducto: true,
-                    imagenUrl: tipoSeleccionado.producto!.rutaImagenProductos,
-                  );
-
-                  if (!detallesSeleccionados.any((d) =>
-                  d.idProducto ==
-                      tipoSeleccionado.producto!.id_producto)) {
-                    detallesSeleccionados.add(detalleAutomatico);
-                  }
+      child: Row(
+        children: [
+          Expanded(
+            child: TextFormField(
+              controller: tipoCtrl,
+              readOnly: true,
+              onTap: _abrirSeleccionTipo,
+              style: const TextStyle(color: Colors.white, fontSize: 15),
+              decoration: InputDecoration(
+                labelText: "Tipo de mantenimiento",
+                labelStyle: TextStyle(
+                  color: Colors.white.withOpacity(0.6),
+                  fontSize: 14,
+                ),
+                prefixIcon: Icon(
+                  Icons.build_circle,
+                  color: idTipoSeleccionado != null
+                      ? const Color(0xFFFBC02D)
+                      : Colors.white54,
+                ),
+                border: InputBorder.none,
+                contentPadding: const EdgeInsets.symmetric(
+                  horizontal: 16,
+                  vertical: 16,
+                ),
+              ),
+              validator: (_) {
+                if (idTipoSeleccionado == null) {
+                  return 'Seleccione un tipo de mantenimiento';
                 }
-
-                // -------- CONCEPTO MANUAL --------
-                if (tipoSeleccionado.conceptoManual != null &&
-                    tipoSeleccionado.conceptoManual!.isNotEmpty) {
-                  final conceptoManual = DetalleUI(
-                    idProducto: -1,
-                    nombre: tipoSeleccionado.conceptoManual!,
-                    cantidad: tipoSeleccionado.conceptoCantidad ?? 1,
-                    precioUnitario:
-                    tipoSeleccionado.conceptoPrecioUnitario ?? 0,
-                    esProducto: false,
-                  );
-
-                  if (!detallesSeleccionados.any(
-                          (d) => d.nombre == tipoSeleccionado.conceptoManual)) {
-                    detallesSeleccionados.add(conceptoManual);
-                  }
-                }
-
-                // Fix 3/4/2026: Actualizar Observaciones al Cambiar el Sv
-                descripcionCtrl.text = tipoSeleccionado.descripcion ?? '';
-              }
-            });
-          }
-        },
-        validator: (value) =>
-        value == null ? 'Seleccione un tipo de mantenimiento' : null,
+                return null;
+              },
+            ),
+          ),
+          Container(
+            margin: const EdgeInsets.only(right: 8),
+            decoration: BoxDecoration(
+              color: const Color(0xFFFBC02D),
+              borderRadius: BorderRadius.circular(8),
+            ),
+            child: IconButton(
+              icon: const Icon(Icons.search, color: Colors.black),
+              onPressed: _abrirSeleccionTipo,
+              tooltip: 'Buscar tipo de servicio',
+            ),
+          ),
+        ],
       ),
     );
+  }
+
+// Buscador de servicios
+  Future<void> _abrirSeleccionTipo() async {
+    final tipoSeleccionado = await Navigator.push(
+      context,
+      MaterialPageRoute(builder: (_) => const SeleccionarTipoScreen()),
+    );
+
+    if (tipoSeleccionado != null && tipoSeleccionado is Tipo) {
+      await _aplicarTipoSeleccionado(tipoSeleccionado);
+    }
+  }
+
+
+  Future<void> _aplicarTipoSeleccionado(Tipo tipo) async {
+    final tipoCompleto = await TipoService.obtenerPorId(tipo.idTipo);
+
+    setState(() {
+      idTipoSeleccionado = tipo.idTipo;
+      tipoCtrl.text = tipo.nombre; // 🆕 muestra el nombre en el campo
+      detallesSeleccionados.clear();
+
+      if (tipoCompleto != null) {
+        // -------- PRODUCTO (si existe) --------
+        if (tipoCompleto.producto != null && tipoCompleto.productoPvp != null) {
+          final detalleAutomatico = DetalleUI(
+            idProducto: tipoCompleto.producto!.id_producto,
+            nombre: tipoCompleto.producto!.nombre,
+            cantidad: 1,
+            precioUnitario: tipoCompleto.productoPvp!,
+            esProducto: true,
+            imagenUrl: tipoCompleto.producto!.rutaImagenProductos,
+          );
+
+          if (!detallesSeleccionados.any(
+                  (d) => d.idProducto == tipoCompleto.producto!.id_producto)) {
+            detallesSeleccionados.add(detalleAutomatico);
+          }
+        }
+
+        // -------- CONCEPTO MANUAL --------
+        if (tipoCompleto.conceptoManual != null &&
+            tipoCompleto.conceptoManual!.isNotEmpty) {
+          final conceptoManual = DetalleUI(
+            idProducto: -1,
+            nombre: tipoCompleto.conceptoManual!,
+            cantidad: tipoCompleto.conceptoCantidad ?? 1,
+            precioUnitario: tipoCompleto.conceptoPrecioUnitario ?? 0,
+            esProducto: false,
+          );
+
+          if (!detallesSeleccionados
+              .any((d) => d.nombre == tipoCompleto.conceptoManual)) {
+            detallesSeleccionados.add(conceptoManual);
+          }
+        }
+
+        descripcionCtrl.text = tipoCompleto.descripcion ?? '';
+      }
+    });
   }
 
   Widget _productsBox() {
