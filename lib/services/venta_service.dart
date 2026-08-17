@@ -11,8 +11,7 @@ class VentaService {
   // =========================
   // Crear venta
   // =========================
-  static Future<VentaListadoModel?> crearVenta(
-      VentaCreateModel venta) async {
+  static Future<VentaListadoModel?> crearVenta(VentaCreateModel venta) async {
     try {
       final baseUrl = await ApiConfig.getBaseUrl();
       if (baseUrl.isEmpty) return null;
@@ -31,11 +30,8 @@ class VentaService {
         body: jsonEncode(venta.toJson()),
       );
 
-      if (response.statusCode == 200 ||
-          response.statusCode == 201) {
-
+      if (response.statusCode == 200 || response.statusCode == 201) {
         final decoded = jsonDecode(response.body);
-
         return VentaListadoModel.fromJson(decoded);
       }
 
@@ -61,9 +57,7 @@ class VentaService {
 
       final response = await http.get(
         url,
-        headers: {
-          'Authorization': 'Bearer $token',
-        },
+        headers: {'Authorization': 'Bearer $token'},
       );
 
       if (response.statusCode != 200) {
@@ -75,9 +69,7 @@ class VentaService {
       final decoded = jsonDecode(response.body);
 
       if (decoded is List) {
-        return decoded
-            .map((e) => VentaListadoModel.fromJson(e))
-            .toList();
+        return decoded.map((e) => VentaListadoModel.fromJson(e)).toList();
       }
 
       if (decoded is Map && decoded['ventas'] is List) {
@@ -90,6 +82,51 @@ class VentaService {
     } catch (e) {
       print('Error en listarVentas: $e');
       throw Exception('Error listando ventas: $e');
+    }
+  }
+
+  // =========================
+  // BUSCAR UNIFICADO
+  // =========================
+  static Future<List<VentaListadoModel>> buscarFacturasPorTexto(String texto) async {
+    try {
+      final baseUrl = await ApiConfig.getBaseUrl();
+      if (baseUrl.isEmpty) return [];
+
+      final url = Uri.parse('$baseUrl/ventas/facturas-rapidas/buscar?q=${Uri.encodeComponent(texto)}');
+
+      final token = await TokenManager.getToken();
+      if (token == null) return [];
+
+      final response = await http.get(
+        url,
+        headers: {'Authorization': 'Bearer $token'},
+      );
+
+      //print(' Status Code: ${response.statusCode}');
+
+      if (response.statusCode != 200) {
+        //print(" ERROR BODY: ${response.body}");
+        return [];
+      }
+
+      final decoded = jsonDecode(response.body);
+      //print(' Respuesta: $decoded');
+
+      if (decoded is List) {
+        return decoded.map((e) => VentaListadoModel.fromJson(e)).toList();
+      }
+
+      if (decoded is Map && decoded['ventas'] is List) {
+        return (decoded['ventas'] as List)
+            .map((e) => VentaListadoModel.fromJson(e))
+            .toList();
+      }
+
+      return [];
+    } catch (e) {
+      print('❌ Error en buscarFacturasPorTexto: $e');
+      throw Exception('Error buscando facturas: $e');
     }
   }
 
@@ -108,9 +145,7 @@ class VentaService {
 
       final response = await http.get(
         url,
-        headers: {
-          'Authorization': 'Bearer $token',
-        },
+        headers: {'Authorization': 'Bearer $token'},
       );
 
       if (response.statusCode == 200) {
@@ -128,8 +163,7 @@ class VentaService {
   // =========================
   // Actualizar Factura
   // =========================
-  static Future<dynamic> actualizarVenta(
-      int id, VentaCreateModel venta) async {
+  static Future<dynamic> actualizarVenta(int id, VentaCreateModel venta) async {
     try {
       final baseUrl = await ApiConfig.getBaseUrl();
       if (baseUrl.isEmpty) {
@@ -167,12 +201,10 @@ class VentaService {
     }
   }
 
-
   // =========================
   // HISTORIAL CÉDULA
   // =========================
-  static Future<List<VentaListadoModel>> historialPorCedula(
-      String cedula) async {
+  static Future<List<VentaListadoModel>> historialPorCedula(String cedula) async {
     try {
       final baseUrl = await ApiConfig.getBaseUrl();
       if (baseUrl.isEmpty) return [];
@@ -207,8 +239,7 @@ class VentaService {
   // =========================
   // HISTORIAL NOMBRE
   // =========================
-  static Future<List<VentaListadoModel>> historialPorNombre(
-      String nombre) async {
+  static Future<List<VentaListadoModel>> historialPorNombre(String nombre) async {
     try {
       final baseUrl = await ApiConfig.getBaseUrl();
       if (baseUrl.isEmpty) return [];
@@ -258,8 +289,7 @@ class VentaService {
         headers: {'Authorization': 'Bearer $token'},
       );
 
-      return response.statusCode == 200 ||
-          response.statusCode == 204;
+      return response.statusCode == 200 || response.statusCode == 204;
     } catch (e) {
       print('Error eliminarVenta: $e');
       return false;

@@ -17,7 +17,13 @@ class _HistorialFacturasRapidasScreenState
   final TextEditingController filtroCtrl = TextEditingController();
 
   List<VentaListadoModel> facturas = [];
+  List<VentaListadoModel> facturasFiltradas = [];
   bool cargando = false;
+
+  // Filtro de fecha
+  int? _diaFiltro;
+  int? _mesFiltro;
+  int? _anioFiltro;
 
   @override
   void initState() {
@@ -31,6 +37,38 @@ class _HistorialFacturasRapidasScreenState
     super.dispose();
   }
 
+  // ================= PARSEAR FECHA =================
+  DateTime? _parsearFecha(String fecha) {
+    try {
+      final partes = fecha.split(',').map((p) => p.trim()).toList();
+      if (partes.length == 3) {
+        return DateTime(
+          int.parse(partes[0]), // año
+          int.parse(partes[1]), // mes
+          int.parse(partes[2]), // día
+        );
+      }
+    } catch (_) {}
+
+    try {
+      return DateTime.parse(fecha);
+    } catch (_) {}
+
+    try {
+      final partes = fecha.split('/');
+      if (partes.length == 3) {
+        return DateTime(
+          int.parse(partes[2]),
+          int.parse(partes[1]),
+          int.parse(partes[0]),
+        );
+      }
+    } catch (_) {}
+
+    return null;
+  }
+
+  // ================= CARGAR FACTURAS =================
   Future<void> _cargarFacturas({String? filtro}) async {
     setState(() => cargando = true);
 
@@ -40,17 +78,12 @@ class _HistorialFacturasRapidasScreenState
       if (filtro == null || filtro.isEmpty) {
         data = await VentaService.listarVentas();
       } else {
-        final esNumerico = RegExp(r'^[0-9]+$').hasMatch(filtro);
-
-        if (esNumerico) {
-          data = await VentaService.historialPorCedula(filtro);
-        } else {
-          data = await VentaService.historialPorNombre(filtro);
-        }
+        data = await VentaService.buscarFacturasPorTexto(filtro);
       }
 
       setState(() {
         facturas = data;
+        _aplicarFiltros();
       });
     } catch (e) {
       ScaffoldMessenger.of(context).showSnackBar(
@@ -61,22 +94,43 @@ class _HistorialFacturasRapidasScreenState
     }
   }
 
+  // ================= APLICAR FILTROS =================
+  void _aplicarFiltros() {
+    List<VentaListadoModel> resultado = List.from(facturas);
+
+    // Filtro por fecha
+    if (_diaFiltro != null || _mesFiltro != null || _anioFiltro != null) {
+      resultado = resultado.where((r) {
+        final fecha = _parsearFecha(r.fechaEmision.toString());
+        if (fecha == null) return false;
+        if (_anioFiltro != null && fecha.year != _anioFiltro) return false;
+        if (_mesFiltro != null && fecha.month != _mesFiltro) return false;
+        if (_diaFiltro != null && fecha.day != _diaFiltro) return false;
+        return true;
+      }).toList();
+    }
+
+    setState(() {
+      facturasFiltradas = resultado;
+    });
+  }
+
   void _buscar() {
-    _cargarFacturas(filtro: filtroCtrl.text.trim());
+    final texto = filtroCtrl.text.trim();
+
+    if (texto.isEmpty) {
+      _cargarFacturas();
+    } else {
+      _cargarFacturas(filtro: texto);
+    }
   }
 
   void _limpiarFiltro() {
     filtroCtrl.clear();
-
-    setState(() {
-      cargando = true;
-    });
-
-    _cargarFacturas().then((_) {
-      if (mounted) {
-        setState(() => cargando = false);
-      }
-    });
+    _diaFiltro = null;
+    _mesFiltro = null;
+    _anioFiltro = null;
+    _cargarFacturas();
   }
 
   Future<void> _eliminarFactura(int id) async {
@@ -90,11 +144,249 @@ class _HistorialFacturasRapidasScreenState
     }
   }
 
+  // Filtrador por fechas
+  void _mostrarFiltroFecha() {
+    int? diaTemp = _diaFiltro;
+    int? mesTemp = _mesFiltro;
+    int? anioTemp = _anioFiltro;
+
+    final meses = [
+      'Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio',
+      'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre'
+    ];
+
+    final aniosDisponibles = facturas
+        .map((r) => _parsearFecha(r.fechaEmision.toString())?.year)
+        .whereType<int>()
+        .toSet()
+        .toList()
+      ..sort((a, b) => b.compareTo(a));
+
+    if (aniosDisponibles.isEmpty) {
+      aniosDisponibles.add(DateTime.now().year);
+    }
+
+    showModalBottomSheet(
+      context: context,
+      backgroundColor: const Color(0xFF1E1E1E),
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+      ),
+      builder: (context) {
+        return StatefulBuilder(
+          builder: (context, setModalState) {
+            return Padding(
+              padding: EdgeInsets.only(
+                left: 20,
+                right: 20,
+                top: 20,
+                bottom: MediaQuery.of(context).viewInsets.bottom + 20,
+              ),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      const Text(
+                        'Filtrar por fecha',
+                        style: TextStyle(
+                          color: Colors.white,
+                          fontSize: 18,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                      IconButton(
+                        icon: const Icon(Icons.close, color: Colors.white54),
+                        onPressed: () => Navigator.pop(context),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 4),
+                  const Text(
+                    'Puedes elegir por año-mes-día, o una fecha exacta',
+                    style: TextStyle(color: Colors.white54, fontSize: 12),
+                  ),
+                  const SizedBox(height: 20),
+
+                  _buildDropdownFiltro<int>(
+                    label: 'Año',
+                    value: anioTemp,
+                    items: aniosDisponibles,
+                    itemLabel: (a) => a.toString(),
+                    onChanged: (v) => setModalState(() => anioTemp = v),
+                  ),
+                  const SizedBox(height: 14),
+
+                  _buildDropdownFiltro<int>(
+                    label: 'Mes',
+                    value: mesTemp,
+                    items: List.generate(12, (i) => i + 1),
+                    itemLabel: (m) => meses[m - 1],
+                    onChanged: (v) => setModalState(() => mesTemp = v),
+                  ),
+                  const SizedBox(height: 14),
+
+                  _buildDropdownFiltro<int>(
+                    label: 'Día',
+                    value: diaTemp,
+                    items: List.generate(31, (i) => i + 1),
+                    itemLabel: (d) => d.toString(),
+                    onChanged: (v) => setModalState(() => diaTemp = v),
+                  ),
+
+                  const SizedBox(height: 24),
+
+                  Row(
+                    children: [
+                      Expanded(
+                        child: OutlinedButton(
+                          onPressed: () {
+                            setModalState(() {
+                              diaTemp = null;
+                              mesTemp = null;
+                              anioTemp = null;
+                            });
+                          },
+                          style: OutlinedButton.styleFrom(
+                            side: const BorderSide(color: Colors.white38),
+                            padding: const EdgeInsets.symmetric(vertical: 14),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(10),
+                            ),
+                          ),
+                          child: const Text(
+                            'Limpiar',
+                            style: TextStyle(color: Colors.white70),
+                          ),
+                        ),
+                      ),
+                      const SizedBox(width: 12),
+                      Expanded(
+                        child: ElevatedButton(
+                          onPressed: () {
+                            setState(() {
+                              _diaFiltro = diaTemp;
+                              _mesFiltro = mesTemp;
+                              _anioFiltro = anioTemp;
+                              _aplicarFiltros();
+                            });
+                            Navigator.pop(context);
+                          },
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: const Color(0xFFFBC02D),
+                            padding: const EdgeInsets.symmetric(vertical: 14),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(10),
+                            ),
+                          ),
+                          child: const Text(
+                            'Aplicar',
+                            style: TextStyle(
+                              color: Colors.black,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ],
+              ),
+            );
+          },
+        );
+      },
+    );
+  }
+
+  Widget _buildDropdownFiltro<T>({
+    required String label,
+    required T? value,
+    required List<T> items,
+    required String Function(T) itemLabel,
+    required void Function(T?) onChanged,
+  }) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 14),
+      decoration: BoxDecoration(
+        color: Colors.grey[900],
+        borderRadius: BorderRadius.circular(10),
+        border: Border.all(color: const Color(0xFFFBC02D).withOpacity(0.4)),
+      ),
+      child: DropdownButtonHideUnderline(
+        child: DropdownButton<T?>(
+          isExpanded: true,
+          value: value,
+          dropdownColor: Colors.grey[900],
+          hint: Text(label, style: const TextStyle(color: Colors.white54)),
+          icon: const Icon(Icons.arrow_drop_down, color: Color(0xFFFBC02D)),
+          style: const TextStyle(color: Colors.white, fontSize: 14),
+          items: [
+            DropdownMenuItem<T?>(
+              value: null,
+              child: Text('$label: Todos', style: const TextStyle(color: Colors.white54)),
+            ),
+            ...items.map(
+                  (item) => DropdownMenuItem<T?>(
+                value: item,
+                child: Text(itemLabel(item)),
+              ),
+            ),
+          ],
+          onChanged: (v) => onChanged(v),
+        ),
+      ),
+    );
+  }
+
+  // ================= CHIP FILTRO FECHA =================
+  Widget _buildChipFiltroFecha() {
+    if (_diaFiltro == null && _mesFiltro == null && _anioFiltro == null) {
+      return const SizedBox.shrink();
+    }
+
+    final meses = [
+      'Ene', 'Feb', 'Mar', 'Abr', 'May', 'Jun',
+      'Jul', 'Ago', 'Sep', 'Oct', 'Nov', 'Dic'
+    ];
+
+    final partes = <String>[];
+    if (_diaFiltro != null) partes.add(_diaFiltro.toString().padLeft(2, '0'));
+    if (_mesFiltro != null) partes.add(meses[_mesFiltro! - 1]);
+    if (_anioFiltro != null) partes.add(_anioFiltro.toString());
+
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
+      child: Align(
+        alignment: Alignment.centerLeft,
+        child: Chip(
+          avatar: const Icon(Icons.event, size: 16, color: Colors.black),
+          label: Text(
+            partes.join(' '),
+            style: const TextStyle(color: Colors.black, fontWeight: FontWeight.w600),
+          ),
+          backgroundColor: const Color(0xFFFBC02D),
+          deleteIcon: const Icon(Icons.close, size: 16, color: Colors.black),
+          onDeleted: () {
+            setState(() {
+              _diaFiltro = null;
+              _mesFiltro = null;
+              _anioFiltro = null;
+              _aplicarFiltros();
+            });
+          },
+        ),
+      ),
+    );
+  }
+
+  // ================= BUILD =================
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: const Color(0xFF121212),
-
       appBar: AppBar(
         automaticallyImplyLeading: true,
         leading: Navigator.canPop(context)
@@ -108,13 +400,21 @@ class _HistorialFacturasRapidasScreenState
         iconTheme: const IconThemeData(color: Colors.black),
         actions: [
           IconButton(
+            icon: Icon(
+              Icons.calendar_month,
+              color: (_diaFiltro != null || _mesFiltro != null || _anioFiltro != null)
+                  ? Colors.black
+                  : Colors.black54,
+            ),
+            tooltip: 'Filtrar por Fecha',
+            onPressed: _mostrarFiltroFecha,
+          ),
+          IconButton(
             onPressed: _limpiarFiltro,
             icon: const Icon(Icons.refresh),
-          )
+          ),
         ],
       ),
-
-      // Agregar
       floatingActionButton: FloatingActionButton.extended(
         backgroundColor: const Color(0xFFFBC02D),
         onPressed: () async {
@@ -129,22 +429,48 @@ class _HistorialFacturasRapidasScreenState
             _cargarFacturas();
           }
         },
-        icon: const Icon(Icons.add, color: Colors.black),
+        icon: const Icon(Icons.add, color: Colors.black, size: 18),
         label: const Text(
           "Agregar",
-          style: TextStyle(color: Colors.black, fontSize: 15, fontWeight: FontWeight.bold ),
+          style: TextStyle(color: Colors.black, fontSize: 15, fontWeight: FontWeight.bold),
         ),
       ),
-
       body: Column(
         children: [
           _buildSearchBox(),
-
+          _buildChipFiltroFecha(),
           Expanded(
             child: cargando
                 ? const Center(
               child: CircularProgressIndicator(
                 color: Color(0xFFFBC02D),
+              ),
+            )
+                : (facturasFiltradas.isEmpty && facturas.isNotEmpty)
+                ? Center(
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Icon(
+                    Icons.inbox_outlined,
+                    size: 80,
+                    color: Colors.white.withOpacity(0.3),
+                  ),
+                  const SizedBox(height: 16),
+                  const Text(
+                    "No hay facturas que coincidan con el filtro",
+                    style: TextStyle(
+                      color: Colors.white70,
+                      fontSize: 18,
+                      fontWeight: FontWeight.w500,
+                    ),
+                  ),
+                  const SizedBox(height: 8),
+                  const Text(
+                    "Prueba cambiando los filtros",
+                    style: TextStyle(color: Colors.white38, fontSize: 14),
+                  ),
+                ],
               ),
             )
                 : facturas.isEmpty
@@ -156,9 +482,9 @@ class _HistorialFacturasRapidasScreenState
             )
                 : ListView.builder(
               padding: const EdgeInsets.all(16),
-              itemCount: facturas.length,
+              itemCount: facturasFiltradas.length,
               itemBuilder: (context, index) {
-                final f = facturas[index];
+                final f = facturasFiltradas[index];
 
                 return Dismissible(
                   key: Key(f.idVenta.toString()),
@@ -183,8 +509,6 @@ class _HistorialFacturasRapidasScreenState
     );
   }
 
-  // ================= UI =================
-
   Widget _buildSearchBox() {
     return Padding(
       padding: const EdgeInsets.all(16),
@@ -207,13 +531,13 @@ class _HistorialFacturasRapidasScreenState
                   contentPadding: EdgeInsets.all(12),
                   prefixIcon: Icon(Icons.search, color: Colors.white54),
                 ),
+                onSubmitted: (_) => _buscar(),
               ),
             ),
             IconButton(
               onPressed: _buscar,
-              icon: const Icon(Icons.arrow_forward,
-                  color: Color(0xFFFBC02D)),
-            )
+              icon: const Icon(Icons.arrow_forward, color: Color(0xFFFBC02D)),
+            ),
           ],
         ),
       ),
@@ -252,7 +576,6 @@ class _HistorialFacturasRapidasScreenState
           childrenPadding: const EdgeInsets.fromLTRB(18, 0, 18, 18),
           iconColor: const Color(0xFFFBC02D),
           collapsedIconColor: const Color(0xFFFBC02D),
-
           title: Row(
             crossAxisAlignment: CrossAxisAlignment.center,
             children: [
@@ -261,9 +584,7 @@ class _HistorialFacturasRapidasScreenState
                 color: Color(0xFFFBC02D),
                 size: 34,
               ),
-
               const SizedBox(width: 12),
-
               Expanded(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
@@ -278,9 +599,7 @@ class _HistorialFacturasRapidasScreenState
                             fontWeight: FontWeight.bold,
                           ),
                         ),
-
                         const SizedBox(width: 6),
-
                         Expanded(
                           child: Text(
                             f.nombreCliente,
@@ -293,10 +612,7 @@ class _HistorialFacturasRapidasScreenState
                         ),
                       ],
                     ),
-
                     const SizedBox(height: 4),
-
-                    // CÉDULA
                     Row(
                       children: [
                         const Text(
@@ -307,9 +623,7 @@ class _HistorialFacturasRapidasScreenState
                             fontWeight: FontWeight.bold,
                           ),
                         ),
-
                         const SizedBox(width: 6),
-
                         Expanded(
                           child: Text(
                             f.cedulaCliente,
@@ -322,8 +636,6 @@ class _HistorialFacturasRapidasScreenState
                         ),
                       ],
                     ),
-
-                    // FECHA
                     Row(
                       children: [
                         const Text(
@@ -334,9 +646,7 @@ class _HistorialFacturasRapidasScreenState
                             fontWeight: FontWeight.bold,
                           ),
                         ),
-
                         const SizedBox(width: 6),
-
                         Expanded(
                           child: Text(
                             '${f.fechaEmision.day.toString().padLeft(2, '0')}/'
@@ -356,11 +666,9 @@ class _HistorialFacturasRapidasScreenState
               ),
             ],
           ),
-
           trailing: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-
               const Text(
                 "TOTAL",
                 style: TextStyle(
@@ -368,7 +676,6 @@ class _HistorialFacturasRapidasScreenState
                   fontSize: 10,
                 ),
               ),
-
               Text(
                 "\$${f.costoTotal.toStringAsFixed(2)}",
                 style: const TextStyle(
@@ -379,17 +686,13 @@ class _HistorialFacturasRapidasScreenState
               ),
             ],
           ),
-
           children: [
-
             const Divider(color: Colors.white24),
-
             Wrap(
               spacing: 10,
               runSpacing: 10,
               crossAxisAlignment: WrapCrossAlignment.center,
               children: [
-
                 Container(
                   padding: const EdgeInsets.symmetric(
                     horizontal: 12,
@@ -417,7 +720,6 @@ class _HistorialFacturasRapidasScreenState
                     ],
                   ),
                 ),
-
                 Container(
                   padding: const EdgeInsets.symmetric(
                     horizontal: 12,
@@ -445,23 +747,30 @@ class _HistorialFacturasRapidasScreenState
                     ],
                   ),
                 ),
-
                 Container(
-                  decoration: const BoxDecoration(
-                    color: Color(0xFFFBC02D),
-                    shape: BoxShape.circle,
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 6,
+                    vertical: 4,
+                  ),
+                  decoration: BoxDecoration(
+                    color: Colors.white10,
+                    borderRadius: BorderRadius.circular(25),
+                    border: Border.all(
+                      color: Colors.white24,
+                    ),
                   ),
                   child: IconButton(
                     constraints: const BoxConstraints(
-                      minWidth: 32,
-                      minHeight: 32,
+                      minWidth: 20,
+                      minHeight: 20,
                     ),
                     padding: EdgeInsets.zero,
-                    iconSize: 16,
-                    splashRadius: 18,
+                    iconSize: 14,
+                    splashRadius: 16,
                     icon: const Icon(
                       Icons.edit,
-                      color: Colors.black,
+                      color: Color(0xFFFBC02D),
+                      size: 14,
                     ),
                     onPressed: () async {
                       final result = await Navigator.push(
@@ -481,9 +790,7 @@ class _HistorialFacturasRapidasScreenState
                 ),
               ],
             ),
-
             const SizedBox(height: 18),
-
             const Text(
               "Productos",
               style: TextStyle(
@@ -492,8 +799,6 @@ class _HistorialFacturasRapidasScreenState
                 fontSize: 15,
               ),
             ),
-
-
             const SizedBox(height: 15),
             ...f.detalles.map(
                   (d) => Container(
@@ -505,9 +810,7 @@ class _HistorialFacturasRapidasScreenState
                 ),
                 child: Row(
                   children: [
-
                     const SizedBox(width: 10),
-
                     Expanded(
                       child: Text(
                         d.descripcion ?? "",
@@ -516,7 +819,6 @@ class _HistorialFacturasRapidasScreenState
                         ),
                       ),
                     ),
-
                     Container(
                       padding: const EdgeInsets.symmetric(
                         horizontal: 10,
