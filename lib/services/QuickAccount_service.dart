@@ -55,6 +55,10 @@ class QuickAccountService {
   static Future<QuickAccountResponse> crearCuentaRapida({
     required String nombreCompleto,
     required String placa,
+    String? modeloMoto,
+    String? cedula,
+    String? direccion,
+    String? telefono,
   }) async {
     try {
       final baseUrl = await ApiConfig.getBaseUrl();
@@ -63,7 +67,6 @@ class QuickAccountService {
         return QuickAccountResponse.error("IP del servidor no configurada");
       }
 
-      // Obtener el token guardado tras el login
       final token = await TokenManager.getToken();
 
       if (token == null || token.isEmpty) {
@@ -75,11 +78,19 @@ class QuickAccountService {
       final body = {
         'nombre_completo': nombreCompleto.trim(),
         'placa': placa.trim().toUpperCase(),
+        if (modeloMoto != null && modeloMoto.trim().isNotEmpty)
+          'modelo_moto': modeloMoto.trim(),
+        if (cedula != null && cedula.trim().isNotEmpty)
+          'cedula': cedula.trim(),
+        if (direccion != null && direccion.trim().isNotEmpty)
+          'direccion': direccion.trim(),
+        if (telefono != null && telefono.trim().isNotEmpty)
+          'telefono': telefono.trim(),
       };
 
       final headers = {
         'Content-Type': 'application/json',
-        'Authorization': 'Bearer $token', // 🆕 esto es lo que faltaba
+        'Authorization': 'Bearer $token',
       };
 
       final response = await http.post(
