@@ -7,6 +7,7 @@ import '../services/tipo_service.dart';
 import '../screens/seleccionar_productos_page.dart';
 import 'package:flutter/services.dart';
 import '../services/pdf_factura_service.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 class DetalleMantenimientoPage extends StatefulWidget {
   final int idRegistro;
@@ -30,6 +31,7 @@ class _DetalleMantenimientoPageState extends State<DetalleMantenimientoPage> {
   final _formKey = GlobalKey<FormState>();
   int? idTipoSeleccionado;
   int? estadoSeleccionado;
+  String? telefonoCliente;
   final TextEditingController observacionesCtrl = TextEditingController();
   final TextEditingController kilometrajeCtrl = TextEditingController();
 
@@ -92,6 +94,7 @@ class _DetalleMantenimientoPageState extends State<DetalleMantenimientoPage> {
       setState(() {
         idTipoSeleccionado = idTipo;
         estadoSeleccionado = detalle.estado;
+        telefonoCliente = detalle.telefonoCliente;
       });
 
       if (detalle.idFactura != null) {
@@ -124,6 +127,44 @@ class _DetalleMantenimientoPageState extends State<DetalleMantenimientoPage> {
     super.dispose();
   }
 
+  String? _formatearNumeroWhatsApp(String? numero) {
+    if (numero == null || numero.trim().isEmpty) return null;
+
+
+    String limpio = numero.replaceAll(RegExp(r'[^0-9]'), '');
+
+    if (limpio.isEmpty) return null;
+    
+    if (limpio.startsWith('0') && limpio.length == 10) {
+      limpio = '593${limpio.substring(1)}';
+    }
+
+    else if (limpio.length == 9) {
+      limpio = '593$limpio';
+    }
+
+
+    return limpio;
+  }
+
+  // 🆕 NUEVO: Abre WhatsApp con el número del cliente
+  Future<void> _abrirWhatsApp() async {
+    final numeroFormateado = _formatearNumeroWhatsApp(telefonoCliente);
+
+    if (numeroFormateado == null) {
+      _mostrarError('Este cliente no tiene número registrado');
+      return;
+    }
+
+    final Uri url = Uri.parse('https://wa.me/$numeroFormateado');
+
+    if (await canLaunchUrl(url)) {
+      await launchUrl(url, mode: LaunchMode.externalApplication);
+    } else {
+      if (mounted) _mostrarError('No se pudo abrir WhatsApp');
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -144,6 +185,16 @@ class _DetalleMantenimientoPageState extends State<DetalleMantenimientoPage> {
           ),
         ),
       ),
+      // 🆕 NUEVO: Botón flotante de WhatsApp (solo si el cliente tiene número registrado)
+      floatingActionButton: (telefonoCliente != null && telefonoCliente!.trim().isNotEmpty)
+          ? FloatingActionButton(
+        mini: true,
+        heroTag: 'btnWhatsApp',
+        backgroundColor: const Color(0xFF25D366),
+        onPressed: _abrirWhatsApp,
+        child: const Icon(Icons.chat, color: Colors.white, size: 22),
+      )
+          : null,
       body: FutureBuilder<RegistroDetalleDTO>(
         future: futureDetalle,
         builder: (context, snapshot) {
@@ -1049,7 +1100,7 @@ class _DetalleMantenimientoPageState extends State<DetalleMantenimientoPage> {
         // Volver a la pantalla anterior
         Navigator.pop(context, true);
       }
-       else {
+      else {
         _mostrarError(resultadoFactura?['error'] ?? "Error al actualizar factura");
       }
     } catch (e) {

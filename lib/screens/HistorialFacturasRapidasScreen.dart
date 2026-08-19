@@ -544,6 +544,30 @@ class _HistorialFacturasRapidasScreenState
     );
   }
 
+  Widget _buildDatoProducto(String label, String valor, {bool destacado = false}) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          label,
+          style: const TextStyle(
+            color: Colors.white38,
+            fontSize: 10,
+          ),
+        ),
+        const SizedBox(height: 2),
+        Text(
+          valor,
+          style: TextStyle(
+            color: destacado ? const Color(0xFFFBC02D) : Colors.white70,
+            fontSize: 13,
+            fontWeight: destacado ? FontWeight.bold : FontWeight.w500,
+          ),
+        ),
+      ],
+    );
+  }
+
   Widget _facturaCard(VentaListadoModel f) {
     return Container(
       margin: const EdgeInsets.only(bottom: 15),
@@ -747,99 +771,172 @@ class _HistorialFacturasRapidasScreenState
                     ],
                   ),
                 ),
-                Container(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 6,
-                    vertical: 4,
-                  ),
-                  decoration: BoxDecoration(
-                    color: Colors.white10,
-                    borderRadius: BorderRadius.circular(25),
-                    border: Border.all(
-                      color: Colors.white24,
+
+                InkWell(
+                  borderRadius: BorderRadius.circular(30),
+                  onTap: () async {
+                    final result = await Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (_) => EditFacturasRapidasScreen(
+                          venta: f,
+                        ),
+                      ),
+                    );
+
+                    if (result == true) {
+                      _cargarFacturas();
+                    }
+                  },
+                  child: Container(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 12,
+                      vertical: 8,
                     ),
-                  ),
-                  child: IconButton(
-                    constraints: const BoxConstraints(
-                      minWidth: 20,
-                      minHeight: 20,
+                    decoration: BoxDecoration(
+                      color: Colors.white10,
+                      borderRadius: BorderRadius.circular(30),
                     ),
-                    padding: EdgeInsets.zero,
-                    iconSize: 14,
-                    splashRadius: 16,
-                    icon: const Icon(
-                      Icons.edit,
-                      color: Color(0xFFFBC02D),
-                      size: 14,
-                    ),
-                    onPressed: () async {
-                      final result = await Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (_) => EditFacturasRapidasScreen(
-                            venta: f,
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: const [
+                        Icon(
+                          Icons.edit,
+                          size: 14,
+                          color: Color(0xFFFBC02D),
+                        ),
+                        SizedBox(width: 6),
+                        Text(
+                          "Editar",
+                          style: TextStyle(
+                            color: Color(0xFFFFFFFF),
+                            fontSize: 13,
                           ),
                         ),
-                      );
-
-                      if (result == true) {
-                        _cargarFacturas();
-                      }
-                    },
+                      ],
+                    ),
                   ),
                 ),
               ],
             ),
             const SizedBox(height: 18),
             const Text(
-              "Productos",
+              "Detalles Factura",
               style: TextStyle(
                 color: Colors.white,
                 fontWeight: FontWeight.bold,
                 fontSize: 15,
               ),
             ),
-            const SizedBox(height: 15),
-            ...f.detalles.map(
-                  (d) => Container(
-                margin: const EdgeInsets.only(bottom: 8),
-                padding: const EdgeInsets.all(12),
-                decoration: BoxDecoration(
-                  color: Colors.black26,
-                  borderRadius: BorderRadius.circular(10),
-                ),
-                child: Row(
-                  children: [
-                    const SizedBox(width: 10),
-                    Expanded(
-                      child: Text(
-                        d.descripcion ?? "",
-                        style: const TextStyle(
-                          color: Colors.white,
-                        ),
-                      ),
-                    ),
-                    Container(
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 10,
-                        vertical: 4,
-                      ),
-                      decoration: BoxDecoration(
-                        color: const Color(0xFFFBC02D),
-                        borderRadius: BorderRadius.circular(20),
-                      ),
-                      child: Text(
-                        "x${d.cantidad}",
-                        style: const TextStyle(
-                          color: Colors.black,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                    ),
-                  ],
+            const SizedBox(height: 12),
+
+            Container(
+              padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 4),
+              decoration: BoxDecoration(
+                color: Colors.black26,
+                borderRadius: BorderRadius.circular(12),
+                border: Border.all(
+                  color: Colors.white.withOpacity(0.06),
                 ),
               ),
+              child: Column(
+                children: [
+                  Padding(
+                    padding: const EdgeInsets.only(top: 12, bottom: 4),
+                    child: Align(
+                      alignment: Alignment.centerLeft,
+                      child: Text(
+                        "🛒 Productos",
+                        style: TextStyle(
+                          color: Colors.white,
+                          fontSize: 14,
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+                    ),
+                  ),
+                  Container(height: 1, color: Colors.white.withOpacity(0.06)),
+                  ...List.generate(f.detalles.length, (index) {
+                    final d = f.detalles[index];
+                    final esUltimo = index == f.detalles.length - 1;
+
+                    return Column(
+                      children: [
+                        Padding(
+                          padding: const EdgeInsets.symmetric(vertical: 12),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                d.descripcion ?? "",
+                                style: const TextStyle(
+                                  color: Colors.white,
+                                  fontWeight: FontWeight.w600,
+                                  fontSize: 14,
+                                ),
+                              ),
+                              const SizedBox(height: 10),
+                              Row(
+                                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                children: [
+                                  _buildDatoProducto("Cantidad", "${d.cantidad}"),
+                                  _buildDatoProducto(
+                                    "P. Unitario",
+                                    "\$${d.precioUnitario.toStringAsFixed(2)}",
+                                  ),
+                                  _buildDatoProducto(
+                                    "Subtotal",
+                                    "\$${d.subtotal.toStringAsFixed(2)}",
+                                    destacado: true,
+                                  ),
+                                ],
+                              ),
+                            ],
+                          ),
+                        ),
+                        if (!esUltimo)
+                          Container(height: 1, color: Colors.white.withOpacity(0.06)),
+                      ],
+                    );
+                  }),
+                ],
+              ),
             ),
+
+            if (f.observaciones != null && f.observaciones!.trim().isNotEmpty) ...[
+              const SizedBox(height: 18),
+              const Align(
+                alignment: Alignment.centerLeft,
+                child: Text(
+                  "Observaciones",
+                  style: TextStyle(
+                    color: Colors.white,
+                    fontWeight: FontWeight.bold,
+                    fontSize: 15,
+                  ),
+                ),
+              ),
+              const SizedBox(height: 12),
+              Container(
+                width: double.infinity,
+                padding: const EdgeInsets.all(14),
+                decoration: BoxDecoration(
+                  color: Colors.black26,
+                  borderRadius: BorderRadius.circular(12),
+                  border: Border.all(
+                    color: Colors.white.withOpacity(0.06),
+                  ),
+                ),
+                child: Text(
+                  f.observaciones!,
+                  style: const TextStyle(
+                    color: Colors.white70,
+                    fontSize: 13,
+                    height: 1.4,
+                  ),
+                ),
+              ),
+            ],
           ],
         ),
       ),
