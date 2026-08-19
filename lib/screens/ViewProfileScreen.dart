@@ -236,7 +236,7 @@ class _ViewProfileScreenState extends State<ViewProfileScreen> {
                 children: [
                   Row(
                     children: [
-                      // Avatar
+                      // Avatar CORREGIDO con Image.network
                       Container(
                         decoration: BoxDecoration(
                           shape: BoxShape.circle,
@@ -246,7 +246,8 @@ class _ViewProfileScreenState extends State<ViewProfileScreen> {
                           ),
                           boxShadow: [
                             BoxShadow(
-                              color: const Color(0xFFFBC02D).withOpacity(0.3),
+                              color: const Color(0xFFFBC02D)
+                                  .withOpacity(0.3),
                               blurRadius: 12,
                               spreadRadius: 2,
                             ),
@@ -255,25 +256,52 @@ class _ViewProfileScreenState extends State<ViewProfileScreen> {
                         child: CircleAvatar(
                           radius: 30,
                           backgroundColor: const Color(0xFF2B2B2B),
-                          backgroundImage: usuario!.rutaImagen != null &&
-                              usuario!.rutaImagen!.isNotEmpty
-                              ? NetworkImage(usuario!.rutaImagen!)
-                              : null,
-                          child: (usuario!.rutaImagen == null ||
-                              usuario!.rutaImagen!.isEmpty)
-                              ? const Icon(
+                          child: (usuario!.rutaImagen != null &&
+                              usuario!.rutaImagen!.isNotEmpty)
+                              ? ClipOval(
+                            child: Image.network(
+                              usuario!.rutaImagen!,
+                              fit: BoxFit.cover,
+                              width: 60,
+                              height: 60,
+                              loadingBuilder:
+                                  (context, child, loadingProgress) {
+                                if (loadingProgress == null)
+                                  return child;
+                                return const Center(
+                                  child: SizedBox(
+                                    width: 20,
+                                    height: 20,
+                                    child:
+                                    CircularProgressIndicator(
+                                      strokeWidth: 2,
+                                      color: Color(0xFFFBC02D),
+                                    ),
+                                  ),
+                                );
+                              },
+                              errorBuilder: (context, error,
+                                  stackTrace) =>
+                              const Icon(
+                                Icons.person,
+                                color: Colors.white54,
+                                size: 40,
+                              ),
+                            ),
+                          )
+                              : const Icon(
                             Icons.person,
                             color: Colors.white54,
                             size: 40,
-                          )
-                              : null,
+                          ),
                         ),
                       ),
                       const SizedBox(width: 16),
                       // Nombre y usuario
                       Expanded(
                         child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
+                          crossAxisAlignment:
+                          CrossAxisAlignment.start,
                           children: [
                             Text(
                               usuario!.nombreCompleto ?? 'Sin nombre',
@@ -289,7 +317,8 @@ class _ViewProfileScreenState extends State<ViewProfileScreen> {
                             Text(
                               '@${usuario!.nombreUsuario ?? 'usuario'}',
                               style: TextStyle(
-                                color: const Color(0xFFFBC02D).withOpacity(0.8),
+                                color: const Color(0xFFFBC02D)
+                                    .withOpacity(0.8),
                                 fontSize: 14,
                               ),
                             ),
@@ -310,13 +339,15 @@ class _ViewProfileScreenState extends State<ViewProfileScreen> {
                                 context,
                                 MaterialPageRoute(
                                   builder: (context) =>
-                                      EditProfileScreen(usuario: usuario!),
+                                      EditProfileScreen(
+                                          usuario: usuario!),
                                 ),
                               );
                               loadUser();
                             }
                           },
-                          icon: const Icon(Icons.edit, color: Colors.black, size: 18),
+                          icon: const Icon(Icons.edit,
+                              color: Colors.black, size: 18),
                           label: const Text(
                             'Editar Perfil',
                             style: TextStyle(
@@ -328,9 +359,11 @@ class _ViewProfileScreenState extends State<ViewProfileScreen> {
                           style: ElevatedButton.styleFrom(
                             backgroundColor: const Color(0xFFFBC02D),
                             shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(10),
+                              borderRadius:
+                              BorderRadius.circular(10),
                             ),
-                            padding: const EdgeInsets.symmetric(vertical: 12),
+                            padding: const EdgeInsets.symmetric(
+                                vertical: 12),
                           ),
                         ),
                       ),
@@ -341,7 +374,8 @@ class _ViewProfileScreenState extends State<ViewProfileScreen> {
                           showDialog(
                             context: context,
                             builder: (context) => AlertDialog(
-                              backgroundColor: const Color(0xFF1E1E1E),
+                              backgroundColor:
+                              const Color(0xFF1E1E1E),
                               title: Text(
                                 _obtenerTextoFormulario(),
                                 style: const TextStyle(
@@ -352,27 +386,34 @@ class _ViewProfileScreenState extends State<ViewProfileScreen> {
                               ),
                               content: const Text(
                                 'Nos gustaría conocer tu opinión sobre la aplicación. ¿Te gustaría continuar?',
-                                style: TextStyle(color: Colors.white70),
+                                style:
+                                TextStyle(color: Colors.white70),
                               ),
                               actions: [
                                 TextButton(
-                                  onPressed: () => Navigator.pop(context),
+                                  onPressed: () =>
+                                      Navigator.pop(context),
                                   child: const Text(
                                     'Cancelar',
-                                    style: TextStyle(color: Colors.white54),
+                                    style: TextStyle(
+                                        color: Colors.white54),
                                   ),
                                 ),
                                 ElevatedButton(
                                   onPressed: () {
-                                    String enlace = _obtenerEnlaceFormulario();
+                                    String enlace =
+                                    _obtenerEnlaceFormulario();
 
                                     // Validar si el rol tiene formulario disponible
                                     if (enlace == 'null') {
                                       Navigator.pop(context);
-                                      ScaffoldMessenger.of(context).showSnackBar(
+                                      ScaffoldMessenger.of(context)
+                                          .showSnackBar(
                                         const SnackBar(
-                                          content: Text('No hay formulario disponible para tu rol'),
-                                          backgroundColor: Colors.orange,
+                                          content: Text(
+                                              'No hay formulario disponible para tu rol'),
+                                          backgroundColor:
+                                          Colors.orange,
                                         ),
                                       );
                                       return;
@@ -382,7 +423,8 @@ class _ViewProfileScreenState extends State<ViewProfileScreen> {
                                     _launchURL(enlace);
                                   },
                                   style: ElevatedButton.styleFrom(
-                                    backgroundColor: const Color(0xFFFBC02D),
+                                    backgroundColor:
+                                    const Color(0xFFFBC02D),
                                   ),
                                   child: const Text(
                                     'Continuar',
@@ -454,7 +496,8 @@ class _ViewProfileScreenState extends State<ViewProfileScreen> {
                 color: const Color(0xFF1E1E1E),
                 borderRadius: BorderRadius.circular(12),
                 border: Border.all(
-                  color: Colors.white24,
+                  color: const Color(0xFFFBC02D)
+                      .withOpacity(0.2), // Amarillo con opacidad 0.2
                   width: 1,
                 ),
               ),
@@ -564,11 +607,13 @@ class _ViewProfileScreenState extends State<ViewProfileScreen> {
                   child: Stack(
                     children: [
                       Container(
-                        margin: const EdgeInsets.only(bottom: 12),
+                        margin:
+                        const EdgeInsets.only(bottom: 12),
                         padding: const EdgeInsets.all(12),
                         decoration: BoxDecoration(
                           color: const Color(0xFF1E1E1E),
-                          borderRadius: BorderRadius.circular(12),
+                          borderRadius:
+                          BorderRadius.circular(12),
                           border: Border.all(
                             color: isSelected
                                 ? const Color(0xFFFBC02D)
@@ -578,7 +623,8 @@ class _ViewProfileScreenState extends State<ViewProfileScreen> {
                           boxShadow: isSelected
                               ? [
                             BoxShadow(
-                              color: const Color(0xFFFBC02D)
+                              color: const Color(
+                                  0xFFFBC02D)
                                   .withOpacity(0.3),
                               blurRadius: 8,
                               spreadRadius: 1,
@@ -594,21 +640,30 @@ class _ViewProfileScreenState extends State<ViewProfileScreen> {
                               height: 70,
                               decoration: BoxDecoration(
                                 color: const Color(0xFF2B2B2B),
-                                borderRadius: BorderRadius.circular(10),
-                                image: motoItem.ruta_imagenMotos != null &&
-                                    motoItem.ruta_imagenMotos!.isNotEmpty
+                                borderRadius:
+                                BorderRadius.circular(10),
+                                image: motoItem
+                                    .ruta_imagenMotos !=
+                                    null &&
+                                    motoItem.ruta_imagenMotos!
+                                        .isNotEmpty
                                     ? DecorationImage(
                                   image: NetworkImage(
-                                      motoItem.ruta_imagenMotos!),
+                                      motoItem
+                                          .ruta_imagenMotos!),
                                   fit: BoxFit.cover,
                                 )
                                     : null,
                               ),
-                              child: (motoItem.ruta_imagenMotos == null ||
-                                  motoItem.ruta_imagenMotos!.isEmpty)
+                              child: (motoItem
+                                  .ruta_imagenMotos ==
+                                  null ||
+                                  motoItem.ruta_imagenMotos!
+                                      .isEmpty)
                                   ? Icon(
                                 Icons.motorcycle,
-                                color: Colors.white.withOpacity(0.3),
+                                color: Colors.white
+                                    .withOpacity(0.3),
                                 size: 35,
                               )
                                   : null,
@@ -617,24 +672,28 @@ class _ViewProfileScreenState extends State<ViewProfileScreen> {
                             // Info de la moto
                             Expanded(
                               child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
+                                crossAxisAlignment:
+                                CrossAxisAlignment.start,
                                 children: [
                                   Text(
                                     '${motoItem.marca ?? '-'} ${motoItem.modelo ?? '-'}',
                                     style: const TextStyle(
                                       color: Colors.white,
                                       fontSize: 16,
-                                      fontWeight: FontWeight.bold,
+                                      fontWeight:
+                                      FontWeight.bold,
                                     ),
                                     maxLines: 1,
-                                    overflow: TextOverflow.ellipsis,
+                                    overflow:
+                                    TextOverflow.ellipsis,
                                   ),
                                   const SizedBox(height: 8),
                                   buildMotoRow(
                                     'Placa',
                                     motoItem.placa ?? '-',
                                     'Año',
-                                    motoItem.anio?.toString() ?? '-',
+                                    motoItem.anio?.toString() ??
+                                        '-',
                                   ),
                                   buildMotoRow(
                                     'Km',
@@ -663,19 +722,24 @@ class _ViewProfileScreenState extends State<ViewProfileScreen> {
                           top: 0,
                           right: 0,
                           child: Container(
-                            padding: const EdgeInsets.symmetric(
+                            padding:
+                            const EdgeInsets.symmetric(
                               horizontal: 12,
                               vertical: 6,
                             ),
                             decoration: BoxDecoration(
                               color: const Color(0xFFFBC02D),
-                              borderRadius: const BorderRadius.only(
-                                topRight: Radius.circular(12),
-                                bottomLeft: Radius.circular(12),
+                              borderRadius:
+                              const BorderRadius.only(
+                                topRight:
+                                Radius.circular(12),
+                                bottomLeft:
+                                Radius.circular(12),
                               ),
                               boxShadow: [
                                 BoxShadow(
-                                  color: Colors.black.withOpacity(0.4),
+                                  color: Colors.black
+                                      .withOpacity(0.4),
                                   blurRadius: 6,
                                   offset: const Offset(0, 2),
                                 ),
@@ -713,7 +777,8 @@ class _ViewProfileScreenState extends State<ViewProfileScreen> {
                     ),
                   ).then((_) => loadUser());
                 },
-                icon: const Icon(Icons.add, color: Colors.black, size: 22),
+                icon: const Icon(Icons.add,
+                    color: Colors.black, size: 22),
                 label: const Text(
                   'AÑADIR MI MOTO',
                   style: TextStyle(

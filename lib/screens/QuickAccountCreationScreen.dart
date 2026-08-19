@@ -600,11 +600,17 @@ class _QuickAccountCreationScreenState
                   ),
                   border: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(12),
-                    borderSide: const BorderSide(color: Color(0xFFFBC02D)),
+                    borderSide: BorderSide(
+                      color: const Color(0xFFFBC02D).withOpacity(0.2),
+                      width: 1,
+                    ),
                   ),
                   enabledBorder: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(12),
-                    borderSide: const BorderSide(color: Color(0xFFFBC02D)),
+                    borderSide: BorderSide(
+                      color: const Color(0xFFFBC02D).withOpacity(0.2),
+                      width: 1,
+                    ),
                   ),
                   focusedBorder: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(12),
@@ -735,11 +741,17 @@ class _QuickAccountCreationScreenState
         fillColor: Colors.grey[850],
         border: OutlineInputBorder(
           borderRadius: BorderRadius.circular(12),
-          borderSide: const BorderSide(color: Color(0xFFFBC02D)),
+          borderSide: BorderSide(
+            color: const Color(0xFFFBC02D).withOpacity(0.2),
+            width: 1,
+          ),
         ),
         enabledBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(12),
-          borderSide: const BorderSide(color: Color(0xFFFBC02D)),
+          borderSide: BorderSide(
+            color: const Color(0xFFFBC02D).withOpacity(0.2),
+            width: 1,
+          ),
         ),
         focusedBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(12),

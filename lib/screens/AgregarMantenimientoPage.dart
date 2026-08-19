@@ -1579,31 +1579,10 @@ class _AgregarMantenimientoPageState extends State<AgregarMantenimientoPage> {
       Navigator.pop(context);
 
       if (resultado != null) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: const Row(
-              children: [
-                Icon(Icons.check_circle, color: Colors.white, size: 24),
-                SizedBox(width: 12),
-                Expanded(
-                  child: Text(
-                    "Mantenimiento guardado exitosamente",
-                    style: TextStyle(fontSize: 15),
-                  ),
-                ),
-              ],
-            ),
-            backgroundColor: Colors.green.shade700,
-            behavior: SnackBarBehavior.floating,
-            shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(12)),
-            duration: const Duration(seconds: 2),
-          ),
-        );
-
         await Future.delayed(const Duration(milliseconds: 500));
         Navigator.pop(context, true);
-      } else {
+      }
+       else {
         _mostrarError("No se recibió respuesta del servidor");
       }
     } catch (e) {

@@ -129,6 +129,13 @@ class _MisRutasPageState extends State<MisRutasPage> {
         return Card(
           color: const Color(0xFF1E1E1E),
           margin: const EdgeInsets.only(bottom: 10),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(12),
+            side: BorderSide(
+              color: const Color(0xFFFBC02D).withOpacity(0.2),
+              width: 1,
+            ),
+          ),
           child: ListTile(
             leading: const Icon(Icons.route, color: Color(0xFFFBC02D)),
             title: Text(

@@ -77,7 +77,7 @@ class _CrearOfertaScreenState extends State<CrearOfertaScreen> {
       // 1. Subir imagen si hay una
       String? imagenUrl;
       if (imagenSeleccionada != null) {
-        _snack('Subiendo imagen...', Colors.blue);
+        //_snack('Subiendo imagen...', Colors.blue);
         imagenUrl = await OfertaService.subirImagenOferta(imagenSeleccionada!);
         if (imagenUrl == null) {
           _snack('Error al subir la imagen', Colors.red);
@@ -105,7 +105,7 @@ class _CrearOfertaScreenState extends State<CrearOfertaScreen> {
       final activada = await OfertaService.activarOferta(creada.idOferta!);
 
       if (activada) {
-        _snack('¡Oferta creada y enviada!', Colors.green);
+        //_snack('¡Oferta creada y enviada!', Colors.green);
         await Future.delayed(const Duration(seconds: 2));
         if (mounted) Navigator.pop(context, true);
       } else {
@@ -156,7 +156,7 @@ class _CrearOfertaScreenState extends State<CrearOfertaScreen> {
                     border: Border.all(
                       color: imagenSeleccionada != null
                           ? const Color(0xFFFBC02D).withOpacity(0.6)
-                          : Colors.white24,
+                          : const Color(0xFFFBC02D).withOpacity(0.2),
                       width: 1.5,
                     ),
                     image: imagenSeleccionada != null
@@ -357,7 +357,7 @@ class _CrearOfertaScreenState extends State<CrearOfertaScreen> {
           border: Border.all(
             color: fecha != null
                 ? const Color(0xFFFBC02D).withOpacity(0.5)
-                : Colors.white24,
+                : const Color(0xFFFBC02D).withOpacity(0.2), // Amarillo pálido
           ),
         ),
         child: Column(
@@ -394,6 +394,8 @@ class _CrearOfertaScreenState extends State<CrearOfertaScreen> {
   BoxDecoration _boxDeco() => BoxDecoration(
     color: const Color(0xFF1E1E1E),
     borderRadius: BorderRadius.circular(12),
-    border: Border.all(color: Colors.white24),
+    border: Border.all(
+      color: const Color(0xFFFBC02D).withOpacity(0.2),
+    )
   );
 }

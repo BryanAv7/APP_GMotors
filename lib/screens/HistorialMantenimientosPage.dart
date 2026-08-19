@@ -20,8 +20,8 @@ class _HistorialMantenimientosPageState
   List<RegistroDetalleDTO> historialMantenimientos = [];
   bool cargando = true;
 
-  TextEditingController _searchController = TextEditingController();
-  TextEditingController _placaController = TextEditingController();
+  // Único controlador: acepta nombre O placa
+  final TextEditingController _busquedaController = TextEditingController();
 
   int _idClienteSeleccionado = 0;
   String _nombreClienteSeleccionado = '';
@@ -39,8 +39,7 @@ class _HistorialMantenimientosPageState
 
   @override
   void dispose() {
-    _searchController.dispose();
-    _placaController.dispose();
+    _busquedaController.dispose();
     super.dispose();
   }
 
@@ -93,13 +92,53 @@ class _HistorialMantenimientosPageState
 
   void _limpiarBusqueda() {
     setState(() {
-      _searchController.clear();
-      _placaController.clear();
+      _busquedaController.clear();
       _mostrarHistorial = false;
       _nombreClienteSeleccionado = '';
       historialMantenimientos = [];
       _facturaFutures.clear();
     });
+  }
+
+  // =====================================================
+  // Búsqueda unificada: decide automáticamente si el texto
+  // ingresado corresponde a una placa o a un nombre.
+  // =====================================================
+  bool _pareceUnaPlaca(String texto) {
+    final limpio = texto.replaceAll(' ', '');
+    final soloAlfanumerico = RegExp(r'^[A-Za-z0-9]+$').hasMatch(limpio);
+    final tieneEspacios = texto.contains(' ');
+    final tieneDigito = RegExp(r'[0-9]').hasMatch(texto);
+    // Las placas no llevan espacios, sí llevan al menos un número
+    // y suelen tener entre 3 y 8 caracteres (ej: ABC1234).
+    return soloAlfanumerico &&
+        !tieneEspacios &&
+        tieneDigito &&
+        limpio.length <= 8;
+  }
+
+  void _buscarUnificado() {
+    final texto = _busquedaController.text.trim();
+
+    if (texto.isEmpty) {
+      _mostrarError('Ingresa un nombre o un número de placa');
+      return;
+    }
+
+    if (_pareceUnaPlaca(texto)) {
+      final placa = texto.toUpperCase();
+      if (placa.length < 3) {
+        _mostrarError('La placa debe tener al menos 3 caracteres');
+        return;
+      }
+      _cargarHistorialPorPlaca(placa);
+    } else {
+      if (texto.length < 2) {
+        _mostrarError('El nombre debe tener al menos 2 caracteres');
+        return;
+      }
+      _cargarHistorial(texto);
+    }
   }
 
   void _buscarPorPlacaOCR() async {
@@ -295,25 +334,27 @@ class _HistorialMantenimientosPageState
           ),
           const SizedBox(height: 8),
           const Text(
-            'Solo debe completar UNA opción para ver el Historial de Mantenimientos del Cliente.',
+            'Escribe el nombre del cliente o el número de placa del vehículo.',
             style: TextStyle(color: Colors.white70, fontSize: 14),
           ),
           const SizedBox(height: 24),
 
           _buildSectionLabel(
-              'Búsqueda por Nombre', Icons.person_search, const Color(0xFFFBC02D)),
+              'Nombre o Placa', Icons.manage_search, const Color(0xFFFBC02D)),
           const SizedBox(height: 8),
           Container(
-            decoration: _inputDecoration(const Color(0xFFFBC02D)),
+            decoration: _inputDecoration(const Color(0xFFFBC02D).withOpacity(0.2)),
             child: TextField(
-              controller: _searchController,
+              controller: _busquedaController,
               keyboardType: TextInputType.text,
+              textCapitalization: TextCapitalization.words,
               style: const TextStyle(color: Colors.white, fontSize: 16),
+              onSubmitted: (_) => _buscarUnificado(),
               decoration: InputDecoration(
-                labelText: "Nombre del Cliente",
+                labelText: "Ej: Juan Pérez o ABC1234",
                 labelStyle: TextStyle(
                     color: Colors.white.withOpacity(0.6), fontSize: 14),
-                prefixIcon: const Icon(Icons.person_search,
+                prefixIcon: const Icon(Icons.manage_search,
                     color: Color(0xFFFBC02D)),
                 border: InputBorder.none,
                 contentPadding: const EdgeInsets.symmetric(
@@ -321,11 +362,11 @@ class _HistorialMantenimientosPageState
               ),
             ),
           ),
-          const SizedBox(height: 12),
+          const SizedBox(height: 16),
 
           Center(
             child: SizedBox(
-              width: 200,
+              width: 220,
               child: ElevatedButton.icon(
                 style: ElevatedButton.styleFrom(
                   backgroundColor: const Color(0xFFFBC02D),
@@ -333,18 +374,7 @@ class _HistorialMantenimientosPageState
                   shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(12)),
                 ),
-                onPressed: () {
-                  final nombreText = _searchController.text.trim();
-                  if (nombreText.isEmpty) {
-                    _mostrarError('Por favor ingresa un nombre');
-                    return;
-                  }
-                  if (nombreText.length < 2) {
-                    _mostrarError('El nombre debe tener al menos 2 caracteres');
-                    return;
-                  }
-                  _cargarHistorial(nombreText);
-                },
+                onPressed: _buscarUnificado,
                 icon: const Icon(Icons.search, color: Colors.black),
                 label: const Text(
                   'Buscar',
@@ -357,97 +387,26 @@ class _HistorialMantenimientosPageState
             ),
           ),
 
-          const SizedBox(height: 10),
+          const SizedBox(height: 20),
           _buildDivider(),
-          const SizedBox(height: 28),
-
-          _buildSectionLabel('Búsqueda por Número de Placa',
-              Icons.directions_car, const Color(0xFF1565C0)),
-          const SizedBox(height: 8),
-          Container(
-            decoration: _inputDecoration(const Color(0xFF1565C0)),
-            child: TextField(
-              controller: _placaController,
-              keyboardType: TextInputType.text,
-              textCapitalization: TextCapitalization.characters,
-
-              inputFormatters: [
-                FilteringTextInputFormatter.allow(RegExp(r'[A-Za-z0-9]')),
-              ],
-
-              style: const TextStyle(color: Colors.white, fontSize: 16),
-              decoration: InputDecoration(
-                labelText: "Número de Placa  (ej: ABC1234)",
-                labelStyle: TextStyle(
-                    color: Colors.white.withOpacity(0.6), fontSize: 14),
-                prefixIcon: const Icon(Icons.directions_car,
-                    color: Color(0xFF1565C0)),
-                border: InputBorder.none,
-                contentPadding: const EdgeInsets.symmetric(
-                    horizontal: 16, vertical: 16),
-              ),
-            ),
-          ),
-          const SizedBox(height: 12),
+          const SizedBox(height: 20),
 
           Center(
             child: SizedBox(
-              width: 200,
-              child: ElevatedButton.icon(
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: const Color(0xFF1565C0),
-                  padding: const EdgeInsets.symmetric(vertical: 16),
-                  shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(12)),
-                ),
-                onPressed: () {
-                  final placa = _placaController.text.trim().toUpperCase();
-                  if (placa.isEmpty) {
-                    _mostrarError('Por favor ingresa un número de placa');
-                    return;
-                  }
-                  if (placa.length < 3) {
-                    _mostrarError('La placa debe tener al menos 3 caracteres');
-                    return;
-                  }
-                  _cargarHistorialPorPlaca(placa);
-                },
-                icon: const Icon(Icons.badge, color: Colors.white),
-                label: const Text(
-                  'Buscar',
-                  style: TextStyle(
-                      color: Colors.white,
-                      fontSize: 14,
-                      fontWeight: FontWeight.bold),
-                ),
-              ),
-            ),
-          ),
-
-          const SizedBox(height: 10),
-          _buildDivider(),
-          const SizedBox(height: 28),
-
-          _buildSectionLabel(
-              'Búsqueda con IA', Icons.camera_alt, const Color(0xFF4CAF50)),
-          const SizedBox(height: 8),
-
-          Center(
-            child: SizedBox(
-              width: 200,
-              child: ElevatedButton.icon(
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: const Color(0xFF4CAF50),
-                  padding: const EdgeInsets.symmetric(vertical: 16),
+              width: 220,
+              child: OutlinedButton.icon(
+                style: OutlinedButton.styleFrom(
+                  side: const BorderSide(color: Colors.red, width: 1.5),
+                  padding: const EdgeInsets.symmetric(vertical: 14),
                   shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(12)),
                 ),
                 onPressed: _buscarPorPlacaOCR,
-                icon: const Icon(Icons.camera_alt, color: Colors.white),
+                icon: const Icon(Icons.camera_alt, color: Colors.red),
                 label: const Text(
                   'Escanear Placa',
                   style: TextStyle(
-                      color: Colors.white,
+                      color: Colors.red,
                       fontSize: 14,
                       fontWeight: FontWeight.bold),
                 ),
@@ -497,7 +456,7 @@ class _HistorialMantenimientosPageState
     return BoxDecoration(
       color: const Color(0xFF1E1E1E),
       borderRadius: BorderRadius.circular(12),
-      border: Border.all(color: accentColor.withOpacity(0.3), width: 1.5),
+      border: Border.all(color: accentColor, width: 2),
       boxShadow: [
         BoxShadow(
           color: Colors.black.withOpacity(0.2),
@@ -754,7 +713,7 @@ class _HistorialMantenimientosPageState
                         const SizedBox(width: 8),
                         Expanded(
                           child: Text(
-                            'Date: $fecha',
+                            'Fecha: $fecha',
                             style: const TextStyle(
                                 color: Colors.white,
                                 fontSize: 15,
@@ -767,11 +726,23 @@ class _HistorialMantenimientosPageState
                     const SizedBox(height: 8),
                     if (registro.tipoMantenimiento != null &&
                         registro.tipoMantenimiento!.isNotEmpty)
-                      Text(
-                        'Tipo: ${registro.tipoMantenimiento}',
-                        style: const TextStyle(
-                            color: Color(0xFFFBC02D), fontSize: 12),
-                        overflow: TextOverflow.ellipsis,
+                      Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          const Text(
+                            'Tipo de Mantenimiento',
+                            style: TextStyle(
+                                color: Color(0xFFFBC02D), fontSize: 12),
+                          ),
+                          const SizedBox(height: 2),
+                          Text(
+                            registro.tipoMantenimiento!,
+                            style: const TextStyle(
+                                color: Color(0xFFFFFFFF),
+                                fontSize: 12,
+                                fontWeight: FontWeight.w600),
+                          ),
+                        ],
                       ),
                   ],
                 ),
@@ -782,11 +753,29 @@ class _HistorialMantenimientosPageState
           ),
           children: [
             Padding(
-              padding: const EdgeInsets.all(16),
+              padding: const EdgeInsets.all(10),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  const Divider(color: Colors.white12, height: 1),
+                  Row(
+                    children: [
+                      const Expanded(
+                          child: Divider(color: Colors.white12, thickness: 1)),
+                      Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 10),
+                        child: Text(
+                          'Datos del Cliente',
+                          style: TextStyle(
+                              color: Colors.white38,
+                              fontSize: 11,
+                              fontWeight: FontWeight.w600,
+                              letterSpacing: 0.5),
+                        ),
+                      ),
+                      const Expanded(
+                          child: Divider(color: Colors.white12, thickness: 1)),
+                    ],
+                  ),
                   const SizedBox(height: 16),
 
                   if (registro.nombreCliente != null &&
@@ -833,7 +822,9 @@ class _HistorialMantenimientosPageState
                         label: 'Costo Total',
                         value:
                         '\$${registro.costoTotal!.toStringAsFixed(2)}',
-                        color: Colors.green),
+                        color: Colors.green,
+                        labelBold: true,
+                        labelColor: Colors.white),
                     const SizedBox(height: 12),
                   ],
 
@@ -970,56 +961,71 @@ class _HistorialMantenimientosPageState
                   // ✅ Deduplicar antes de mostrar para corregir duplicados del backend
                   final detalles = _deduplicarDetalles(snapshot.data!);
 
-                  return ListView.separated(
-                    shrinkWrap: true,
-                    physics: const NeverScrollableScrollPhysics(),
-                    itemCount: detalles.length,
-                    separatorBuilder: (_, __) =>
-                    const Divider(color: Colors.white12, height: 12),
-                    itemBuilder: (context, index) {
-                      final detalle = detalles[index];
-                      return Container(
-                        padding: const EdgeInsets.all(10),
-                        decoration: BoxDecoration(
-                          color: Colors.white.withOpacity(0.03),
-                          borderRadius: BorderRadius.circular(6),
-                        ),
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(
-                              'Producto:\n${detalle.descripcion}',
-                              style: const TextStyle(
-                                  color: Colors.white,
-                                  fontSize: 13,
-                                  fontWeight: FontWeight.w500),
-                            ),
-                            const SizedBox(height: 6),
-                            Row(
-                              mainAxisAlignment:
-                              MainAxisAlignment.spaceBetween,
-                              children: [
-                                Text('Cantidad: ${detalle.cantidad}',
-                                    style: const TextStyle(
-                                        color: Colors.white70,
-                                        fontSize: 12)),
-                                Text(
-                                    'Precio: \$${detalle.precioUnitario.toStringAsFixed(2)}',
-                                    style: const TextStyle(
-                                        color: Colors.white70,
-                                        fontSize: 12)),
-                                Text(
-                                    'Subtotal: \$${detalle.subtotal.toStringAsFixed(2)}',
-                                    style: const TextStyle(
-                                        color: Color(0xFFFBC02D),
-                                        fontSize: 12,
-                                        fontWeight: FontWeight.bold)),
-                              ],
-                            ),
-                          ],
-                        ),
-                      );
-                    },
+                  return Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      const Row(
+                        children: [
+                          Icon(Icons.inventory_2,
+                              color: Color(0xFFFBC02D), size: 15),
+                          SizedBox(width: 6),
+                          Text(
+                            'Producto',
+                            style: TextStyle(
+                                color: Color(0xFFFBC02D),
+                                fontSize: 12,
+                                fontWeight: FontWeight.bold,
+                                letterSpacing: 0.5),
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: 8),
+                      ListView.separated(
+                        shrinkWrap: true,
+                        physics: const NeverScrollableScrollPhysics(),
+                        itemCount: detalles.length,
+                        separatorBuilder: (_, __) =>
+                        const Divider(color: Colors.white12, height: 16),
+                        itemBuilder: (context, index) {
+                          final detalle = detalles[index];
+                          return Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                detalle.descripcion,
+                                style: const TextStyle(
+                                    color: Colors.white,
+                                    fontSize: 13,
+                                    fontWeight: FontWeight.w600),
+                              ),
+                              const SizedBox(height: 6),
+                              Row(
+                                mainAxisAlignment:
+                                MainAxisAlignment.spaceBetween,
+                                children: [
+                                  Text(
+                                      'Cantidad: ${detalle.cantidad}',
+                                      style: const TextStyle(
+                                          color: Colors.white70,
+                                          fontSize: 12)),
+                                  Text(
+                                      'Precio: \$${detalle.precioUnitario.toStringAsFixed(2)}',
+                                      style: const TextStyle(
+                                          color: Colors.white70,
+                                          fontSize: 12)),
+                                  Text(
+                                      'Subtotal: \$${detalle.subtotal.toStringAsFixed(2)}',
+                                      style: const TextStyle(
+                                          color: Colors.white,
+                                          fontSize: 12,
+                                          fontWeight: FontWeight.bold)),
+                                ],
+                              ),
+                            ],
+                          );
+                        },
+                      ),
+                    ],
                   );
                 },
               ),
@@ -1035,6 +1041,8 @@ class _HistorialMantenimientosPageState
     required String label,
     required String value,
     required Color color,
+    bool labelBold = false,
+    Color? labelColor,
   }) {
     return Row(
       children: [
@@ -1052,8 +1060,11 @@ class _HistorialMantenimientosPageState
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text(label,
-                  style:
-                  const TextStyle(color: Colors.white54, fontSize: 11)),
+                  style: TextStyle(
+                      color: labelColor ?? Colors.white54,
+                      fontSize: 11,
+                      fontWeight:
+                      labelBold ? FontWeight.bold : FontWeight.normal)),
               const SizedBox(height: 2),
               Text(value,
                   style: const TextStyle(
@@ -1082,7 +1093,7 @@ class _HistorialMantenimientosPageState
       iconoEstado = Icons.autorenew;
     } else if (estado == 2) {
       textoEstado = 'Finalizado';
-      colorEstado = Colors.green;
+      colorEstado = Colors.red;
       iconoEstado = Icons.check_circle;
     } else if (estado == 3) {
       textoEstado = 'Entregado';

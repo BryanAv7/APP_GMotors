@@ -172,12 +172,7 @@ class _EditProductosScreenState extends State<EditProductosScreen> {
       final resultado = await ProductoService.actualizarProducto(productoActualizado);
 
       if (resultado != null && mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('Foto eliminada correctamente'),
-            backgroundColor: Colors.green,
-          ),
-        );
+        // ✅ SnackBar eliminado
         Navigator.pop(context, true);
       } else if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
@@ -235,14 +230,7 @@ class _EditProductosScreenState extends State<EditProductosScreen> {
         return;
       }
 
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('Imagen subida a Supabase'),
-            backgroundColor: Colors.green,
-          ),
-        );
-      }
+      // ✅ SnackBar de "Imagen subida a Supabase" eliminado
 
       Producto productoActualizado = Producto(
         idProducto: widget.producto.idProducto,
@@ -262,12 +250,7 @@ class _EditProductosScreenState extends State<EditProductosScreen> {
       final resultado = await ProductoService.actualizarProducto(productoActualizado);
 
       if (resultado != null && mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('Foto actualizada correctamente'),
-            backgroundColor: Colors.green,
-          ),
-        );
+        // ✅ SnackBar de "Foto actualizada correctamente" eliminado
         Navigator.pop(context, true);
       } else if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
@@ -307,7 +290,7 @@ class _EditProductosScreenState extends State<EditProductosScreen> {
     return Scaffold(
       backgroundColor: Colors.grey[850],
       appBar: AppBar(
-        backgroundColor: Color(0xFFFBC02D),
+        backgroundColor: const Color(0xFFFBC02D),
         elevation: 0,
         title: const Text(
           'Actualizar Foto',
@@ -337,7 +320,6 @@ class _EditProductosScreenState extends State<EditProductosScreen> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // Título
             const Text(
               'Producto Seleccionado',
               style: TextStyle(
@@ -348,7 +330,6 @@ class _EditProductosScreenState extends State<EditProductosScreen> {
             ),
             const SizedBox(height: 12),
 
-            // Información del producto
             Container(
               padding: const EdgeInsets.all(16),
               decoration: BoxDecoration(
@@ -362,7 +343,6 @@ class _EditProductosScreenState extends State<EditProductosScreen> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  // Nombre
                   Row(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
@@ -386,8 +366,6 @@ class _EditProductosScreenState extends State<EditProductosScreen> {
                     ],
                   ),
                   const SizedBox(height: 12),
-
-                  // Código
                   Row(
                     children: [
                       Text(
@@ -408,8 +386,6 @@ class _EditProductosScreenState extends State<EditProductosScreen> {
                     ],
                   ),
                   const SizedBox(height: 12),
-
-                  // Stock
                   Row(
                     children: [
                       Text(
@@ -450,13 +426,9 @@ class _EditProductosScreenState extends State<EditProductosScreen> {
             ),
 
             const SizedBox(height: 10),
-
-            // Divider
             Divider(color: Colors.grey[700], thickness: 1),
-
             const SizedBox(height: 5),
 
-            // Foto actual
             Center(
               child: Column(
                 children: [
@@ -509,7 +481,6 @@ class _EditProductosScreenState extends State<EditProductosScreen> {
 
             const SizedBox(height: 32),
 
-            // Nueva foto
             if (_imageFile != null) ...[
               Center(
                 child: Column(
@@ -530,12 +501,12 @@ class _EditProductosScreenState extends State<EditProductosScreen> {
                         color: Colors.grey[800],
                         borderRadius: BorderRadius.circular(12),
                         border: Border.all(
-                          color: Color(0xFFFBC02D),
+                          color: const Color(0xFFFBC02D),
                           width: 3,
                         ),
                         boxShadow: [
                           BoxShadow(
-                            color: Color(0xFFFBC02D).withOpacity(0.3),
+                            color: const Color(0xFFFBC02D).withOpacity(0.3),
                             blurRadius: 15,
                             spreadRadius: 2,
                           ),
@@ -555,7 +526,6 @@ class _EditProductosScreenState extends State<EditProductosScreen> {
               const SizedBox(height: 32),
             ],
 
-            // Botones
             SizedBox(
               width: double.infinity,
               child: ElevatedButton.icon(
@@ -570,7 +540,7 @@ class _EditProductosScreenState extends State<EditProductosScreen> {
                   ),
                 ),
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: Color(0xFFFBC02D),
+                  backgroundColor: const Color(0xFFFBC02D),
                   padding: const EdgeInsets.symmetric(vertical: 16),
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(12),

@@ -352,23 +352,9 @@ class _AddMotorcycleScreenState extends State<AddMotorcycleScreen> {
     Navigator.pop(context); // cerrar loader
 
     if (success) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Row(
-            children: const [
-              Icon(Icons.check_circle, color: Colors.green),
-              SizedBox(width: 12),
-              Expanded(
-                child: Text('¡Moto registrada con éxito!'),
-              ),
-            ],
-          ),
-          backgroundColor: Colors.grey[850],
-          behavior: SnackBarBehavior.floating,
-        ),
-      );
       Navigator.pop(context, moto);
-    } else {
+    }
+    else {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Row(
@@ -487,11 +473,17 @@ class _AddMotorcycleScreenState extends State<AddMotorcycleScreen> {
                 ),
                 border: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(8),
-                  borderSide: const BorderSide(color: Color(0xFFFBC02D)),
+                  borderSide: BorderSide(
+                    color: const Color(0xFFFBC02D).withOpacity(0.2),
+                    width: 1,
+                  ),
                 ),
                 enabledBorder: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(8),
-                  borderSide: const BorderSide(color: Color(0xFFFBC02D)),
+                  borderSide: BorderSide(
+                    color: const Color(0xFFFBC02D).withOpacity(0.2),
+                    width: 1,
+                  ),
                 ),
                 focusedBorder: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(8),
@@ -568,7 +560,7 @@ class _AddMotorcycleScreenState extends State<AddMotorcycleScreen> {
                 text: label,
                 style: const TextStyle(color: Colors.grey),
               ),
-              if (isRequired)  // Campos oblogatorios
+              if (isRequired)  // Campos obligatorios
                 const TextSpan(
                   text: ' *',
                   style: TextStyle(color: Colors.red, fontWeight: FontWeight.bold),
@@ -582,11 +574,17 @@ class _AddMotorcycleScreenState extends State<AddMotorcycleScreen> {
         fillColor: Colors.grey[850],
         border: OutlineInputBorder(
           borderRadius: BorderRadius.circular(8),
-          borderSide: const BorderSide(color: Color(0xFFFBC02D)),
+          borderSide: BorderSide(
+            color: const Color(0xFFFBC02D).withOpacity(0.2),
+            width: 1,
+          ),
         ),
         enabledBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(8),
-          borderSide: const BorderSide(color: Color(0xFFFBC02D)),
+          borderSide: BorderSide(
+            color: const Color(0xFFFBC02D).withOpacity(0.2),
+            width: 1,
+          ),
         ),
         focusedBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(8),
@@ -630,11 +628,17 @@ class _AddMotorcycleScreenState extends State<AddMotorcycleScreen> {
         fillColor: Colors.grey[850],
         border: OutlineInputBorder(
           borderRadius: BorderRadius.circular(8),
-          borderSide: const BorderSide(color: Color(0xFFFBC02D)),
+          borderSide: BorderSide(
+            color: const Color(0xFFFBC02D).withOpacity(0.2),
+            width: 1,
+          ),
         ),
         enabledBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(8),
-          borderSide: const BorderSide(color: Color(0xFFFBC02D)),
+          borderSide: BorderSide(
+            color: const Color(0xFFFBC02D).withOpacity(0.2),
+            width: 1,
+          ),
         ),
         focusedBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(8),

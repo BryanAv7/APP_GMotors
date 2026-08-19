@@ -1046,32 +1046,10 @@ class _DetalleMantenimientoPageState extends State<DetalleMantenimientoPage> {
       Navigator.pop(context); // Cerrar loading dialog
 
       if (resultadoFactura != null && resultadoFactura['success'] == true) {
-        // Mostrar mensaje de éxito
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Row(
-              children: const [
-                Icon(Icons.check_circle, color: Colors.white, size: 24),
-                SizedBox(width: 12),
-                Expanded(
-                  child: Text(
-                    'Mantenimiento actualizado exitosamente',
-                    style: TextStyle(fontSize: 15),
-                  ),
-                ),
-              ],
-            ),
-            backgroundColor: Colors.green.shade700,
-            behavior: SnackBarBehavior.floating,
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(12),
-            ),
-          ),
-        );
-
         // Volver a la pantalla anterior
         Navigator.pop(context, true);
-      } else {
+      }
+       else {
         _mostrarError(resultadoFactura?['error'] ?? "Error al actualizar factura");
       }
     } catch (e) {
