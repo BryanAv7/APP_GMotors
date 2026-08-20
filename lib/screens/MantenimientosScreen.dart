@@ -154,15 +154,15 @@ class _MantenimientosPageState extends State<MantenimientosPage> {
     }
   }
 
-  // 🆕 Bottom sheet con 3 selectores: día, mes, año
+  // Botones de los Filtros
   void _mostrarFiltroFecha() {
     int? diaTemp = _diaFiltro;
     int? mesTemp = _mesFiltro;
     int? anioTemp = _anioFiltro;
 
     final meses = [
-      'Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio',
-      'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre'
+      'Ene', 'Feb', 'Mar', 'Abr', 'May', 'Jun',
+      'Jul', 'Ago', 'Sep', 'Oct', 'Nov', 'Dic'
     ];
 
     final aniosDisponibles = _registrosCache
@@ -196,6 +196,7 @@ class _MantenimientosPageState extends State<MantenimientosPage> {
                 mainAxisSize: MainAxisSize.min,
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
+                  // Título y botón cerrar
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
@@ -215,39 +216,57 @@ class _MantenimientosPageState extends State<MantenimientosPage> {
                   ),
                   const SizedBox(height: 4),
                   const Text(
-                    'Puedes elegir por año-mes-dia, o una fecha exacta',
+                    'Selecciona año, mes y día',
                     style: TextStyle(color: Colors.white54, fontSize: 12),
                   ),
+                  const SizedBox(height: 16),
+
+                  // Filtros
+                  Row(
+                    children: [
+                      // Dropdown de Año
+                      Expanded(
+                        child: _buildDropdownFiltroCompacto<int>(
+                          label: 'Año',
+                          value: anioTemp,
+                          items: aniosDisponibles,
+                          itemLabel: (a) => a.toString(),
+                          onChanged: (v) => setModalState(() => anioTemp = v),
+                          width: 70,
+                        ),
+                      ),
+                      const SizedBox(width: 8),
+
+                      // Dropdown de Mes
+                      Expanded(
+                        child: _buildDropdownFiltroCompacto<int>(
+                          label: 'Mes',
+                          value: mesTemp,
+                          items: List.generate(12, (i) => i + 1),
+                          itemLabel: (m) => meses[m - 1],
+                          onChanged: (v) => setModalState(() => mesTemp = v),
+                          width: 60,
+                        ),
+                      ),
+                      const SizedBox(width: 8),
+
+                      // Dropdown de Día
+                      Expanded(
+                        child: _buildDropdownFiltroCompacto<int>(
+                          label: 'Día',
+                          value: diaTemp,
+                          items: List.generate(31, (i) => i + 1),
+                          itemLabel: (d) => d.toString().padLeft(2, '0'),
+                          onChanged: (v) => setModalState(() => diaTemp = v),
+                          width: 50,
+                        ),
+                      ),
+                    ],
+                  ),
+
                   const SizedBox(height: 20),
 
-                  _buildDropdownFiltro<int>(
-                    label: 'Año',
-                    value: anioTemp,
-                    items: aniosDisponibles,
-                    itemLabel: (a) => a.toString(),
-                    onChanged: (v) => setModalState(() => anioTemp = v),
-                  ),
-                  const SizedBox(height: 14),
-
-                  _buildDropdownFiltro<int>(
-                    label: 'Mes',
-                    value: mesTemp,
-                    items: List.generate(12, (i) => i + 1),
-                    itemLabel: (m) => meses[m - 1],
-                    onChanged: (v) => setModalState(() => mesTemp = v),
-                  ),
-                  const SizedBox(height: 14),
-
-                  _buildDropdownFiltro<int>(
-                    label: 'Día',
-                    value: diaTemp,
-                    items: List.generate(31, (i) => i + 1),
-                    itemLabel: (d) => d.toString(),
-                    onChanged: (v) => setModalState(() => diaTemp = v),
-                  ),
-
-                  const SizedBox(height: 24),
-
+                  // Botones de acción en una sola fila
                   Row(
                     children: [
                       Expanded(
@@ -261,7 +280,7 @@ class _MantenimientosPageState extends State<MantenimientosPage> {
                           },
                           style: OutlinedButton.styleFrom(
                             side: const BorderSide(color: Colors.white38),
-                            padding: const EdgeInsets.symmetric(vertical: 14),
+                            padding: const EdgeInsets.symmetric(vertical: 12),
                             shape: RoundedRectangleBorder(
                               borderRadius: BorderRadius.circular(10),
                             ),
@@ -285,7 +304,7 @@ class _MantenimientosPageState extends State<MantenimientosPage> {
                           },
                           style: ElevatedButton.styleFrom(
                             backgroundColor: const Color(0xFFFBC02D),
-                            padding: const EdgeInsets.symmetric(vertical: 14),
+                            padding: const EdgeInsets.symmetric(vertical: 12),
                             shape: RoundedRectangleBorder(
                               borderRadius: BorderRadius.circular(10),
                             ),
@@ -310,19 +329,21 @@ class _MantenimientosPageState extends State<MantenimientosPage> {
     );
   }
 
-  // 🆕 Dropdown reutilizable para el bottom sheet, con opción "Todos"
-  Widget _buildDropdownFiltro<T>({
+  // 🆕 Dropdown compacto para el bottom sheet
+  Widget _buildDropdownFiltroCompacto<T>({
     required String label,
     required T? value,
     required List<T> items,
     required String Function(T) itemLabel,
     required void Function(T?) onChanged,
+    double width = 70,
   }) {
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 14),
+      height: 44,
+      padding: const EdgeInsets.symmetric(horizontal: 8),
       decoration: BoxDecoration(
         color: Colors.grey[900],
-        borderRadius: BorderRadius.circular(10),
+        borderRadius: BorderRadius.circular(8),
         border: Border.all(color: const Color(0xFFFBC02D).withOpacity(0.4)),
       ),
       child: DropdownButtonHideUnderline(
@@ -330,22 +351,26 @@ class _MantenimientosPageState extends State<MantenimientosPage> {
           isExpanded: true,
           value: value,
           dropdownColor: Colors.grey[900],
-          hint: Text(label, style: const TextStyle(color: Colors.white54)),
-          icon: const Icon(Icons.arrow_drop_down, color: Color(0xFFFBC02D)),
-          style: const TextStyle(color: Colors.white, fontSize: 14),
+          hint: Text(label, style: const TextStyle(color: Colors.white54, fontSize: 12)),
+          icon: const Icon(Icons.arrow_drop_down, color: Color(0xFFFBC02D), size: 20),
+          style: const TextStyle(color: Colors.white, fontSize: 13),
           items: [
             DropdownMenuItem<T?>(
               value: null,
-              child: Text('$label: Todos', style: const TextStyle(color: Colors.white54)),
+              child: Text('Todo', style: const TextStyle(color: Colors.white54, fontSize: 12)),
             ),
             ...items.map(
                   (item) => DropdownMenuItem<T?>(
                 value: item,
-                child: Text(itemLabel(item)),
+                child: Text(
+                  itemLabel(item),
+                  style: const TextStyle(fontSize: 13),
+                ),
               ),
             ),
           ],
           onChanged: (v) => onChanged(v),
+          elevation: 8,
         ),
       ),
     );
@@ -505,10 +530,6 @@ class _MantenimientosPageState extends State<MantenimientosPage> {
 
           final registros = snapshot.data!;
           _registrosCache = registros;
-
-          //if (registros.isNotEmpty) {
-            //debugPrint('FECHA REAL: "${registros.first.fecha}"');
-          //}
 
           return Column(
             children: [
