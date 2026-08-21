@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart';
 import '../models/RegistroDetalleDTO.dart';
 import '../models/detalle_ui.dart';
-import '../models/Tipo.dart';
+import '../models/Tipo.dart' hide Producto;
+import '../models/productos.dart';
 import '../services/registros_service.dart';
 import '../services/tipo_service.dart';
+import '../services/productos_service.dart';
 import '../screens/seleccionar_productos_page.dart';
 import 'package:flutter/services.dart';
 import '../services/pdf_factura_service.dart';
@@ -26,6 +28,7 @@ class _DetalleMantenimientoPageState extends State<DetalleMantenimientoPage> {
   late Future<RegistroDetalleDTO> futureDetalle;
   List<DetalleUI> detallesSeleccionados = [];
   List<Tipo> tiposMantenimiento = [];
+  List<Producto> productosCatalogo = [];
   bool guardando = false;
   bool intentoGuardar = false;
   final _formKey = GlobalKey<FormState>();
@@ -54,9 +57,56 @@ class _DetalleMantenimientoPageState extends State<DetalleMantenimientoPage> {
     }
   }
 
+  // Cargar nombre de los productos
+  Future<void> _cargarProductosCatalogo() async {
+    try {
+      final productos = await ProductoService.listarProductos();
+      setState(() {
+        productosCatalogo = productos;
+      });
+    } catch (e) {
+      print('Error al cargar catálogo de productos: $e');
+    }
+  }
+
   Future<void> _cargarTodoEnOrden() async {
     await _cargarTipos();
+    await _cargarProductosCatalogo();
     await _cargarRegistro();
+  }
+
+  // En caso de error. Buscar el nombre del producto por ID.
+  String _cargarNombreProducto(String? descripcion, int? idProducto) {
+    if (descripcion != null && descripcion.trim().isNotEmpty) {
+      return descripcion;
+    }
+
+    if (idProducto != null && productosCatalogo.isNotEmpty) {
+      final encontrado = productosCatalogo
+          .where((p) => p.idProducto == idProducto)
+          .toList();
+      if (encontrado.isNotEmpty) {
+        return encontrado.first.nombre ?? '';
+      }
+    }
+
+    return descripcion ?? '';
+  }
+
+
+  String? _cargarImagenProducto(int? idProducto) {
+    if (idProducto == null || productosCatalogo.isEmpty) return null;
+
+    final encontrado = productosCatalogo
+        .where((p) => p.idProducto == idProducto)
+        .toList();
+
+    if (encontrado.isEmpty) return null;
+
+    final ruta = encontrado.first.rutaImagenProductos;
+    if (ruta == null || ruta.trim().isEmpty) return null;
+
+    return ruta;
   }
 
   Future<void> _cargarRegistro() async {
@@ -100,14 +150,21 @@ class _DetalleMantenimientoPageState extends State<DetalleMantenimientoPage> {
           detalle.idFactura!,
         );
 
+
+        if (productosCatalogo.isEmpty) {
+          await _cargarProductosCatalogo();
+        }
+
         setState(() {
           detallesSeleccionados = detalles
               .map((d) => DetalleUI(
             idProducto: d.idProducto,
-            nombre: d.descripcion ?? '',
+            nombre: _cargarNombreProducto(d.descripcion, d.idProducto),
             cantidad: d.cantidad ?? 0,
             precioUnitario: d.precioUnitario ?? 0,
             esProducto: true,
+
+            imagenUrl: _cargarImagenProducto(d.idProducto),
           ))
               .toSet()
               .toList();
