@@ -55,8 +55,8 @@ class _DetalleMantenimientoPageState extends State<DetalleMantenimientoPage> {
   }
 
   Future<void> _cargarTodoEnOrden() async {
-    await _cargarTipos();    // espera a que tipos estén listos
-    await _cargarRegistro(); // luego carga el registro
+    await _cargarTipos();
+    await _cargarRegistro();
   }
 
   Future<void> _cargarRegistro() async {
@@ -65,7 +65,6 @@ class _DetalleMantenimientoPageState extends State<DetalleMantenimientoPage> {
     try {
       final detalle = await futureDetalle;
 
-      // Cargar observaciones
       if (detalle.descripcion != null) {
         setState(() {
           observacionesCtrl.text = detalle.descripcion!;
@@ -78,7 +77,6 @@ class _DetalleMantenimientoPageState extends State<DetalleMantenimientoPage> {
         });
       }
 
-      // Buscar el ID del tipo por su nombre
       int? idTipo;
       if (detalle.tipoMantenimiento != null && tiposMantenimiento.isNotEmpty) {
         try {
@@ -130,24 +128,19 @@ class _DetalleMantenimientoPageState extends State<DetalleMantenimientoPage> {
   String? _formatearNumeroWhatsApp(String? numero) {
     if (numero == null || numero.trim().isEmpty) return null;
 
-
     String limpio = numero.replaceAll(RegExp(r'[^0-9]'), '');
 
     if (limpio.isEmpty) return null;
-    
+
     if (limpio.startsWith('0') && limpio.length == 10) {
       limpio = '593${limpio.substring(1)}';
-    }
-
-    else if (limpio.length == 9) {
+    } else if (limpio.length == 9) {
       limpio = '593$limpio';
     }
-
 
     return limpio;
   }
 
-  // 🆕 NUEVO: Abre WhatsApp con el número del cliente
   Future<void> _abrirWhatsApp() async {
     final numeroFormateado = _formatearNumeroWhatsApp(telefonoCliente);
 
@@ -174,7 +167,7 @@ class _DetalleMantenimientoPageState extends State<DetalleMantenimientoPage> {
         elevation: 0,
         leading: IconButton(
           icon: const Icon(Icons.arrow_back, color: Colors.black),
-          onPressed: () => Navigator.pop(context),
+          onPressed: () => Navigator.pop(context, false), // 👈 Enviar false al cancelar
         ),
         title: const Text(
           "Actualizar Mantenimiento",
@@ -185,7 +178,6 @@ class _DetalleMantenimientoPageState extends State<DetalleMantenimientoPage> {
           ),
         ),
       ),
-      // 🆕 NUEVO: Botón flotante de WhatsApp (solo si el cliente tiene número registrado)
       floatingActionButton: (telefonoCliente != null && telefonoCliente!.trim().isNotEmpty)
           ? FloatingActionButton(
         mini: true,
@@ -245,7 +237,6 @@ class _DetalleMantenimientoPageState extends State<DetalleMantenimientoPage> {
                   _buildTipoInfo(),
                   const SizedBox(height: 20),
 
-                  // 🆕 NUEVO BLOQUE: Estado del Mantenimiento
                   _buildSectionTitle('Estado del Mantenimiento', Icons.flag),
                   const SizedBox(height: 12),
                   _buildEstadoSelector(),
@@ -533,7 +524,6 @@ class _DetalleMantenimientoPageState extends State<DetalleMantenimientoPage> {
     );
   }
 
-  // 🆕 NUEVO WIDGET: Selector de Estado con Chips
   Widget _buildEstadoSelector() {
     final bool error = intentoGuardar && estadoSeleccionado == null;
 
@@ -607,7 +597,6 @@ class _DetalleMantenimientoPageState extends State<DetalleMantenimientoPage> {
     );
   }
 
-  // 🆕 NUEVO WIDGET: Chip individual de estado
   Widget _buildChipEstado(int valor, String texto, Color color) {
     final bool seleccionado = estadoSeleccionado == valor;
 
@@ -657,15 +646,14 @@ class _DetalleMantenimientoPageState extends State<DetalleMantenimientoPage> {
     );
   }
 
-  // 🆕 NUEVO HELPER: Obtener color según estado
   Color _getColorEstado(int estado) {
     switch (estado) {
       case 1:
-        return Colors.blue; // En Proceso
+        return Colors.blue;
       case 2:
-        return Colors.green; // Finalizado
+        return Colors.green;
       case 3:
-        return Colors.orange; // Reservado
+        return Colors.orange;
       default:
         return Colors.white24;
     }
@@ -958,7 +946,6 @@ class _DetalleMantenimientoPageState extends State<DetalleMantenimientoPage> {
     );
   }
 
-
   Widget _buildGuardarButton() {
     return Container(
       width: double.infinity,
@@ -1001,7 +988,6 @@ class _DetalleMantenimientoPageState extends State<DetalleMantenimientoPage> {
     );
   }
 
-  // 🔄 MODIFICADO: Validación incluye estado
   void _validarAntesDeGuardar() {
     setState(() => intentoGuardar = true);
 
@@ -1023,7 +1009,7 @@ class _DetalleMantenimientoPageState extends State<DetalleMantenimientoPage> {
     _actualizarMantenimiento();
   }
 
-  // 🔄 MODIFICADO: Ahora actualiza estado Y factura
+  // Actualizar estado y factura
   Future<void> _actualizarMantenimiento() async {
     showDialog(
       context: context,
@@ -1059,7 +1045,7 @@ class _DetalleMantenimientoPageState extends State<DetalleMantenimientoPage> {
     try {
       setState(() => guardando = true);
 
-      // 1️⃣ PRIMERO: Actualizar el estado
+      //  Actualizar el estado
       print('[DetalleMantenimiento] Actualizando estado a: $estadoSeleccionado');
 
       final resultadoEstado = await RegistrosService.actualizarEstado(
@@ -1077,7 +1063,7 @@ class _DetalleMantenimientoPageState extends State<DetalleMantenimientoPage> {
 
       print('[DetalleMantenimiento] Estado actualizado exitosamente');
 
-      // 2️⃣ SEGUNDO: Actualizar la factura con los detalles
+      //  Actualizar la factura con los detalles
       final detallesJSON = detallesSeleccionados
           .map((detalle) => {
         "idProducto": detalle.idProducto,
@@ -1097,10 +1083,9 @@ class _DetalleMantenimientoPageState extends State<DetalleMantenimientoPage> {
       Navigator.pop(context); // Cerrar loading dialog
 
       if (resultadoFactura != null && resultadoFactura['success'] == true) {
-        // Volver a la pantalla anterior
+
         Navigator.pop(context, true);
-      }
-      else {
+      } else {
         _mostrarError(resultadoFactura?['error'] ?? "Error al actualizar factura");
       }
     } catch (e) {
