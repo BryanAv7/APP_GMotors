@@ -3,6 +3,7 @@ import 'package:url_launcher/url_launcher.dart';
 import 'EditProfileScreen.dart';
 import 'AddMotorcycleScreen.dart';
 import 'ViewMotorcycleScreen.dart';
+import 'CambiarContrasenaScreen.dart';
 import '../models/usuario.dart';
 import '../models/moto.dart';
 import '../services/moto_service.dart';
@@ -21,7 +22,7 @@ class _ViewProfileScreenState extends State<ViewProfileScreen> {
   List<Moto> motos = [];
   bool isLoading = true;
   int? selectedMotoIndex;
-  int? userRole; // Para almacenar el rol del usuario
+  int? userRole;
 
   @override
   void initState() {
@@ -34,8 +35,6 @@ class _ViewProfileScreenState extends State<ViewProfileScreen> {
     if (jsonMap != null) {
       usuario = Usuario.fromJson(jsonMap);
       motos = await MotoService.listarMotosPorUsuario(usuario!.idUsuario!);
-
-      // Obtener el Rol del Usuario
       userRole = await _obtenerRolUsuario(usuario!.idUsuario!);
     }
     setState(() {
@@ -43,12 +42,9 @@ class _ViewProfileScreenState extends State<ViewProfileScreen> {
     });
   }
 
-  // Obtener rol del usuario
   Future<int?> _obtenerRolUsuario(int idUsuario) async {
     try {
-      // Aquí llamas a tu servicio para obtener los roles
       final roles = await AuthService.obtenerRolesUsuario(idUsuario);
-
       if (roles != null && roles.isNotEmpty) {
         final rolPrincipal = roles[0] as Map<String, dynamic>;
         return rolPrincipal['idRol'] as int?;
@@ -57,36 +53,6 @@ class _ViewProfileScreenState extends State<ViewProfileScreen> {
     } catch (e) {
       print('Error obteniendo rol: $e');
       return null;
-    }
-  }
-
-  // Obtener URL según rol
-  String _obtenerEnlaceFormulario() {
-    if (userRole == 2) {
-      // CLIENTE - Formulario de usuarios
-      return 'https://forms.gle/z2tH1Vm2dYAv9wNs5';
-    } else if (userRole == 3) {
-      // MECANICO - Formulario de mecánicos
-      return 'https://forms.gle/AQCmxEGBsvGmUjTT8';
-    } else if (userRole == 1) {
-      // ADMIN - Formulario de administrador
-      return 'https://forms.gle/AQCmxEGBsvGmUjTT8';
-    } else {
-      // Rol desconocido - Sin formulario disponible
-      return 'null';
-    }
-  }
-
-// Obtener texto según rol
-  String _obtenerTextoFormulario() {
-    if (userRole == 2) {
-      return 'Formulario de Satisfacción - Cliente';
-    } else if (userRole == 3) {
-      return 'Formulario de Satisfacción - Mecánico';
-    } else if (userRole == 1) {
-      return 'Formulario de Satisfacción - Administrador';
-    } else {
-      return 'Rol no identificado';
     }
   }
 
@@ -149,33 +115,6 @@ class _ViewProfileScreenState extends State<ViewProfileScreen> {
     );
   }
 
-  // Método para abrir URL
-  Future<void> _launchURL(String url) async {
-    try {
-      // ignore: deprecated_member_use
-      if (await canLaunch(url)) {
-        // ignore: deprecated_member_use
-        await launch(url);
-      } else {
-        if (!mounted) return;
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('No se pudo abrir el formulario'),
-            backgroundColor: Colors.red,
-          ),
-        );
-      }
-    } catch (e) {
-      if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text('Error: $e'),
-          backgroundColor: Colors.red,
-        ),
-      );
-    }
-  }
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -236,7 +175,7 @@ class _ViewProfileScreenState extends State<ViewProfileScreen> {
                 children: [
                   Row(
                     children: [
-                      // Avatar CORREGIDO con Image.network
+                      // Avatar
                       Container(
                         decoration: BoxDecoration(
                           shape: BoxShape.circle,
@@ -272,8 +211,7 @@ class _ViewProfileScreenState extends State<ViewProfileScreen> {
                                   child: SizedBox(
                                     width: 20,
                                     height: 20,
-                                    child:
-                                    CircularProgressIndicator(
+                                    child: CircularProgressIndicator(
                                       strokeWidth: 2,
                                       color: Color(0xFFFBC02D),
                                     ),
@@ -328,7 +266,7 @@ class _ViewProfileScreenState extends State<ViewProfileScreen> {
                     ],
                   ),
                   const SizedBox(height: 16),
-                  // Botones
+                  // Botones - Editar Perfil y Cambiar Contraseña
                   Row(
                     children: [
                       Expanded(
@@ -347,12 +285,12 @@ class _ViewProfileScreenState extends State<ViewProfileScreen> {
                             }
                           },
                           icon: const Icon(Icons.edit,
-                              color: Colors.black, size: 18),
+                              color: Colors.black, size: 19),
                           label: const Text(
                             'Editar Perfil',
                             style: TextStyle(
                               color: Colors.black,
-                              fontSize: 14,
+                              fontSize: 15,
                               fontWeight: FontWeight.bold,
                             ),
                           ),
@@ -368,91 +306,31 @@ class _ViewProfileScreenState extends State<ViewProfileScreen> {
                         ),
                       ),
                       const SizedBox(width: 12),
-                      // ✅ BOTÓN CON ENLACE SEGÚN ROL
-                      ElevatedButton(
-                        onPressed: () {
-                          showDialog(
-                            context: context,
-                            builder: (context) => AlertDialog(
-                              backgroundColor:
-                              const Color(0xFF1E1E1E),
-                              title: Text(
-                                _obtenerTextoFormulario(),
-                                style: const TextStyle(
-                                  color: Color(0xFFFBC02D),
-                                  fontSize: 20,
-                                  fontWeight: FontWeight.bold,
-                                ),
-                              ),
-                              content: const Text(
-                                'Nos gustaría conocer tu opinión sobre la aplicación. ¿Te gustaría continuar?',
-                                style:
-                                TextStyle(color: Colors.white70),
-                              ),
-                              actions: [
-                                TextButton(
-                                  onPressed: () =>
-                                      Navigator.pop(context),
-                                  child: const Text(
-                                    'Cancelar',
-                                    style: TextStyle(
-                                        color: Colors.white54),
-                                  ),
-                                ),
-                                ElevatedButton(
-                                  onPressed: () {
-                                    String enlace =
-                                    _obtenerEnlaceFormulario();
-
-                                    // Validar si el rol tiene formulario disponible
-                                    if (enlace == 'null') {
-                                      Navigator.pop(context);
-                                      ScaffoldMessenger.of(context)
-                                          .showSnackBar(
-                                        const SnackBar(
-                                          content: Text(
-                                              'No hay formulario disponible para tu rol'),
-                                          backgroundColor:
-                                          Colors.orange,
-                                        ),
-                                      );
-                                      return;
-                                    }
-
-                                    Navigator.pop(context);
-                                    _launchURL(enlace);
-                                  },
-                                  style: ElevatedButton.styleFrom(
-                                    backgroundColor:
-                                    const Color(0xFFFBC02D),
-                                  ),
-                                  child: const Text(
-                                    'Continuar',
-                                    style: TextStyle(
-                                      color: Colors.black,
-                                      fontWeight: FontWeight.bold,
-                                    ),
-                                  ),
-                                ),
-                              ],
-                            ),
-                          );
-                        },
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: const Color(0xFF2B2B2B),
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(10),
-                            side: const BorderSide(
-                              color: Color(0xFFFBC02D),
-                              width: 1.5,
-                            ),
-                          ),
-                          padding: const EdgeInsets.all(12),
+                      // 👈 BOTÓN CAMBIAR CONTRASEÑA - MÁS PEQUEÑO
+                      Container(
+                        width: 60,
+                        height: 45,
+                        decoration: BoxDecoration(
+                          color: const Color(0xFFFBC02D),
+                          borderRadius: BorderRadius.circular(10),
                         ),
-                        child: const Icon(
-                          Icons.assignment_outlined,
-                          color: Color(0xFFFBC02D),
-                          size: 20,
+                        child: IconButton(
+                          onPressed: () {
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (context) =>
+                                const CambiarContrasenaScreen(),
+                              ),
+                            );
+                          },
+                          icon: const Icon(
+                            Icons.vpn_key,
+                            color: Colors.black,
+                            size: 20,
+                          ),
+                          padding: EdgeInsets.zero,
+                          constraints: const BoxConstraints(),
                         ),
                       ),
                     ],
@@ -479,7 +357,7 @@ class _ViewProfileScreenState extends State<ViewProfileScreen> {
                 ),
                 const SizedBox(width: 12),
                 const Text(
-                  'Descripción',
+                  'Detalles',
                   style: TextStyle(
                     color: Colors.white,
                     fontWeight: FontWeight.bold,
@@ -497,7 +375,7 @@ class _ViewProfileScreenState extends State<ViewProfileScreen> {
                 borderRadius: BorderRadius.circular(12),
                 border: Border.all(
                   color: const Color(0xFFFBC02D)
-                      .withOpacity(0.2), // Amarillo con opacidad 0.2
+                      .withOpacity(0.2),
                   width: 1,
                 ),
               ),
@@ -603,7 +481,6 @@ class _ViewProfileScreenState extends State<ViewProfileScreen> {
                       }
                     });
                   },
-                  // Stack con banner lateral
                   child: Stack(
                     children: [
                       Container(
