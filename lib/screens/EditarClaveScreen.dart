@@ -84,7 +84,7 @@ class _EditarClaveScreenState extends State<EditarClaveScreen> {
           onPressed: () => Navigator.pop(context),
         ),
         title: const Text(
-          'Cambiar Contraseña',
+          'Cambiar Clave Seguridad',
           style: TextStyle(
             color: Colors.black,
             fontWeight: FontWeight.normal,
@@ -117,7 +117,7 @@ class _EditarClaveScreenState extends State<EditarClaveScreen> {
                       const SizedBox(width: 12),
                       const Expanded(
                         child: Text(
-                          'Ingrese la contraseña para autorizar la eliminación de facturas de mantenimiento.',
+                          'Ingrese la clave para autorizar la eliminación de facturas de mantenimiento.',
                           style: TextStyle(
                             color: Color(0xFFFBC02D),
                             fontSize: 13,

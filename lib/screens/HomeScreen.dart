@@ -310,7 +310,7 @@ class _HomeScreenState extends State<HomeScreen> {
           if (_esAdmin)
             _DashboardCard(
               icon: Icons.lock,
-              label: 'Editar Contraseña',
+              label: 'Editar Clave',
               selected: _selectedCardIndex == 8,
               onTap: () {
                 setState(() => _selectedCardIndex = 8);
