@@ -59,6 +59,7 @@ class QuickAccountService {
     String? cedula,
     String? direccion,
     String? telefono,
+    String? correo,
   }) async {
     try {
       final baseUrl = await ApiConfig.getBaseUrl();
@@ -86,6 +87,8 @@ class QuickAccountService {
           'direccion': direccion.trim(),
         if (telefono != null && telefono.trim().isNotEmpty)
           'telefono': telefono.trim(),
+        if (correo != null && correo.trim().isNotEmpty)
+          'correo': correo.trim(),
       };
 
       final headers = {
@@ -147,6 +150,30 @@ class QuickAccountService {
     }
     if (placa.length < 6) {
       return "La placa debe tener al menos 6 caracteres";
+    }
+    return null;
+  }
+
+
+  static String? validarCedula(String cedula) {
+    final limpio = cedula.trim();
+    if (limpio.isEmpty) {
+      return null; // opcional
+    }
+    if (limpio.length < 10 || limpio.length > 13) {
+      return "La cédula debe tener entre 10 y 13 dígitos";
+    }
+    return null;
+  }
+
+
+  static String? validarCorreo(String correo) {
+    if (correo.trim().isEmpty) {
+      return null; // opcional, campo vacío es válido
+    }
+    final regex = RegExp(r'^[\w\.\-]+@([\w\-]+\.)+[\w\-]{2,}$');
+    if (!regex.hasMatch(correo.trim())) {
+      return "Ingresa un correo válido";
     }
     return null;
   }

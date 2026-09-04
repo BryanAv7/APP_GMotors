@@ -22,6 +22,7 @@ class _QuickAccountCreationScreenState
   final TextEditingController cedulaCtrl = TextEditingController();
   final TextEditingController direccionCtrl = TextEditingController();
   final TextEditingController telefonoCtrl = TextEditingController();
+  final TextEditingController correoCtrl = TextEditingController();
 
   // Para evitar múltiples envíos
   bool _isLoading = false;
@@ -53,6 +54,7 @@ class _QuickAccountCreationScreenState
     cedulaCtrl.dispose();
     direccionCtrl.dispose();
     telefonoCtrl.dispose();
+    correoCtrl.dispose(); // 🆕 NUEVO
     super.dispose();
   }
 
@@ -272,6 +274,20 @@ class _QuickAccountCreationScreenState
       return;
     }
 
+    // validar correo
+    final errorCorreo = QuickAccountService.validarCorreo(correoCtrl.text);
+    if (errorCorreo != null) {
+      _showSnack(errorCorreo);
+      return;
+    }
+
+    // validar cedula
+    final errorCedula = QuickAccountService.validarCedula(cedulaCtrl.text);
+    if (errorCedula != null) {
+      _showSnack(errorCedula);
+      return;
+    }
+
     setState(() => _isLoading = true);
 
     final response = await QuickAccountService.crearCuentaRapida(
@@ -281,6 +297,7 @@ class _QuickAccountCreationScreenState
       cedula: cedulaCtrl.text,
       direccion: direccionCtrl.text,
       telefono: telefonoCtrl.text,
+      correo: correoCtrl.text, // 🆕 NUEVO
     );
 
     setState(() => _isLoading = false);
@@ -306,6 +323,7 @@ class _QuickAccountCreationScreenState
         cedulaCtrl.clear();
         direccionCtrl.clear();
         telefonoCtrl.clear();
+        correoCtrl.clear();
       });
     } else {
       _showSnack('Error: ${response.error}');
@@ -503,8 +521,13 @@ class _QuickAccountCreationScreenState
   void _showSnack(String msg) {
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
-        content: Text(msg),
-        backgroundColor: Color(0xFFFBC02D),
+        content: Text(
+          msg,
+          style: const TextStyle(
+            fontWeight: FontWeight.bold,
+          ),
+        ),
+        backgroundColor: Color(0xFFFF0000),
         behavior: SnackBarBehavior.floating,
       ),
     );
@@ -547,7 +570,7 @@ class _QuickAccountCreationScreenState
                   border: Border.all(color: Colors.orange[400]!),
                 ),
                 child: const Text(
-                  '💡 Se genera automáticamente los siguientes campos:\n'
+                  '💡 Si no ingresas un correo, se genera automáticamente:\n'
                       '• Email: nombreUsuario@gmotors.com\n'
                       '• Contraseña: root111',
                   style: TextStyle(
@@ -634,6 +657,15 @@ class _QuickAccountCreationScreenState
                   ),
                   Expanded(child: Divider(color: Colors.grey[700])),
                 ],
+              ),
+              const SizedBox(height: 20),
+
+
+              _buildField(
+                correoCtrl,
+                "Correo Electrónico",
+                isRequired: false,
+                keyboardType: TextInputType.emailAddress,
               ),
               const SizedBox(height: 20),
 
