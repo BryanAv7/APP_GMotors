@@ -84,6 +84,17 @@ class _MyAppState extends State<MyApp> {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
       navigatorKey: navigatorKey,
+      theme: ThemeData(
+        brightness: Brightness.dark,
+        scaffoldBackgroundColor: const Color(0xFF121212),
+        canvasColor: const Color(0xFF121212),
+        colorScheme: ColorScheme.fromSeed(
+          seedColor: const Color(0xFFFBC02D),
+          brightness: Brightness.dark,
+        ).copyWith(
+          surface: const Color(0xFF121212),
+        ),
+      ),
       initialRoute: '/login',
       routes: {
         '/login': (context) => const LoginScreen(),
