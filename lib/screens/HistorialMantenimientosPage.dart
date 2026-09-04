@@ -5,6 +5,9 @@ import '../models/DetalleFacturaDTO.dart';
 import '../services/registros_service.dart';
 import 'package:flutter/services.dart';
 import '../services/pdf_factura_service.dart';
+import '../services/pdf_historial_mantenimientos_service.dart';
+import '../services/productos_service.dart';
+import '../models/productos.dart';
 
 class HistorialMantenimientosPage extends StatefulWidget {
   const HistorialMantenimientosPage({super.key});
@@ -32,9 +35,14 @@ class _HistorialMantenimientosPageState
   // Caché de futures para evitar re-llamadas al servicio en cada rebuild
   final Map<int, Future<List<DetalleFacturaDTO>>> _facturaFutures = {};
 
+  // Catálogo de productos para obtener nombres por ID
+  List<Producto> _productosCatalogo = [];
+  bool _productosCargados = false;
+
   @override
   void initState() {
     super.initState();
+    _cargarProductosCatalogo();
   }
 
   @override
@@ -43,15 +51,50 @@ class _HistorialMantenimientosPageState
     super.dispose();
   }
 
-  // Devuelve siempre el mismo Future para el mismo idFactura
+  // Cargar catálogo de productos
+  Future<void> _cargarProductosCatalogo() async {
+    try {
+      final productos = await ProductoService.listarProductos();
+      setState(() {
+        _productosCatalogo = productos;
+        _productosCargados = true;
+      });
+    } catch (e) {
+      print('Error al cargar catálogo de productos: $e');
+    }
+  }
+
+  // Obtener nombre del producto por ID
+  String _obtenerNombreProducto(int? idProducto, String descripcion) {
+    // Si la descripción no está vacía, usarla
+    if (descripcion.isNotEmpty && descripcion.trim().isNotEmpty) {
+      return descripcion;
+    }
+
+    // Si no, buscar por ID
+    if (idProducto != null && _productosCatalogo.isNotEmpty) {
+      final encontrado = _productosCatalogo
+          .where((p) => p.idProducto == idProducto)
+          .toList();
+      if (encontrado.isNotEmpty) {
+        return encontrado.first.nombre ?? 'Producto #$idProducto';
+      }
+    }
+
+    return 'Producto #${idProducto ?? '?'}';
+  }
+
   Future<List<DetalleFacturaDTO>> _getFacturaFuture(int idFactura) {
+    // Si no hay productos cargados, cargarlos primero
+    if (!_productosCargados && _productosCatalogo.isEmpty) {
+      _cargarProductosCatalogo();
+    }
+
     _facturaFutures[idFactura] ??=
         RegistrosService.obtenerDetallesFactura(idFactura);
     return _facturaFutures[idFactura]!;
   }
 
-  // ✅ Elimina duplicados que vienen del backend
-  // Compara descripcion + precioUnitario + cantidad como clave única
   List<DetalleFacturaDTO> _deduplicarDetalles(List<DetalleFacturaDTO> detalles) {
     final vistos = <String>{};
     return detalles.where((d) {
@@ -88,6 +131,48 @@ class _HistorialMantenimientosPageState
         });
       }
     }).catchError((_) {});
+  }
+
+  Future<void> _imprimirHistorialCompleto() async {
+    if (historialMantenimientos.isEmpty) {
+      _mostrarError('No hay mantenimientos para imprimir');
+      return;
+    }
+
+    try {
+      showDialog(
+        context: context,
+        barrierDismissible: false,
+        builder: (_) => const Center(
+          child: CircularProgressIndicator(
+            color: Color(0xFFFBC02D),
+          ),
+        ),
+      );
+
+      // Construir mapa de nombres de productos
+      final Map<int, String> mapaNombresProductos = {};
+      for (var producto in _productosCatalogo) {
+        if (producto.idProducto != null && producto.nombre != null && producto.nombre!.isNotEmpty) {
+          mapaNombresProductos[producto.idProducto!] = producto.nombre!;
+        }
+      }
+
+      await PdfHistorialMantenimientosService.generarEImprimir(
+        historial: historialMantenimientos,
+        nombreCliente: _nombreClienteSeleccionado,
+        mapaNombresProductos: mapaNombresProductos, // 👈 Pasar el mapa
+      );
+
+      if (mounted) {
+        Navigator.pop(context);
+      }
+    } catch (e) {
+      if (mounted) {
+        Navigator.pop(context);
+        _mostrarError('Error al generar historial: $e');
+      }
+    }
   }
 
   void _limpiarBusqueda() {
@@ -261,7 +346,6 @@ class _HistorialMantenimientosPageState
 
   // =====================================================
   // Método para generar e imprimir la factura PDF
-  // Solo disponible para registros con estado == 2 (Finalizado)
   // =====================================================
   Future<void> _imprimirFactura(RegistroDetalleDTO registro) async {
     try {
@@ -480,8 +564,38 @@ class _HistorialMantenimientosPageState
           return _buildSinDatos();
         }
         historialMantenimientos = snapshot.data!;
-        return _buildListaHistorial();
+        return Stack(
+          children: [
+            _buildListaHistorial(),
+            // Botón flotante dentro del Stack para que se muestre correctamente
+            Positioned(
+              bottom: 20,
+              right: 20,
+              child: _buildFloatingActionButton(),
+            ),
+          ],
+        );
       },
+    );
+  }
+
+  // =====================================================
+  // BOTÓN FLOTANTE
+  // =====================================================
+  Widget _buildFloatingActionButton() {
+    if (!_mostrarHistorial || historialMantenimientos.isEmpty) {
+      return const SizedBox.shrink();
+    }
+
+    return FloatingActionButton(
+      onPressed: _imprimirHistorialCompleto,
+      backgroundColor: const Color(0xFFCC0000),
+      foregroundColor: Colors.white,
+      elevation: 8,
+      child: const Icon(
+        Icons.print,
+        size: 22,
+      ),
     );
   }
 
@@ -668,6 +782,8 @@ class _HistorialMantenimientosPageState
               return _buildTarjetaMantenimiento(registro);
             },
           ),
+          // Espacio para el botón flotante
+          const SizedBox(height: 80),
         ],
       ),
     );
@@ -816,6 +932,16 @@ class _HistorialMantenimientosPageState
                     const SizedBox(height: 12),
                   ],
 
+                  if (registro.kilometraje != null) ...[
+                    _buildInfoField(
+                      icon: Icons.route,
+                      label: 'Kilometraje',
+                      value: '${registro.kilometraje} km',
+                      color: Colors.orange,
+                    ),
+                    const SizedBox(height: 12),
+                  ],
+
                   if (registro.costoTotal != null) ...[
                     _buildInfoField(
                         icon: Icons.attach_money,
@@ -870,7 +996,7 @@ class _HistorialMantenimientosPageState
                   ],
 
                   // =====================================================
-                  // PASO 3 - Botón imprimir/compartir PDF
+                  // Botón imprimir/compartir PDF
                   // Solo visible cuando el registro está Finalizado (estado == 2)
                   // y tiene una factura asociada
                   // =====================================================
@@ -958,7 +1084,6 @@ class _HistorialMantenimientosPageState
                     );
                   }
 
-                  // ✅ Deduplicar antes de mostrar para corregir duplicados del backend
                   final detalles = _deduplicarDetalles(snapshot.data!);
 
                   return Column(
@@ -988,11 +1113,18 @@ class _HistorialMantenimientosPageState
                         const Divider(color: Colors.white12, height: 16),
                         itemBuilder: (context, index) {
                           final detalle = detalles[index];
+
+                          // Obtener el name del producto por el Id
+                          final nombreProducto = _obtenerNombreProducto(
+                              detalle.idProducto,
+                              detalle.descripcion
+                          );
+
                           return Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
                               Text(
-                                detalle.descripcion,
+                                nombreProducto,
                                 style: const TextStyle(
                                     color: Colors.white,
                                     fontSize: 13,

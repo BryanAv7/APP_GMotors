@@ -19,6 +19,8 @@ class _MantenimientosPageState extends State<MantenimientosPage> {
   int? _diaFiltro;
   int? _mesFiltro;
   int? _anioFiltro;
+  String _terminoBusqueda = '';
+  final TextEditingController _searchController = TextEditingController();
 
   OverlayEntry? _alertOverlay;
 
@@ -42,7 +44,6 @@ class _MantenimientosPageState extends State<MantenimientosPage> {
     required Color color,
     Duration duracion = const Duration(seconds: 2),
   }) {
-
     _removerAlerta();
 
     // Crear overlay
@@ -113,7 +114,6 @@ class _MantenimientosPageState extends State<MantenimientosPage> {
 
     // Insertar overlay
     Overlay.of(context).insert(_alertOverlay!);
-
 
     Future.delayed(duracion, _removerAlerta);
   }
@@ -240,7 +240,6 @@ class _MantenimientosPageState extends State<MantenimientosPage> {
 
                     Navigator.pop(context);
 
-
                     final resultado = await RegistrosService.eliminarRegistroConClave(
                       registro.idRegistro,
                       claveIngresada,
@@ -353,6 +352,7 @@ class _MantenimientosPageState extends State<MantenimientosPage> {
   List<RegistroDTO> _aplicarFiltro(List<RegistroDTO> registros) {
     List<RegistroDTO> resultado;
 
+    // Filtro por estado
     switch (_filtroSeleccionado) {
       case 'recibido':
         resultado = registros.where((r) => r.estado == 0).toList();
@@ -374,6 +374,7 @@ class _MantenimientosPageState extends State<MantenimientosPage> {
         resultado = List.from(registros);
     }
 
+    // Filtro por fecha
     if (_diaFiltro != null || _mesFiltro != null || _anioFiltro != null) {
       resultado = resultado.where((r) {
         final fecha = _parsearFecha(r.fecha);
@@ -385,6 +386,20 @@ class _MantenimientosPageState extends State<MantenimientosPage> {
       }).toList();
     }
 
+    // ================= FILTRO POR BÚSQUEDA =================
+    if (_terminoBusqueda.isNotEmpty) {
+      final termino = _terminoBusqueda.toLowerCase().trim();
+      resultado = resultado.where((r) {
+        final nombre = r.nombreCliente.toLowerCase();
+        final placa = r.placaMoto.toLowerCase();
+        final modelo = r.modeloMoto.toLowerCase();
+        return nombre.contains(termino) ||
+            placa.contains(termino) ||
+            modelo.contains(termino);
+      }).toList();
+    }
+
+    // Ordenamiento
     resultado.sort((a, b) => _ordenReciente
         ? b.fecha.compareTo(a.fecha)
         : a.fecha.compareTo(b.fecha));
@@ -394,6 +409,9 @@ class _MantenimientosPageState extends State<MantenimientosPage> {
 
   // ================= MENSAJE VACIO =================
   String _mensajeVacio() {
+    if (_terminoBusqueda.isNotEmpty) {
+      return 'No se encontraron mantenimientos que coincidan con la búsqueda';
+    }
     switch (_filtroSeleccionado) {
       case 'recibido': return 'No hay mantenimientos recibidos';
       case 'enProceso': return 'No hay mantenimientos en proceso';
@@ -630,7 +648,7 @@ class _MantenimientosPageState extends State<MantenimientosPage> {
     if (_anioFiltro != null) partes.add(_anioFiltro.toString());
 
     return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 16),
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
       child: Align(
         alignment: Alignment.centerLeft,
         child: Chip(
@@ -646,6 +664,56 @@ class _MantenimientosPageState extends State<MantenimientosPage> {
               _diaFiltro = null;
               _mesFiltro = null;
               _anioFiltro = null;
+            });
+          },
+        ),
+      ),
+    );
+  }
+
+  // ================= BARRA DE BÚSQUEDA =================
+  Widget _buildSearchBar() {
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+      child: Container(
+        decoration: BoxDecoration(
+          color: const Color(0xFF1E1E1E),
+          borderRadius: BorderRadius.circular(12),
+          border: Border.all(
+            color: Color(0xFFFBC02D).withOpacity(0.2),
+            width: 1.5,
+          ),
+        ),
+        child: TextField(
+          style: const TextStyle(color: Colors.white),
+          controller: _searchController,
+          decoration: InputDecoration(
+            hintText: 'Buscar por nombre, placa o modelo...',
+            hintStyle: TextStyle(color: Colors.white.withOpacity(0.4)),
+            prefixIcon: Icon(
+              Icons.search,
+              color: Color(0xFFFBC02D),
+            ),
+            suffixIcon: _terminoBusqueda.isNotEmpty
+                ? IconButton(
+              icon: const Icon(Icons.clear, color: Color(0xFFE53935)),
+              onPressed: () {
+                setState(() {
+                  _terminoBusqueda = '';
+                  _searchController.clear();
+                });
+              },
+            )
+                : null,
+            border: InputBorder.none,
+            contentPadding: const EdgeInsets.symmetric(
+              horizontal: 16,
+              vertical: 12,
+            ),
+          ),
+          onChanged: (value) {
+            setState(() {
+              _terminoBusqueda = value;
             });
           },
         ),
@@ -772,6 +840,7 @@ class _MantenimientosPageState extends State<MantenimientosPage> {
           return Column(
             children: [
               _buildHeaderStats(registros),
+              _buildSearchBar(),
               _buildChipFiltroFecha(),
               Expanded(child: _buildListaMantenimientos(registros)),
             ],
@@ -821,10 +890,16 @@ class _MantenimientosPageState extends State<MantenimientosPage> {
               ),
             ),
             const SizedBox(height: 8),
-            const Text(
-              "Presiona el botón + para agregar uno",
-              style: TextStyle(color: Colors.white38, fontSize: 14),
-            ),
+            if (_terminoBusqueda.isEmpty)
+              const Text(
+                "Presiona el botón + para agregar uno",
+                style: TextStyle(color: Colors.white38, fontSize: 14),
+              )
+            else
+              const Text(
+                "Intenta con otros términos de búsqueda",
+                style: TextStyle(color: Colors.white38, fontSize: 14),
+              ),
           ],
         ),
       );
@@ -1014,7 +1089,6 @@ class _MantenimientosPageState extends State<MantenimientosPage> {
                   ),
                 ),
               );
-              // Si el resultado es true, recargar la lista
               if (resultado == true) {
                 _recargarLista();
               }
@@ -1028,7 +1102,6 @@ class _MantenimientosPageState extends State<MantenimientosPage> {
               child: Row(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  // Imagen con badge
                   Stack(
                     children: [
                       ClipRRect(
@@ -1077,7 +1150,6 @@ class _MantenimientosPageState extends State<MantenimientosPage> {
                     ],
                   ),
                   const SizedBox(width: 12),
-                  // Información
                   Expanded(
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
@@ -1100,7 +1172,7 @@ class _MantenimientosPageState extends State<MantenimientosPage> {
                             const SizedBox(width: 4),
                             Expanded(
                               child: Text(
-                                "${registro.marcaMoto} - ${registro.modeloMoto}",
+                                "${registro.placaMoto} - ${registro.modeloMoto}",
                                 style: const TextStyle(
                                     color: Colors.white70, fontSize: 13),
                                 maxLines: 1,
@@ -1137,7 +1209,6 @@ class _MantenimientosPageState extends State<MantenimientosPage> {
                         Row(
                           mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           children: [
-                            // Badge de estado
                             Container(
                               padding: const EdgeInsets.symmetric(
                                   horizontal: 12, vertical: 6),

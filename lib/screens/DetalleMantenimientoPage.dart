@@ -9,6 +9,8 @@ import '../services/productos_service.dart';
 import '../screens/seleccionar_productos_page.dart';
 import 'package:flutter/services.dart';
 import '../services/pdf_factura_service.dart';
+import '../services/auth_service.dart';
+import '../utils/token_manager.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 class DetalleMantenimientoPage extends StatefulWidget {
@@ -35,6 +37,7 @@ class _DetalleMantenimientoPageState extends State<DetalleMantenimientoPage> {
   int? idTipoSeleccionado;
   int? estadoSeleccionado;
   String? telefonoCliente;
+  bool esAdministrador = false;
   final TextEditingController observacionesCtrl = TextEditingController();
   final TextEditingController kilometrajeCtrl = TextEditingController();
 
@@ -44,6 +47,7 @@ class _DetalleMantenimientoPageState extends State<DetalleMantenimientoPage> {
     _cargarTipos();
     _cargarRegistro();
     _cargarTodoEnOrden();
+    _verificarAdministrador();
   }
 
   Future<void> _cargarTipos() async {
@@ -175,6 +179,54 @@ class _DetalleMantenimientoPageState extends State<DetalleMantenimientoPage> {
     }
   }
 
+  Future<void> _verificarAdministrador() async {
+    try {
+      final userMap = await TokenManager.getUserJson();
+
+      if (userMap == null) {
+        //print('[DetalleMantenimiento] No hay usuario guardado');
+        return;
+      }
+
+      final rolesList = userMap['roles'] as List? ?? [];
+
+      bool esAdmin = false;
+
+      for (var item in rolesList) {
+        if (item is Map) {
+
+          final idRol = item['idRol'];
+
+          if (idRol == 1 || idRol?.toString() == '1') {
+            esAdmin = true;
+            break;
+          }
+
+          final rolObj = item['rol'];
+
+          if (rolObj is Map) {
+            final idRolInterno = rolObj['id_rol'];
+
+            if (idRolInterno == 1 ||
+                idRolInterno?.toString() == '1') {
+              esAdmin = true;
+              break;
+            }
+          }
+        }
+      }
+
+      if (!mounted) return;
+
+      setState(() {
+        esAdministrador = esAdmin;
+      });
+
+    } catch (e) {
+      print("Error al cargar el rol del usuario: $e");
+    }
+  }
+
   @override
   void dispose() {
     observacionesCtrl.dispose();
@@ -235,13 +287,21 @@ class _DetalleMantenimientoPageState extends State<DetalleMantenimientoPage> {
           ),
         ),
       ),
-      floatingActionButton: (telefonoCliente != null && telefonoCliente!.trim().isNotEmpty)
+      floatingActionButton: (
+          esAdministrador &&
+              telefonoCliente != null &&
+              telefonoCliente!.trim().isNotEmpty
+      )
           ? FloatingActionButton(
         mini: true,
         heroTag: 'btnWhatsApp',
         backgroundColor: const Color(0xFF25D366),
         onPressed: _abrirWhatsApp,
-        child: const Icon(Icons.chat, color: Colors.white, size: 22),
+        child: const Icon(
+          Icons.chat,
+          color: Colors.white,
+          size: 22,
+        ),
       )
           : null,
       body: FutureBuilder<RegistroDetalleDTO>(
