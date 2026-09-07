@@ -43,18 +43,20 @@ class _QuickAccountCreationScreenState
       _formatearPlaca();
       _validarPlaca();
     });
+    telefonoCtrl.addListener(_formatearTelefono);
   }
 
   @override
   void dispose() {
     placaCtrl.removeListener(_validarPlaca);
+    telefonoCtrl.removeListener(_formatearTelefono);
     nombreCompletoCtrl.dispose();
     placaCtrl.dispose();
     modeloCtrl.dispose();
     cedulaCtrl.dispose();
     direccionCtrl.dispose();
     telefonoCtrl.dispose();
-    correoCtrl.dispose(); // 🆕 NUEVO
+    correoCtrl.dispose();
     super.dispose();
   }
 
@@ -84,6 +86,24 @@ class _QuickAccountCreationScreenState
         text: placa,
         selection: TextSelection.fromPosition(
           TextPosition(offset: placa.length),
+        ),
+      );
+    }
+  }
+
+
+  void _formatearTelefono() {
+    String telefono = telefonoCtrl.text.replaceAll(RegExp(r'[^0-9]'), '');
+
+    if (telefono.length > 10) {
+      telefono = telefono.substring(0, 10);
+    }
+
+    if (telefonoCtrl.text != telefono) {
+      telefonoCtrl.value = telefonoCtrl.value.copyWith(
+        text: telefono,
+        selection: TextSelection.fromPosition(
+          TextPosition(offset: telefono.length),
         ),
       );
     }
@@ -285,6 +305,13 @@ class _QuickAccountCreationScreenState
     final errorCedula = QuickAccountService.validarCedula(cedulaCtrl.text);
     if (errorCedula != null) {
       _showSnack(errorCedula);
+      return;
+    }
+
+    // validar teléfono
+    final errorTelefono = QuickAccountService.validarTelefono(telefonoCtrl.text);
+    if (errorTelefono != null) {
+      _showSnack(errorTelefono);
       return;
     }
 
@@ -686,7 +713,7 @@ class _QuickAccountCreationScreenState
               ),
               const SizedBox(height: 20),
 
-              // Teléfono (opcional)
+              // Teléfono (opcional) - misma alerta que cédula: solo al crear cuenta
               _buildField(
                 telefonoCtrl,
                 "Teléfono",

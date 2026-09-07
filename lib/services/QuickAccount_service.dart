@@ -158,7 +158,7 @@ class QuickAccountService {
   static String? validarCedula(String cedula) {
     final limpio = cedula.trim();
     if (limpio.isEmpty) {
-      return null; // opcional
+      return null;
     }
     if (limpio.length < 10 || limpio.length > 13) {
       return "La cédula debe tener entre 10 y 13 dígitos";
@@ -166,10 +166,21 @@ class QuickAccountService {
     return null;
   }
 
+  static String? validarTelefono(String telefono) {
+    final limpio = telefono.trim();
+    if (limpio.isEmpty) {
+      return null;
+    }
+    if (limpio.length != 10) {
+      return "El teléfono debe tener 10 dígitos";
+    }
+    return null;
+  }
+
 
   static String? validarCorreo(String correo) {
     if (correo.trim().isEmpty) {
-      return null; // opcional, campo vacío es válido
+      return null;
     }
     final regex = RegExp(r'^[\w\.\-]+@([\w\-]+\.)+[\w\-]{2,}$');
     if (!regex.hasMatch(correo.trim())) {
