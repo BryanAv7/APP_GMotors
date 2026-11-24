@@ -1,4 +1,18 @@
 import 'productos.dart';
+const String kMarcaProducto = '[PROD] ';
+const String kMarcaManoObra = '[MO] ';
+
+String? tipoDesdeDescripcion(String desc) {
+  if (desc.startsWith(kMarcaProducto)) return 'producto';
+  if (desc.startsWith(kMarcaManoObra)) return 'manoObra';
+  return null;
+}
+
+String quitarMarca(String desc) {
+  if (desc.startsWith(kMarcaProducto)) return desc.substring(kMarcaProducto.length);
+  if (desc.startsWith(kMarcaManoObra)) return desc.substring(kMarcaManoObra.length);
+  return desc;
+}
 
 class DetalleUI {
   final int? idProducto;
@@ -7,6 +21,7 @@ class DetalleUI {
   final double precioUnitario;
   final bool esProducto; // true = inventario, false = concepto manual
   final String? imagenUrl;
+  final String? tipoConcepto;
 
   DetalleUI({
     this.idProducto,
@@ -15,6 +30,7 @@ class DetalleUI {
     required this.precioUnitario,
     required this.esProducto,
     this.imagenUrl,
+    this.tipoConcepto,
   });
 
   // Fix, multiplicar por la cantidad.
@@ -37,6 +53,7 @@ class DetalleUI {
     required String descripcion,
     required int cantidad,
     required double precio,
+    required String tipoConcepto
   }) {
     return DetalleUI(
       idProducto: null,
@@ -44,6 +61,7 @@ class DetalleUI {
       cantidad: cantidad,
       precioUnitario: precio,
       esProducto: false,
+      tipoConcepto: tipoConcepto,
     );
   }
 
@@ -56,7 +74,21 @@ class DetalleUI {
       precioUnitario: precioUnitario,
       esProducto: esProducto,
       imagenUrl: imagenUrl,
+      tipoConcepto: tipoConcepto,
     );
+  }
+  String get descripcionParaGuardar {
+    if (esProducto) return nombre;
+    if (tipoConcepto == 'producto') return '$kMarcaProducto$nombre';
+    if (tipoConcepto == 'manoObra') return '$kMarcaManoObra$nombre';
+    return nombre;
+  }
+
+  String get etiquetaTipo {
+    if (esProducto) return 'Producto';
+    if (tipoConcepto == 'producto') return 'Producto agregado';
+    if (tipoConcepto == 'manoObra') return 'Mano de obra';
+    return 'Concepto manual'; // registros antiguos sin marca
   }
 
   // Convertir a JSON para enviar al backend

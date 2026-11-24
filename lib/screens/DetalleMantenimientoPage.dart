@@ -100,16 +100,20 @@ class _DetalleMantenimientoPageState extends State<DetalleMantenimientoPage> {
         );
 
         setState(() {
-          detallesSeleccionados = detalles
-              .map((d) => DetalleUI(
-            idProducto: d.idProducto,
-            nombre: d.descripcion ?? '',
-            cantidad: d.cantidad ?? 0,
-            precioUnitario: d.precioUnitario ?? 0,
-            esProducto: true,
-          ))
-              .toSet()
-              .toList();
+          detallesSeleccionados = detalles.map((d) {
+            final desc = d.descripcion; // viene del backend, puede traer [PROD] o [MO]
+
+            return DetalleUI(
+              idProducto: d.idProducto,
+              nombre: quitarMarca(desc),            // texto limpio, sin la marca
+              cantidad: d.cantidad,
+              precioUnitario: d.precioUnitario,
+              esProducto: d.idProducto != null,     // con ID = producto de inventario
+              tipoConcepto: d.idProducto == null
+                  ? tipoDesdeDescripcion(desc)      // 'producto', 'manoObra' o null
+                  : null,
+            );
+          }).toList();                              // sin .toSet()
         });
       }
     } catch (e) {
@@ -1030,7 +1034,7 @@ class _DetalleMantenimientoPageState extends State<DetalleMantenimientoPage> {
       final detallesJSON = detallesSeleccionados
           .map((detalle) => {
         "idProducto": detalle.idProducto,
-        "descripcion": detalle.nombre,
+        "descripcion": detalle.descripcionParaGuardar,
         "cantidad": detalle.cantidad,
         "precioUnitario": detalle.precioUnitario,
       })

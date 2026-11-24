@@ -108,14 +108,15 @@ class _SeleccionarProductosPageState extends State<SeleccionarProductosPage> {
   void _agregarProducto(Producto producto) {
     // Verificar si ya está agregado
     final index = detallesSeleccionados.indexWhere(
-          (d) => d.esProducto && d.idProducto == producto.idProducto,
+      (d) => d.esProducto && d.idProducto == producto.idProducto,
     );
 
     setState(() {
       if (index != -1) {
         // Ya existe, aumentar cantidad
-        detallesSeleccionados[index] = detallesSeleccionados[index]
-            .copyWith(cantidad: detallesSeleccionados[index].cantidad + 1);
+        detallesSeleccionados[index] = detallesSeleccionados[index].copyWith(
+          cantidad: detallesSeleccionados[index].cantidad + 1,
+        );
       } else {
         // Agregar nuevo
         detallesSeleccionados.add(DetalleUI.fromProducto(producto, 1));
@@ -131,70 +132,190 @@ class _SeleccionarProductosPageState extends State<SeleccionarProductosPage> {
     final cantidadCtrl = TextEditingController(text: '1');
     final precioCtrl = TextEditingController();
 
+    String? tipo; // 'producto' o 'manoObra'
+    String? errTipo;
+    String? errDesc;
+    String? errCant;
+    String? errPrecio;
+
     showDialog(
       context: context,
-      builder: (ctx) => AlertDialog(
-        backgroundColor: const Color(0xFF2B2B2B),
-        title: const Text(
-          'Agregar Concepto Manual',
-          style: TextStyle(color: Colors.white),
-        ),
-        content: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            TextField(
-              controller: descripcionCtrl,
-              style: const TextStyle(color: Colors.white),
-              decoration: _inputDecoration('Descripción'),
+      builder: (ctx) => StatefulBuilder(
+        builder: (ctx, setDialogState) => AlertDialog(
+          backgroundColor: const Color(0xFF2B2B2B),
+          title: const Text(
+            'Agregar Concepto Manual',
+            style: TextStyle(color: Colors.white),
+          ),
+          content: SingleChildScrollView(
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                TextField(
+                  controller: descripcionCtrl,
+                  style: const TextStyle(color: Colors.white),
+                  decoration: _inputDecoration(
+                    'Descripción',
+                  ).copyWith(errorText: errDesc),
+                ),
+                const SizedBox(height: 12),
+
+                // Selector Producto / Mano de Obra
+                Row(
+                  children: [
+                    ChoiceChip(
+                      label: const Text('Producto'),
+                      selected: tipo == 'producto',
+                      showCheckmark: true,
+                      checkmarkColor: Colors.black,
+                      backgroundColor: const Color(0xFF3A3A3A),
+                      selectedColor: const Color(0xFFFBC02D),
+                      side: BorderSide(
+                        color: tipo == 'producto'
+                            ? const Color(0xFFFBC02D)
+                            : Colors.white54,
+                      ),
+                      labelStyle: TextStyle(
+                        color: tipo == 'producto' ? Colors.black : Colors.white,
+                        fontWeight: tipo == 'producto'
+                            ? FontWeight.bold
+                            : FontWeight.normal,
+                      ),
+                      onSelected: (_) => setDialogState(() {
+                        tipo = 'producto';
+                        errTipo = null;
+                      }),
+                    ),
+                    const SizedBox(width: 12),
+                    ChoiceChip(
+                      label: const Text('Mano de Obra'),
+                      selected: tipo == 'manoObra',
+                      showCheckmark: true,
+                      checkmarkColor: Colors.black,
+                      backgroundColor: const Color(0xFF3A3A3A),
+                      selectedColor: const Color(0xFFFBC02D),
+                      side: BorderSide(
+                        color: tipo == 'manoObra'
+                            ? const Color(0xFFFBC02D)
+                            : Colors.white54,
+                      ),
+                      labelStyle: TextStyle(
+                        color: tipo == 'manoObra' ? Colors.black : Colors.white,
+                        fontWeight: tipo == 'manoObra'
+                            ? FontWeight.bold
+                            : FontWeight.normal,
+                      ),
+                      onSelected: (_) => setDialogState(() {
+                        tipo = 'manoObra';
+                        errTipo = null;
+                      }),
+                    ),
+                  ],
+                ),
+                if (errTipo != null)
+                  Padding(
+                    padding: const EdgeInsets.only(top: 6, left: 4),
+                    child: Text(
+                      errTipo!,
+                      style: const TextStyle(color: Colors.red, fontSize: 12),
+                    ),
+                  ),
+                const SizedBox(height: 12),
+
+                TextField(
+                  controller: cantidadCtrl,
+                  keyboardType: const TextInputType.numberWithOptions(
+                    signed: true,
+                  ),
+                  style: const TextStyle(color: Colors.white),
+                  decoration: _inputDecoration(
+                    'Cantidad',
+                  ).copyWith(errorText: errCant),
+                ),
+                const SizedBox(height: 12),
+                TextField(
+                  controller: precioCtrl,
+                  keyboardType: const TextInputType.numberWithOptions(
+                    decimal: true,
+                    signed: true,
+                  ),
+                  style: const TextStyle(color: Colors.white),
+                  decoration: _inputDecoration(
+                    'Precio Unitario',
+                  ).copyWith(errorText: errPrecio),
+                ),
+              ],
             ),
-            const SizedBox(height: 12),
-            TextField(
-              controller: cantidadCtrl,
-              keyboardType: TextInputType.number,
-              style: const TextStyle(color: Colors.white),
-              decoration: _inputDecoration('Cantidad'),
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(ctx),
+              child: const Text(
+                'Cancelar',
+                style: TextStyle(color: Colors.white),
+              ),
             ),
-            const SizedBox(height: 12),
-            TextField(
-              controller: precioCtrl,
-              keyboardType: const TextInputType.numberWithOptions(decimal: true),
-              style: const TextStyle(color: Colors.white),
-              decoration: _inputDecoration('Precio Unitario'),
+            TextButton(
+              onPressed: () {
+                final desc = descripcionCtrl.text.trim();
+                final cant = int.tryParse(cantidadCtrl.text.trim());
+                final precio = double.tryParse(
+                  precioCtrl.text.trim().replaceAll(',', '.'),
+                );
+
+                setDialogState(() {
+                  errTipo = tipo == null
+                      ? 'Seleccione Producto o Mano de Obra'
+                      : null;
+
+                  errDesc = desc.isEmpty ? 'Ingrese una descripción' : null;
+
+                  errCant = cant == null
+                      ? 'Ingrese un número entero válido'
+                      : cant < 0
+                      ? 'No se permiten números negativos'
+                      : cant == 0
+                      ? 'La cantidad debe ser mayor a 0'
+                      : null;
+
+                  errPrecio = precio == null
+                      ? 'Ingrese un precio válido'
+                      : precio < 0
+                      ? 'No se permiten números negativos'
+                      : precio == 0
+                      ? 'El precio debe ser mayor a 0'
+                      : null;
+                });
+
+                if (errTipo != null ||
+                    errDesc != null ||
+                    errCant != null ||
+                    errPrecio != null) {
+                  return;
+                }
+
+                setState(() {
+                  detallesSeleccionados.add(
+                    DetalleUI.conceptoManual(
+                      descripcion: desc,
+                      cantidad: cant!,
+                      precio: precio!,
+                      tipoConcepto: tipo!,
+                    ),
+                  );
+                });
+
+                Navigator.pop(ctx);
+                _mostrarSnackbar('Concepto agregado', Colors.green);
+              },
+              child: const Text(
+                'Agregar',
+                style: TextStyle(color: Color(0xFFFBC02D)),
+              ),
             ),
           ],
         ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(ctx),
-            child: const Text('Cancelar', style: TextStyle(color: Colors.white)),
-          ),
-          TextButton(
-            onPressed: () {
-              final desc = descripcionCtrl.text.trim();
-              final cant = int.tryParse(cantidadCtrl.text) ?? 1;
-              final precio = double.tryParse(precioCtrl.text) ?? 0.0;
-
-              if (desc.isEmpty || precio <= 0) {
-                _mostrarError('Complete todos los campos correctamente');
-                return;
-              }
-
-              setState(() {
-                detallesSeleccionados.add(
-                  DetalleUI.conceptoManual(
-                    descripcion: desc,
-                    cantidad: cant,
-                    precio: precio,
-                  ),
-                );
-              });
-
-              Navigator.pop(ctx);
-              _mostrarSnackbar('Concepto agregado', Colors.green);
-            },
-            child: const Text('Agregar', style: TextStyle(color: Color(0xFFFBC02D))),
-          ),
-        ],
       ),
     );
   }
@@ -202,8 +323,9 @@ class _SeleccionarProductosPageState extends State<SeleccionarProductosPage> {
   // ---------------- CAMBIAR CANTIDAD ----------------
   void _cambiarCantidad(int index, int nuevaCantidad) {
     setState(() {
-      detallesSeleccionados[index] =
-          detallesSeleccionados[index].copyWith(cantidad: nuevaCantidad);
+      detallesSeleccionados[index] = detallesSeleccionados[index].copyWith(
+        cantidad: nuevaCantidad,
+      );
     });
   }
 
@@ -219,7 +341,7 @@ class _SeleccionarProductosPageState extends State<SeleccionarProductosPage> {
   double get totalGeneral {
     return detallesSeleccionados.fold(
       0.0,
-          (sum, detalle) => sum + detalle.subtotal,
+      (sum, detalle) => sum + detalle.subtotal,
     );
   }
 
@@ -381,9 +503,7 @@ class _SeleccionarProductosPageState extends State<SeleccionarProductosPage> {
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
         color: const Color(0xFF2B2B2B),
-        border: Border(
-          top: BorderSide(color: Colors.yellow.withOpacity(0.3)),
-        ),
+        border: Border(top: BorderSide(color: Colors.yellow.withOpacity(0.3))),
       ),
       child: SizedBox(
         width: double.infinity,
@@ -436,10 +556,7 @@ class _SeleccionarProductosPageState extends State<SeleccionarProductosPage> {
 
   void _mostrarError(String mensaje) {
     ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text(mensaje),
-        backgroundColor: Colors.red,
-      ),
+      SnackBar(content: Text(mensaje), backgroundColor: Colors.red),
     );
   }
 }

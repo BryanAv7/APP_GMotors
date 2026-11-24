@@ -72,7 +72,7 @@ class _DetalleItemCardState extends State<DetalleItemCard> {
                       ),
                       const SizedBox(height: 4),
                       Text(
-                        widget.detalle.esProducto ? 'Producto' : 'Concepto manual',
+                        widget.detalle.etiquetaTipo,
                         style: const TextStyle(
                           color: Colors.white60,
                           fontSize: 12,
@@ -217,7 +217,11 @@ class _DetalleItemCardState extends State<DetalleItemCard> {
         borderRadius: BorderRadius.circular(8),
       ),
       child: Icon(
-        widget.detalle.esProducto ? Icons.inventory_2 : Icons.build,
+        widget.detalle.esProducto
+            ? Icons.inventory_2
+            : widget.detalle.tipoConcepto == 'producto'
+            ? Icons.add_box
+            : Icons.build,
         color: Colors.yellow,
         size: 30,
       ),
