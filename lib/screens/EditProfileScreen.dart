@@ -17,6 +17,7 @@ class EditProfileScreen extends StatefulWidget {
 class _EditProfileScreenState extends State<EditProfileScreen> {
   late TextEditingController nombreUsuarioController;
   late TextEditingController nombreCompletoController;
+  late TextEditingController correoController;
   late TextEditingController descripcionController;
   late TextEditingController cedulaController;
   late TextEditingController direccionController;
@@ -35,6 +36,8 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
         TextEditingController(text: widget.usuario.nombreUsuario);
     nombreCompletoController =
         TextEditingController(text: widget.usuario.nombreCompleto);
+    correoController =
+        TextEditingController(text: widget.usuario.correo);
     descripcionController =
         TextEditingController(text: widget.usuario.descripcion);
     cedulaController = TextEditingController(text: widget.usuario.cedula);
@@ -48,6 +51,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
   void dispose() {
     nombreUsuarioController.dispose();
     nombreCompletoController.dispose();
+    correoController.dispose();
     descripcionController.dispose();
     paisController.dispose();
     ciudadController.dispose();
@@ -210,6 +214,21 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                 fillColor: Colors.grey[850],
                 border: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(8),
+                  borderSide: BorderSide(
+                    color: const Color(0xFFFBC02D).withOpacity(0.2),
+                    width: 1,
+                  ),
+                ),
+                enabledBorder: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(8),
+                  borderSide: BorderSide(
+                    color: const Color(0xFFFBC02D).withOpacity(0.2),
+                    width: 1,
+                  ),
+                ),
+                focusedBorder: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(8),
+                  borderSide: const BorderSide(color: Color(0xFFFBC02D), width: 2),
                 ),
               ),
             ),
@@ -229,6 +248,57 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                 fillColor: Colors.grey[850],
                 border: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(8),
+                  borderSide: BorderSide(
+                    color: const Color(0xFFFBC02D).withOpacity(0.2),
+                    width: 1,
+                  ),
+                ),
+                enabledBorder: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(8),
+                  borderSide: BorderSide(
+                    color: const Color(0xFFFBC02D).withOpacity(0.2),
+                    width: 1,
+                  ),
+                ),
+                focusedBorder: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(8),
+                  borderSide: const BorderSide(color: Color(0xFFFBC02D), width: 2),
+                ),
+              ),
+            ),
+            const SizedBox(height: 15),
+
+// Correo electrónico
+            TextField(
+              controller: correoController,
+              enabled: !isUploadingImage,
+              keyboardType: TextInputType.emailAddress,
+              style: const TextStyle(color: Colors.white),
+              decoration: InputDecoration(
+                labelText: 'Correo electrónico',
+                hintText: 'Ej.: usuario@correo.com',
+                hintStyle: const TextStyle(color: Colors.grey),
+                labelStyle: const TextStyle(color: Colors.grey),
+                filled: true,
+                fillColor: Colors.grey[850],
+                prefixIcon: const Icon(Icons.email_outlined, color: Colors.grey),
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(8),
+                  borderSide: BorderSide(
+                    color: const Color(0xFFFBC02D).withOpacity(0.2),
+                    width: 1,
+                  ),
+                ),
+                enabledBorder: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(8),
+                  borderSide: BorderSide(
+                    color: const Color(0xFFFBC02D).withOpacity(0.2),
+                    width: 1,
+                  ),
+                ),
+                focusedBorder: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(8),
+                  borderSide: const BorderSide(color: Color(0xFFFBC02D), width: 2),
                 ),
               ),
             ),
@@ -249,6 +319,21 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                 fillColor: Colors.grey[850],
                 border: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(8),
+                  borderSide: BorderSide(
+                    color: const Color(0xFFFBC02D).withOpacity(0.2),
+                    width: 1,
+                  ),
+                ),
+                enabledBorder: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(8),
+                  borderSide: BorderSide(
+                    color: const Color(0xFFFBC02D).withOpacity(0.2),
+                    width: 1,
+                  ),
+                ),
+                focusedBorder: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(8),
+                  borderSide: const BorderSide(color: Color(0xFFFBC02D), width: 2),
                 ),
               ),
             ),
@@ -295,6 +380,21 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                 fillColor: Colors.grey[850],
                 border: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(8),
+                  borderSide: BorderSide(
+                    color: const Color(0xFFFBC02D).withOpacity(0.2),
+                    width: 1,
+                  ),
+                ),
+                enabledBorder: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(8),
+                  borderSide: BorderSide(
+                    color: const Color(0xFFFBC02D).withOpacity(0.2),
+                    width: 1,
+                  ),
+                ),
+                focusedBorder: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(8),
+                  borderSide: const BorderSide(color: Color(0xFFFBC02D), width: 2),
                 ),
               ),
             ),
@@ -314,6 +414,21 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                 fillColor: Colors.grey[850],
                 border: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(8),
+                  borderSide: BorderSide(
+                    color: const Color(0xFFFBC02D).withOpacity(0.2),
+                    width: 1,
+                  ),
+                ),
+                enabledBorder: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(8),
+                  borderSide: BorderSide(
+                    color: const Color(0xFFFBC02D).withOpacity(0.2),
+                    width: 1,
+                  ),
+                ),
+                focusedBorder: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(8),
+                  borderSide: const BorderSide(color: Color(0xFFFBC02D), width: 2),
                 ),
               ),
             ),
@@ -333,6 +448,21 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                 fillColor: Colors.grey[850],
                 border: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(8),
+                  borderSide: BorderSide(
+                    color: const Color(0xFFFBC02D).withOpacity(0.2),
+                    width: 1,
+                  ),
+                ),
+                enabledBorder: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(8),
+                  borderSide: BorderSide(
+                    color: const Color(0xFFFBC02D).withOpacity(0.2),
+                    width: 1,
+                  ),
+                ),
+                focusedBorder: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(8),
+                  borderSide: const BorderSide(color: Color(0xFFFBC02D), width: 2),
                 ),
               ),
             ),
@@ -379,6 +509,21 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                 fillColor: Colors.grey[850],
                 border: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(8),
+                  borderSide: BorderSide(
+                    color: const Color(0xFFFBC02D).withOpacity(0.2),
+                    width: 1,
+                  ),
+                ),
+                enabledBorder: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(8),
+                  borderSide: BorderSide(
+                    color: const Color(0xFFFBC02D).withOpacity(0.2),
+                    width: 1,
+                  ),
+                ),
+                focusedBorder: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(8),
+                  borderSide: const BorderSide(color: Color(0xFFFBC02D), width: 2),
                 ),
               ),
             ),
@@ -398,6 +543,21 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                 fillColor: Colors.grey[850],
                 border: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(8),
+                  borderSide: BorderSide(
+                    color: const Color(0xFFFBC02D).withOpacity(0.2),
+                    width: 1,
+                  ),
+                ),
+                enabledBorder: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(8),
+                  borderSide: BorderSide(
+                    color: const Color(0xFFFBC02D).withOpacity(0.2),
+                    width: 1,
+                  ),
+                ),
+                focusedBorder: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(8),
+                  borderSide: const BorderSide(color: Color(0xFFFBC02D), width: 2),
                 ),
               ),
             ),
@@ -412,11 +572,24 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                     : () async {
 
                   final nombreCompleto = nombreCompletoController.text.trim();
+                  final correo = correoController.text.trim();
 
                   if (nombreCompleto.split(RegExp(r'\s+')).length < 2) {
                     ScaffoldMessenger.of(context).showSnackBar(
                       const SnackBar(
                         content: Text('Ingrese al menos un nombre y un apellido.'),
+                        backgroundColor: Colors.red,
+                      ),
+                    );
+                    return;
+                  }
+
+                  // Validación correo
+                  final emailValido = RegExp(r'^[\w\.\-]+@[\w\-]+\.[\w\.\-]+$').hasMatch(correo);
+                  if (correo.isEmpty || !emailValido) {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(
+                        content: Text('Ingrese un correo electrónico válido.'),
                         backgroundColor: Colors.red,
                       ),
                     );
@@ -442,6 +615,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                     idUsuario: widget.usuario.idUsuario,
                     nombreUsuario: nombreUsuarioController.text,
                     nombreCompleto: nombreCompletoController.text.trim(),
+                    correo: correo,
                     descripcion: descripcionController.text,
                     pais: paisController.text,
                     ciudad: ciudadController.text,
@@ -461,16 +635,10 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                         usuarioActualizado.toJson());
 
                     if (mounted) {
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        const SnackBar(
-                          content: Text('Perfil actualizado exitosamente'),
-                          backgroundColor: Colors.green,
-                        ),
-                      );
-
                       Navigator.pop(context, usuarioActualizado);
                     }
-                  } else {
+                  }
+                  else {
                     if (mounted) {
                       ScaffoldMessenger.of(context).showSnackBar(
                         const SnackBar(

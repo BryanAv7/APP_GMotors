@@ -299,19 +299,6 @@ class _ViewMotorcycleScreenState extends State<ViewMotorcycleScreen> {
     Navigator.pop(context);
 
     if (result != null) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Row(
-            children: const [
-              Icon(Icons.check_circle, color: Colors.green),
-              SizedBox(width: 12),
-              Expanded(child: Text('¡Moto actualizada con éxito!')),
-            ],
-          ),
-          backgroundColor: Colors.grey[850],
-          behavior: SnackBarBehavior.floating,
-        ),
-      );
       Navigator.pop(context, true);
     } else {
       ScaffoldMessenger.of(context).showSnackBar(

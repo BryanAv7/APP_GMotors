@@ -96,6 +96,66 @@ class RegistrosService {
   }
 
   // =====================================================
+  // ELIMINAR REGISTRO CON CLAVE DE SEGURIDAD
+  // =====================================================
+  static Future<Map<String, dynamic>> eliminarRegistroConClave(
+      int idRegistro,
+      String clave) async {
+    try {
+      final baseUrl = await ApiConfig.getBaseUrl();
+      if (baseUrl.isEmpty) {
+        throw Exception("IP del servidor no configurada");
+      }
+
+      final token = await TokenManager.getToken();
+      if (token == null) {
+        print('No hay token disponible');
+        throw Exception("No hay token de autenticación");
+      }
+
+      final url = Uri.parse('$baseUrl/registros/$idRegistro/eliminar-con-clave');
+
+      print("[RegistrosService] ELIMINAR CON CLAVE $idRegistro → $url");
+
+      final response = await http.delete(
+        url,
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": "Bearer $token",
+        },
+        body: jsonEncode({'clave': clave}),
+      );
+
+      //print("[RegistrosService] ELIMINAR $idRegistro → ${response.statusCode}");
+
+      final responseBody = json.decode(response.body);
+
+      if (response.statusCode == 200) {
+        return {
+          'success': true,
+          'message': responseBody['mensaje'] ?? 'Eliminado correctamente'
+        };
+      } else if (response.statusCode == 401 || response.statusCode == 403) {
+        return {
+          'success': false,
+          'message': responseBody['mensaje'] ?? 'Clave de seguridad incorrecta'
+        };
+      } else {
+        return {
+          'success': false,
+          'message': responseBody['mensaje'] ?? 'Error al eliminar el registro'
+        };
+      }
+    } catch (e) {
+      print('Error en eliminarRegistroConClave: $e');
+      return {
+        'success': false,
+        'message': 'Error de conexión: $e'
+      };
+    }
+  }
+
+  // =====================================================
   // CREAR REGISTRO (POST /api/registros)
   // =====================================================
   static Future<Mantenimiento?> crear(Map<String, dynamic> body) async {

@@ -14,54 +14,73 @@ class _RegisterScreenState extends State<RegisterScreen> {
   final TextEditingController nombreUsuarioCtrl = TextEditingController();
   final TextEditingController correoCtrl = TextEditingController();
   final TextEditingController contrasenaCtrl = TextEditingController();
+  final TextEditingController confirmarContrasenaCtrl = TextEditingController();
 
-  // Para mostrar/ocultar contraseña
+  // Clave y estado de validación del formulario
+  final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
+  bool _autoValidate = false;
+
   bool _obscurePassword = true;
-
-  // Para evitar múltiples envíos
+  bool _obscureConfirmPassword = true;
   bool _isLoading = false;
-
-  // Ícono dinámico para el correo
-  Widget? _correoSuffix;
-
-  @override
-  void initState() {
-    super.initState();
-    // Inicialmente muestra X
-    _correoSuffix = const Icon(Icons.close, color: Colors.red);
-
-    // Escuchar cambios en el campo de correo
-    correoCtrl.addListener(_validarCorreo);
-  }
 
   @override
   void dispose() {
-    correoCtrl.removeListener(_validarCorreo);
+    nombreCompletoCtrl.dispose();
+    nombreUsuarioCtrl.dispose();
+    correoCtrl.dispose();
+    contrasenaCtrl.dispose();
+    confirmarContrasenaCtrl.dispose();
     super.dispose();
   }
 
-  void _validarCorreo() {
-    final email = correoCtrl.text.trim();
+  // Validadores específicos por campo
+  String? _validarNombreCompleto(String? value) {
+    final v = value?.trim() ?? '';
+    if (v.isEmpty) return 'El nombre completo es requerido';
+    if (v.length < 3) return 'Ingresa un nombre válido';
+    return null;
+  }
 
-    // Verificar si termina con el dominio
-    if (email.endsWith('@gmail.com') || email.endsWith('@outlook.com')) {
-      setState(() => _correoSuffix = const Icon(Icons.check_circle, color: Colors.green));
-    } else {
-      setState(() => _correoSuffix = const Icon(Icons.close, color: Colors.red));
-    }
+  String? _validarNombreUsuario(String? value) {
+    final v = value?.trim() ?? '';
+    if (v.isEmpty) return 'El nombre de usuario es requerido';
+    if (v.length < 3) return 'Mínimo 3 caracteres';
+    if (v.contains(' ')) return 'No se permiten espacios';
+    return null;
+  }
+
+  String? _validarCorreo(String? value) {
+    final v = value?.trim() ?? '';
+    if (v.isEmpty) return 'El correo es requerido';
+    final emailRegex = RegExp(r'^[\w\.\-]+@[\w\-]+\.[\w\.\-]+$');
+    if (!emailRegex.hasMatch(v)) return 'Ingresa un correo válido';
+    return null;
+  }
+
+  String? _validarContrasena(String? value) {
+    final v = value?.trim() ?? '';
+    if (v.isEmpty) return 'La contraseña es requerida';
+    if (v.length < 6) return 'Mínimo 6 caracteres';
+    return null;
+  }
+
+  String? _validarConfirmarContrasena(String? value) {
+    final v = value?.trim() ?? '';
+    if (v.isEmpty) return 'Confirma tu contraseña';
+    if (v != contrasenaCtrl.text.trim()) return 'Las contraseñas no coinciden';
+    return null;
   }
 
   // Función para registrarse
   Future<void> _registrarUsuario() async {
     if (_isLoading) return;
 
-    if (nombreCompletoCtrl.text.isEmpty ||
-        nombreUsuarioCtrl.text.isEmpty ||
-        correoCtrl.text.isEmpty ||
-        contrasenaCtrl.text.isEmpty) {
-      _showSnack("Completa todos los campos");
-      return;
-    }
+    // Validación visual y valida todos los campos
+    setState(() => _autoValidate = true);
+
+    final isValid = _formKey.currentState?.validate() ?? false;
+    if (!isValid) return;
 
     setState(() => _isLoading = true);
 
@@ -75,12 +94,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
     setState(() => _isLoading = false);
 
     if (success) {
-      _showSnack("¡Felicidades, Bienvenido a la Familia!");
-
-      // Espera un momento y regresa al login
-      Future.delayed(const Duration(milliseconds: 800), () {
-        Navigator.pop(context);
-      });
+      Navigator.pop(context);
     } else {
       _showSnack("Error al registrar usuario");
     }
@@ -89,8 +103,14 @@ class _RegisterScreenState extends State<RegisterScreen> {
   void _showSnack(String msg) {
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
-        content: Text(msg),
-        backgroundColor: Color(0xFFFBC02D),
+        content: Text(
+          msg,
+          style: const TextStyle(
+            color: Colors.black,
+            fontWeight: FontWeight.w600,
+          ),
+        ),
+        backgroundColor: const Color(0xFFFBC02D),
         behavior: SnackBarBehavior.floating,
       ),
     );
@@ -114,194 +134,201 @@ class _RegisterScreenState extends State<RegisterScreen> {
                 child: IntrinsicHeight(
                   child: Padding(
                     padding: const EdgeInsets.all(20.0),
-                    child: Column(
-                      children: [
-                        // Botón atrás
-                        Align(
-                          alignment: Alignment.centerLeft,
-                          child: IconButton(
-                            onPressed: () => Navigator.pop(context),
-                            icon: const Icon(Icons.arrow_back, color: Colors.white),
+                    // 🆕 Todo envuelto en Form
+                    child: Form(
+                      key: _formKey,
+                      autovalidateMode: _autoValidate
+                          ? AutovalidateMode.onUserInteraction
+                          : AutovalidateMode.disabled,
+                      child: Column(
+                        children: [
+                          // Botón atrás
+                          Align(
+                            alignment: Alignment.centerLeft,
+                            child: IconButton(
+                              onPressed: () => Navigator.pop(context),
+                              icon: const Icon(Icons.arrow_back, color: Colors.white),
+                            ),
                           ),
-                        ),
 
-                        const SizedBox(height: 10),
+                          const SizedBox(height: 2),
 
-                        Center(
-                          child: Container(
-                            width: 120,
-                            height: 120,
-                            decoration: BoxDecoration(
-                              shape: BoxShape.circle,
-                              border: Border.all(
-                                color: Colors.red,
-                                width: 3,
-                              ),
-                              boxShadow: [
-                                BoxShadow(
-                                  color: Colors.red.withOpacity(0.3),
-                                  blurRadius: 12,
-                                  spreadRadius: 2,
+                          Center(
+                            child: Container(
+                              width: 110,
+                              height: 110,
+                              decoration: BoxDecoration(
+                                shape: BoxShape.circle,
+                                border: Border.all(
+                                  color: const Color(0xFFFBC02D),
+                                  width: 3,
                                 ),
-                              ],
-                            ),
-                            child: ClipOval(
-                              child: Image.asset(
-                                'assets/images/logoMotors.png',
-                                width: 120,
-                                height: 120,
-                                fit: BoxFit.cover,
-                                errorBuilder: (context, error, stackTrace) {
-                                  return Container(
-                                    color: Colors.grey[850],
-                                    child: Icon(
-                                      Icons.motorcycle,
-                                      color: Colors.grey[400],
-                                      size: 60,
-                                    ),
-                                  );
-                                },
-                              ),
-                            ),
-                          ),
-                        ),
-
-                        const SizedBox(height: 10),
-
-                        // Título
-                        const Text(
-                          'Registro de Usuario',
-                          style: TextStyle(
-                            color: Colors.white,
-                            fontSize: 28,
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
-
-                        const SizedBox(height: 20),
-
-                        // Campos
-                        _buildField(nombreCompletoCtrl, "Nombre Completo"),
-                        const SizedBox(height: 15),
-
-                        _buildField(nombreUsuarioCtrl, "Nombre Usuario"),
-                        const SizedBox(height: 15),
-
-                        _buildField(
-                            correoCtrl,
-                            "Correo Electrónico",
-                            isEmail: true
-                        ),
-                        const SizedBox(height: 15),
-
-                        // Contraseña
-                        TextField(
-                          controller: contrasenaCtrl,
-                          obscureText: _obscurePassword,
-                          style: const TextStyle(color: Colors.white),
-                          decoration: InputDecoration(
-                            hintText: 'Contraseña',
-                            hintStyle: const TextStyle(color: Colors.grey),
-                            label: RichText(
-                              text: const TextSpan(
-                                children: [
-                                  TextSpan(
-                                    text: 'Contraseña',
-                                    style: TextStyle(color: Colors.grey),
-                                  ),
-                                  TextSpan(
-                                    text: ' *',
-                                    style: TextStyle(
-                                      color: Colors.red,
-                                      fontWeight: FontWeight.bold,
-                                      fontSize: 14,
-                                    ),
+                                boxShadow: [
+                                  BoxShadow(
+                                    color: const Color(0xFFFBC02D).withOpacity(0.3),
+                                    blurRadius: 12,
+                                    spreadRadius: 2,
                                   ),
                                 ],
                               ),
+                              child: ClipOval(
+                                child: Image.asset(
+                                  'assets/images/logoMotors.png',
+                                  width: 110,
+                                  height: 110,
+                                  fit: BoxFit.cover,
+                                  errorBuilder: (context, error, stackTrace) {
+                                    return Container(
+                                      color: Colors.grey[850],
+                                      child: Icon(
+                                        Icons.motorcycle,
+                                        color: Colors.grey[400],
+                                        size: 55,
+                                      ),
+                                    );
+                                  },
+                                ),
+                              ),
                             ),
-                            filled: true,
-                            fillColor: Colors.grey[850],
-                            border: OutlineInputBorder(
-                              borderRadius: BorderRadius.circular(12),
-                              borderSide: const BorderSide(color: Color(0xFFFBC02D)),
+                          ),
+
+                          const SizedBox(height: 16),
+
+                          const Text(
+                            'Crear Cuenta',
+                            style: TextStyle(
+                              color: Colors.white,
+                              fontSize: 26,
+                              fontWeight: FontWeight.bold,
                             ),
-                            enabledBorder: OutlineInputBorder(
-                              borderRadius: BorderRadius.circular(12),
-                              borderSide: const BorderSide(color: Color(0xFFFBC02D)),
-                            ),
-                            focusedBorder: OutlineInputBorder(
-                              borderRadius: BorderRadius.circular(12),
-                              borderSide: const BorderSide(color: Color(0xFFFBC02D), width: 2),
-                            ),
+                          ),
+                          const SizedBox(height: 4),
+                          Text(
+                            'Únete a la familia Gorila Motors',
+                            style: TextStyle(color: Colors.grey[400], fontSize: 13),
+                          ),
+
+                          const SizedBox(height: 22),
+
+                          // Campos
+                          _buildField(
+                            nombreCompletoCtrl,
+                            "Nombre Completo",
+                            validator: _validarNombreCompleto,
+                          ),
+                          const SizedBox(height: 15),
+
+                          _buildField(
+                            nombreUsuarioCtrl,
+                            "Nombre Usuario",
+                            validator: _validarNombreUsuario,
+                          ),
+                          const SizedBox(height: 15),
+
+                          _buildField(
+                            correoCtrl,
+                            "Correo Electrónico",
+                            keyboardType: TextInputType.emailAddress,
+                            validator: _validarCorreo,
+                          ),
+                          const SizedBox(height: 15),
+
+                          // Contraseña
+                          _buildField(
+                            contrasenaCtrl,
+                            "Contraseña",
+                            obscureText: _obscurePassword,
+                            validator: _validarContrasena,
                             suffixIcon: IconButton(
                               icon: Icon(
-                                _obscurePassword
-                                    ? Icons.visibility_off
-                                    : Icons.visibility,
+                                _obscurePassword ? Icons.visibility_off : Icons.visibility,
                                 color: Colors.grey[400],
                               ),
                               onPressed: () {
-                                setState(() {
-                                  _obscurePassword = !_obscurePassword;
-                                });
+                                setState(() => _obscurePassword = !_obscurePassword);
                               },
                             ),
                           ),
-                        ),
+                          const SizedBox(height: 15),
 
-                        const SizedBox(height: 25),
-
-                        // Botón Registrar
-                        SizedBox(
-                          width: double.infinity,
-                          child: ElevatedButton(
-                            onPressed: _isLoading ? null : _registrarUsuario,
-                            style: ElevatedButton.styleFrom(
-                              backgroundColor: Color(0xFFFBC02D),
-                              padding: const EdgeInsets.symmetric(vertical: 15),
-                              shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(12),
+                          // 🆕 Confirmar contraseña
+                          _buildField(
+                            confirmarContrasenaCtrl,
+                            "Confirmar Contraseña",
+                            obscureText: _obscureConfirmPassword,
+                            validator: _validarConfirmarContrasena,
+                            suffixIcon: IconButton(
+                              icon: Icon(
+                                _obscureConfirmPassword ? Icons.visibility_off : Icons.visibility,
+                                color: Colors.grey[400],
                               ),
-                            ),
-                            child: _isLoading
-                                ? const CircularProgressIndicator(color: Colors.black)
-                                : const Text(
-                              'REGISTRARSE',
-                              style: TextStyle(
-                                color: Colors.black,
-                                fontSize: 16,
-                                fontWeight: FontWeight.bold,
-                              ),
+                              onPressed: () {
+                                setState(() => _obscureConfirmPassword = !_obscureConfirmPassword);
+                              },
                             ),
                           ),
-                        ),
 
-                        const SizedBox(height: 15),
+                          const SizedBox(height: 25),
 
-                        // Texto: ¿Ya tienes una cuenta?
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            const Text(
-                              '¿Ya tienes una cuenta? ',
-                              style: TextStyle(color: Colors.white),
-                            ),
-                            TextButton(
-                              onPressed: () => Navigator.pop(context),
-                              child: const Text(
-                                'Iniciar Sesión',
+                          // Botón Registrar
+                          SizedBox(
+                            width: double.infinity,
+                            child: ElevatedButton(
+                              onPressed: _isLoading ? null : _registrarUsuario,
+                              style: ElevatedButton.styleFrom(
+                                backgroundColor: const Color(0xFFFBC02D),
+                                padding: const EdgeInsets.symmetric(vertical: 15),
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(12),
+                                ),
+                                elevation: 3,
+                              ),
+                              child: _isLoading
+                                  ? const SizedBox(
+                                width: 22,
+                                height: 22,
+                                child: CircularProgressIndicator(
+                                  color: Colors.black,
+                                  strokeWidth: 2.5,
+                                ),
+                              )
+                                  : const Text(
+                                'REGISTRARSE',
                                 style: TextStyle(
-                                  color: Color(0xFFFBC02D),
+                                  color: Colors.black,
+                                  fontSize: 16,
                                   fontWeight: FontWeight.bold,
                                 ),
                               ),
                             ),
-                          ],
-                        ),
+                          ),
 
-                        const SizedBox(height: 20),
-                      ],
+                          const SizedBox(height: 3),
+
+                          // Texto: ¿Ya tienes una cuenta?
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              const Text(
+                                '¿Ya tienes una cuenta? ',
+                                style: TextStyle(color: Colors.white),
+                              ),
+                              TextButton(
+                                onPressed: _isLoading ? null : () => Navigator.pop(context),
+                                child: const Text(
+                                  'Iniciar Sesión',
+                                  style: TextStyle(
+                                    color: Color(0xFFFBC02D),
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
+
+                          const SizedBox(height: 20),
+                        ],
+                      ),
                     ),
                   ),
                 ),
@@ -313,15 +340,22 @@ class _RegisterScreenState extends State<RegisterScreen> {
     );
   }
 
-  // * Campos Obligatorios
-  Widget _buildField(TextEditingController ctrl, String hint,
-      {bool isEmail = false}) {
-    return TextField(
+  // 🆕 Campo reutilizable con validator y soporte de error visual
+  Widget _buildField(
+      TextEditingController ctrl,
+      String hint, {
+        String? Function(String?)? validator,
+        Widget? suffixIcon,
+        bool obscureText = false,
+        TextInputType? keyboardType,
+      }) {
+    return TextFormField(
       controller: ctrl,
+      obscureText: obscureText,
+      keyboardType: keyboardType,
       style: const TextStyle(color: Colors.white),
+      validator: validator,
       decoration: InputDecoration(
-        hintText: hint,
-        hintStyle: const TextStyle(color: Colors.grey),
         label: RichText(
           text: TextSpan(
             children: [
@@ -330,7 +364,6 @@ class _RegisterScreenState extends State<RegisterScreen> {
                 style: const TextStyle(color: Colors.grey),
               ),
               const TextSpan(
-                text: ' *',
                 style: TextStyle(
                   color: Colors.red,
                   fontWeight: FontWeight.bold,
@@ -342,7 +375,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
         ),
         filled: true,
         fillColor: Colors.grey[850],
-        suffixIcon: isEmail ? _correoSuffix : null,
+        suffixIcon: suffixIcon,
         border: OutlineInputBorder(
           borderRadius: BorderRadius.circular(12),
           borderSide: const BorderSide(color: Color(0xFFFBC02D)),
@@ -355,6 +388,16 @@ class _RegisterScreenState extends State<RegisterScreen> {
           borderRadius: BorderRadius.circular(12),
           borderSide: const BorderSide(color: Color(0xFFFBC02D), width: 2),
         ),
+        // 🆕 Bordes de error, coherentes con LoginScreen
+        errorBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(12),
+          borderSide: const BorderSide(color: Colors.redAccent, width: 1.5),
+        ),
+        focusedErrorBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(12),
+          borderSide: const BorderSide(color: Colors.redAccent, width: 2),
+        ),
+        errorStyle: const TextStyle(color: Colors.redAccent, fontSize: 12),
       ),
     );
   }

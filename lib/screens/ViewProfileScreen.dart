@@ -3,6 +3,7 @@ import 'package:url_launcher/url_launcher.dart';
 import 'EditProfileScreen.dart';
 import 'AddMotorcycleScreen.dart';
 import 'ViewMotorcycleScreen.dart';
+import 'CambiarContrasenaScreen.dart';
 import '../models/usuario.dart';
 import '../models/moto.dart';
 import '../services/moto_service.dart';
@@ -21,7 +22,7 @@ class _ViewProfileScreenState extends State<ViewProfileScreen> {
   List<Moto> motos = [];
   bool isLoading = true;
   int? selectedMotoIndex;
-  int? userRole; // Para almacenar el rol del usuario
+  int? userRole;
 
   @override
   void initState() {
@@ -34,8 +35,6 @@ class _ViewProfileScreenState extends State<ViewProfileScreen> {
     if (jsonMap != null) {
       usuario = Usuario.fromJson(jsonMap);
       motos = await MotoService.listarMotosPorUsuario(usuario!.idUsuario!);
-
-      // Obtener el Rol del Usuario
       userRole = await _obtenerRolUsuario(usuario!.idUsuario!);
     }
     setState(() {
@@ -43,12 +42,9 @@ class _ViewProfileScreenState extends State<ViewProfileScreen> {
     });
   }
 
-  // Obtener rol del usuario
   Future<int?> _obtenerRolUsuario(int idUsuario) async {
     try {
-      // Aquí llamas a tu servicio para obtener los roles
       final roles = await AuthService.obtenerRolesUsuario(idUsuario);
-
       if (roles != null && roles.isNotEmpty) {
         final rolPrincipal = roles[0] as Map<String, dynamic>;
         return rolPrincipal['idRol'] as int?;
@@ -57,36 +53,6 @@ class _ViewProfileScreenState extends State<ViewProfileScreen> {
     } catch (e) {
       print('Error obteniendo rol: $e');
       return null;
-    }
-  }
-
-  // Obtener URL según rol
-  String _obtenerEnlaceFormulario() {
-    if (userRole == 2) {
-      // CLIENTE - Formulario de usuarios
-      return 'https://forms.gle/z2tH1Vm2dYAv9wNs5';
-    } else if (userRole == 3) {
-      // MECANICO - Formulario de mecánicos
-      return 'https://forms.gle/AQCmxEGBsvGmUjTT8';
-    } else if (userRole == 1) {
-      // ADMIN - Formulario de administrador
-      return 'https://forms.gle/AQCmxEGBsvGmUjTT8';
-    } else {
-      // Rol desconocido - Sin formulario disponible
-      return 'null';
-    }
-  }
-
-// Obtener texto según rol
-  String _obtenerTextoFormulario() {
-    if (userRole == 2) {
-      return 'Formulario de Satisfacción - Cliente';
-    } else if (userRole == 3) {
-      return 'Formulario de Satisfacción - Mecánico';
-    } else if (userRole == 1) {
-      return 'Formulario de Satisfacción - Administrador';
-    } else {
-      return 'Rol no identificado';
     }
   }
 
@@ -147,33 +113,6 @@ class _ViewProfileScreenState extends State<ViewProfileScreen> {
         ],
       ),
     );
-  }
-
-  // Método para abrir URL
-  Future<void> _launchURL(String url) async {
-    try {
-      // ignore: deprecated_member_use
-      if (await canLaunch(url)) {
-        // ignore: deprecated_member_use
-        await launch(url);
-      } else {
-        if (!mounted) return;
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('No se pudo abrir el formulario'),
-            backgroundColor: Colors.red,
-          ),
-        );
-      }
-    } catch (e) {
-      if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text('Error: $e'),
-          backgroundColor: Colors.red,
-        ),
-      );
-    }
   }
 
   @override
@@ -246,7 +185,8 @@ class _ViewProfileScreenState extends State<ViewProfileScreen> {
                           ),
                           boxShadow: [
                             BoxShadow(
-                              color: const Color(0xFFFBC02D).withOpacity(0.3),
+                              color: const Color(0xFFFBC02D)
+                                  .withOpacity(0.3),
                               blurRadius: 12,
                               spreadRadius: 2,
                             ),
@@ -255,25 +195,51 @@ class _ViewProfileScreenState extends State<ViewProfileScreen> {
                         child: CircleAvatar(
                           radius: 30,
                           backgroundColor: const Color(0xFF2B2B2B),
-                          backgroundImage: usuario!.rutaImagen != null &&
-                              usuario!.rutaImagen!.isNotEmpty
-                              ? NetworkImage(usuario!.rutaImagen!)
-                              : null,
-                          child: (usuario!.rutaImagen == null ||
-                              usuario!.rutaImagen!.isEmpty)
-                              ? const Icon(
+                          child: (usuario!.rutaImagen != null &&
+                              usuario!.rutaImagen!.isNotEmpty)
+                              ? ClipOval(
+                            child: Image.network(
+                              usuario!.rutaImagen!,
+                              fit: BoxFit.cover,
+                              width: 60,
+                              height: 60,
+                              loadingBuilder:
+                                  (context, child, loadingProgress) {
+                                if (loadingProgress == null)
+                                  return child;
+                                return const Center(
+                                  child: SizedBox(
+                                    width: 20,
+                                    height: 20,
+                                    child: CircularProgressIndicator(
+                                      strokeWidth: 2,
+                                      color: Color(0xFFFBC02D),
+                                    ),
+                                  ),
+                                );
+                              },
+                              errorBuilder: (context, error,
+                                  stackTrace) =>
+                              const Icon(
+                                Icons.person,
+                                color: Colors.white54,
+                                size: 40,
+                              ),
+                            ),
+                          )
+                              : const Icon(
                             Icons.person,
                             color: Colors.white54,
                             size: 40,
-                          )
-                              : null,
+                          ),
                         ),
                       ),
                       const SizedBox(width: 16),
                       // Nombre y usuario
                       Expanded(
                         child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
+                          crossAxisAlignment:
+                          CrossAxisAlignment.start,
                           children: [
                             Text(
                               usuario!.nombreCompleto ?? 'Sin nombre',
@@ -289,7 +255,8 @@ class _ViewProfileScreenState extends State<ViewProfileScreen> {
                             Text(
                               '@${usuario!.nombreUsuario ?? 'usuario'}',
                               style: TextStyle(
-                                color: const Color(0xFFFBC02D).withOpacity(0.8),
+                                color: const Color(0xFFFBC02D)
+                                    .withOpacity(0.8),
                                 fontSize: 14,
                               ),
                             ),
@@ -299,7 +266,7 @@ class _ViewProfileScreenState extends State<ViewProfileScreen> {
                     ],
                   ),
                   const SizedBox(height: 16),
-                  // Botones
+                  // Botones - Editar Perfil y Cambiar Contraseña
                   Row(
                     children: [
                       Expanded(
@@ -310,107 +277,60 @@ class _ViewProfileScreenState extends State<ViewProfileScreen> {
                                 context,
                                 MaterialPageRoute(
                                   builder: (context) =>
-                                      EditProfileScreen(usuario: usuario!),
+                                      EditProfileScreen(
+                                          usuario: usuario!),
                                 ),
                               );
                               loadUser();
                             }
                           },
-                          icon: const Icon(Icons.edit, color: Colors.black, size: 18),
+                          icon: const Icon(Icons.edit,
+                              color: Colors.black, size: 19),
                           label: const Text(
                             'Editar Perfil',
                             style: TextStyle(
                               color: Colors.black,
-                              fontSize: 14,
+                              fontSize: 15,
                               fontWeight: FontWeight.bold,
                             ),
                           ),
                           style: ElevatedButton.styleFrom(
                             backgroundColor: const Color(0xFFFBC02D),
                             shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(10),
+                              borderRadius:
+                              BorderRadius.circular(10),
                             ),
-                            padding: const EdgeInsets.symmetric(vertical: 12),
+                            padding: const EdgeInsets.symmetric(
+                                vertical: 12),
                           ),
                         ),
                       ),
                       const SizedBox(width: 12),
-                      // ✅ BOTÓN CON ENLACE SEGÚN ROL
-                      ElevatedButton(
-                        onPressed: () {
-                          showDialog(
-                            context: context,
-                            builder: (context) => AlertDialog(
-                              backgroundColor: const Color(0xFF1E1E1E),
-                              title: Text(
-                                _obtenerTextoFormulario(),
-                                style: const TextStyle(
-                                  color: Color(0xFFFBC02D),
-                                  fontSize: 20,
-                                  fontWeight: FontWeight.bold,
-                                ),
-                              ),
-                              content: const Text(
-                                'Nos gustaría conocer tu opinión sobre la aplicación. ¿Te gustaría continuar?',
-                                style: TextStyle(color: Colors.white70),
-                              ),
-                              actions: [
-                                TextButton(
-                                  onPressed: () => Navigator.pop(context),
-                                  child: const Text(
-                                    'Cancelar',
-                                    style: TextStyle(color: Colors.white54),
-                                  ),
-                                ),
-                                ElevatedButton(
-                                  onPressed: () {
-                                    String enlace = _obtenerEnlaceFormulario();
-
-                                    // Validar si el rol tiene formulario disponible
-                                    if (enlace == 'null') {
-                                      Navigator.pop(context);
-                                      ScaffoldMessenger.of(context).showSnackBar(
-                                        const SnackBar(
-                                          content: Text('No hay formulario disponible para tu rol'),
-                                          backgroundColor: Colors.orange,
-                                        ),
-                                      );
-                                      return;
-                                    }
-
-                                    Navigator.pop(context);
-                                    _launchURL(enlace);
-                                  },
-                                  style: ElevatedButton.styleFrom(
-                                    backgroundColor: const Color(0xFFFBC02D),
-                                  ),
-                                  child: const Text(
-                                    'Continuar',
-                                    style: TextStyle(
-                                      color: Colors.black,
-                                      fontWeight: FontWeight.bold,
-                                    ),
-                                  ),
-                                ),
-                              ],
-                            ),
-                          );
-                        },
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: const Color(0xFF2B2B2B),
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(10),
-                            side: const BorderSide(
-                              color: Color(0xFFFBC02D),
-                              width: 1.5,
-                            ),
-                          ),
-                          padding: const EdgeInsets.all(12),
+                      // 👈 BOTÓN CAMBIAR CONTRASEÑA - MÁS PEQUEÑO
+                      Container(
+                        width: 60,
+                        height: 45,
+                        decoration: BoxDecoration(
+                          color: const Color(0xFFFBC02D),
+                          borderRadius: BorderRadius.circular(10),
                         ),
-                        child: const Icon(
-                          Icons.assignment_outlined,
-                          color: Color(0xFFFBC02D),
-                          size: 20,
+                        child: IconButton(
+                          onPressed: () {
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (context) =>
+                                const CambiarContrasenaScreen(),
+                              ),
+                            );
+                          },
+                          icon: const Icon(
+                            Icons.vpn_key,
+                            color: Colors.black,
+                            size: 20,
+                          ),
+                          padding: EdgeInsets.zero,
+                          constraints: const BoxConstraints(),
                         ),
                       ),
                     ],
@@ -437,7 +357,7 @@ class _ViewProfileScreenState extends State<ViewProfileScreen> {
                 ),
                 const SizedBox(width: 12),
                 const Text(
-                  'Descripción',
+                  'Detalles',
                   style: TextStyle(
                     color: Colors.white,
                     fontWeight: FontWeight.bold,
@@ -454,7 +374,8 @@ class _ViewProfileScreenState extends State<ViewProfileScreen> {
                 color: const Color(0xFF1E1E1E),
                 borderRadius: BorderRadius.circular(12),
                 border: Border.all(
-                  color: Colors.white24,
+                  color: const Color(0xFFFBC02D)
+                      .withOpacity(0.2),
                   width: 1,
                 ),
               ),
@@ -560,15 +481,16 @@ class _ViewProfileScreenState extends State<ViewProfileScreen> {
                       }
                     });
                   },
-                  // Stack con banner lateral
                   child: Stack(
                     children: [
                       Container(
-                        margin: const EdgeInsets.only(bottom: 12),
+                        margin:
+                        const EdgeInsets.only(bottom: 12),
                         padding: const EdgeInsets.all(12),
                         decoration: BoxDecoration(
                           color: const Color(0xFF1E1E1E),
-                          borderRadius: BorderRadius.circular(12),
+                          borderRadius:
+                          BorderRadius.circular(12),
                           border: Border.all(
                             color: isSelected
                                 ? const Color(0xFFFBC02D)
@@ -578,7 +500,8 @@ class _ViewProfileScreenState extends State<ViewProfileScreen> {
                           boxShadow: isSelected
                               ? [
                             BoxShadow(
-                              color: const Color(0xFFFBC02D)
+                              color: const Color(
+                                  0xFFFBC02D)
                                   .withOpacity(0.3),
                               blurRadius: 8,
                               spreadRadius: 1,
@@ -594,21 +517,30 @@ class _ViewProfileScreenState extends State<ViewProfileScreen> {
                               height: 70,
                               decoration: BoxDecoration(
                                 color: const Color(0xFF2B2B2B),
-                                borderRadius: BorderRadius.circular(10),
-                                image: motoItem.ruta_imagenMotos != null &&
-                                    motoItem.ruta_imagenMotos!.isNotEmpty
+                                borderRadius:
+                                BorderRadius.circular(10),
+                                image: motoItem
+                                    .ruta_imagenMotos !=
+                                    null &&
+                                    motoItem.ruta_imagenMotos!
+                                        .isNotEmpty
                                     ? DecorationImage(
                                   image: NetworkImage(
-                                      motoItem.ruta_imagenMotos!),
+                                      motoItem
+                                          .ruta_imagenMotos!),
                                   fit: BoxFit.cover,
                                 )
                                     : null,
                               ),
-                              child: (motoItem.ruta_imagenMotos == null ||
-                                  motoItem.ruta_imagenMotos!.isEmpty)
+                              child: (motoItem
+                                  .ruta_imagenMotos ==
+                                  null ||
+                                  motoItem.ruta_imagenMotos!
+                                      .isEmpty)
                                   ? Icon(
                                 Icons.motorcycle,
-                                color: Colors.white.withOpacity(0.3),
+                                color: Colors.white
+                                    .withOpacity(0.3),
                                 size: 35,
                               )
                                   : null,
@@ -617,24 +549,28 @@ class _ViewProfileScreenState extends State<ViewProfileScreen> {
                             // Info de la moto
                             Expanded(
                               child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
+                                crossAxisAlignment:
+                                CrossAxisAlignment.start,
                                 children: [
                                   Text(
                                     '${motoItem.marca ?? '-'} ${motoItem.modelo ?? '-'}',
                                     style: const TextStyle(
                                       color: Colors.white,
                                       fontSize: 16,
-                                      fontWeight: FontWeight.bold,
+                                      fontWeight:
+                                      FontWeight.bold,
                                     ),
                                     maxLines: 1,
-                                    overflow: TextOverflow.ellipsis,
+                                    overflow:
+                                    TextOverflow.ellipsis,
                                   ),
                                   const SizedBox(height: 8),
                                   buildMotoRow(
                                     'Placa',
                                     motoItem.placa ?? '-',
                                     'Año',
-                                    motoItem.anio?.toString() ?? '-',
+                                    motoItem.anio?.toString() ??
+                                        '-',
                                   ),
                                   buildMotoRow(
                                     'Km',
@@ -663,19 +599,24 @@ class _ViewProfileScreenState extends State<ViewProfileScreen> {
                           top: 0,
                           right: 0,
                           child: Container(
-                            padding: const EdgeInsets.symmetric(
+                            padding:
+                            const EdgeInsets.symmetric(
                               horizontal: 12,
                               vertical: 6,
                             ),
                             decoration: BoxDecoration(
                               color: const Color(0xFFFBC02D),
-                              borderRadius: const BorderRadius.only(
-                                topRight: Radius.circular(12),
-                                bottomLeft: Radius.circular(12),
+                              borderRadius:
+                              const BorderRadius.only(
+                                topRight:
+                                Radius.circular(12),
+                                bottomLeft:
+                                Radius.circular(12),
                               ),
                               boxShadow: [
                                 BoxShadow(
-                                  color: Colors.black.withOpacity(0.4),
+                                  color: Colors.black
+                                      .withOpacity(0.4),
                                   blurRadius: 6,
                                   offset: const Offset(0, 2),
                                 ),
@@ -713,7 +654,8 @@ class _ViewProfileScreenState extends State<ViewProfileScreen> {
                     ),
                   ).then((_) => loadUser());
                 },
-                icon: const Icon(Icons.add, color: Colors.black, size: 22),
+                icon: const Icon(Icons.add,
+                    color: Colors.black, size: 22),
                 label: const Text(
                   'AÑADIR MI MOTO',
                   style: TextStyle(

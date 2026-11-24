@@ -16,6 +16,13 @@ class _MantenimientosPageState extends State<MantenimientosPage> {
   String _filtroSeleccionado = 'todos';
   bool _ordenReciente = true;
   List<RegistroDTO> _registrosCache = [];
+  int? _diaFiltro;
+  int? _mesFiltro;
+  int? _anioFiltro;
+  String _terminoBusqueda = '';
+  final TextEditingController _searchController = TextEditingController();
+
+  OverlayEntry? _alertOverlay;
 
   @override
   void initState() {
@@ -28,6 +35,283 @@ class _MantenimientosPageState extends State<MantenimientosPage> {
       registrosFuture = RegistrosService.listarRegistros();
       _registrosCache = [];
     });
+  }
+
+  // ================= SISTEMA DE ALERTAS CENTRAL =================
+  void _mostrarAlertaCentral({
+    required String mensaje,
+    required IconData icono,
+    required Color color,
+    Duration duracion = const Duration(seconds: 2),
+  }) {
+    _removerAlerta();
+
+    // Crear overlay
+    _alertOverlay = OverlayEntry(
+      builder: (context) => Positioned(
+        top: MediaQuery.of(context).size.height / 2 - 80,
+        left: 40,
+        right: 40,
+        child: Material(
+          color: Colors.transparent,
+          child: TweenAnimationBuilder<double>(
+            duration: const Duration(milliseconds: 300),
+            tween: Tween(begin: 0.0, end: 1.0),
+            builder: (context, value, child) {
+              return Opacity(
+                opacity: value,
+                child: Transform.scale(
+                  scale: value,
+                  child: child,
+                ),
+              );
+            },
+            child: Container(
+              padding: const EdgeInsets.all(24),
+              decoration: BoxDecoration(
+                color: Colors.grey[900]!.withOpacity(0.95),
+                borderRadius: BorderRadius.circular(20),
+                border: Border.all(
+                  color: color.withOpacity(0.5),
+                  width: 2,
+                ),
+                boxShadow: [
+                  BoxShadow(
+                    color: color.withOpacity(0.2),
+                    blurRadius: 20,
+                    spreadRadius: 5,
+                  ),
+                ],
+              ),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Container(
+                    padding: const EdgeInsets.all(12),
+                    decoration: BoxDecoration(
+                      color: color.withOpacity(0.2),
+                      shape: BoxShape.circle,
+                    ),
+                    child: Icon(icono, color: color, size: 32),
+                  ),
+                  const SizedBox(height: 12),
+                  Text(
+                    mensaje,
+                    style: const TextStyle(
+                      color: Colors.white,
+                      fontSize: 15,
+                      fontWeight: FontWeight.w600,
+                    ),
+                    textAlign: TextAlign.center,
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+
+    // Insertar overlay
+    Overlay.of(context).insert(_alertOverlay!);
+
+    Future.delayed(duracion, _removerAlerta);
+  }
+
+  void _removerAlerta() {
+    _alertOverlay?.remove();
+    _alertOverlay = null;
+  }
+
+  void _mostrarExito(String mensaje) {
+    _mostrarAlertaCentral(
+      mensaje: mensaje,
+      icono: Icons.check_circle_outline,
+      color: Colors.green,
+    );
+  }
+
+  void _mostrarError(String mensaje) {
+    _mostrarAlertaCentral(
+      mensaje: mensaje,
+      icono: Icons.error_outline,
+      color: Colors.red,
+      duracion: const Duration(seconds: 3),
+    );
+  }
+
+  // ================= ELIMINAR CON CLAVE =================
+  Future<void> _mostrarDialogoEliminar(RegistroDTO registro) async {
+    String claveIngresada = '';
+    bool mostrarClave = false;
+
+    return showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (BuildContext context) {
+        return StatefulBuilder(
+          builder: (context, setDialogState) {
+            return AlertDialog(
+              backgroundColor: const Color(0xFF1E1E1E),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(16),
+                side: const BorderSide(color: Colors.red, width: 2),
+              ),
+              title: Row(
+                children: [
+                  const Icon(Icons.warning_amber_rounded, color: Colors.red, size: 28),
+                  const SizedBox(width: 10),
+                  const Text(
+                    'Eliminar Mantenimiento',
+                    style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 18),
+                  ),
+                ],
+              ),
+              content: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    '¿Estás seguro de eliminar este mantenimiento?',
+                    style: TextStyle(color: Colors.white70, fontSize: 14),
+                  ),
+                  const SizedBox(height: 8),
+                  Text(
+                    'Cliente: ${registro.nombreCliente}',
+                    style: TextStyle(color: Colors.yellow, fontSize: 12),
+                  ),
+                  const SizedBox(height: 16),
+                  const Text(
+                    'Ingresa la clave de seguridad:',
+                    style: TextStyle(color: Colors.white, fontSize: 13, fontWeight: FontWeight.bold),
+                  ),
+                  const SizedBox(height: 8),
+                  TextField(
+                    style: const TextStyle(color: Colors.white),
+                    obscureText: !mostrarClave,
+                    decoration: InputDecoration(
+                      hintText: 'Clave de seguridad',
+                      hintStyle: const TextStyle(color: Colors.white38),
+                      prefixIcon: const Icon(Icons.lock, color: Colors.white54),
+                      suffixIcon: IconButton(
+                        icon: Icon(
+                          mostrarClave ? Icons.visibility_off : Icons.visibility,
+                          color: Colors.white54,
+                        ),
+                        onPressed: () {
+                          setDialogState(() {
+                            mostrarClave = !mostrarClave;
+                          });
+                        },
+                      ),
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(10),
+                        borderSide: const BorderSide(color: Colors.white24),
+                      ),
+                      enabledBorder: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(10),
+                        borderSide: const BorderSide(color: Colors.white24),
+                      ),
+                      focusedBorder: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(10),
+                        borderSide: const BorderSide(color: Color(0xFFFBC02D)),
+                      ),
+                    ),
+                    onChanged: (value) {
+                      claveIngresada = value;
+                    },
+                  ),
+                ],
+              ),
+              actions: [
+                TextButton(
+                  onPressed: () => Navigator.pop(context),
+                  child: const Text(
+                    'Cancelar',
+                    style: TextStyle(color: Colors.white54),
+                  ),
+                ),
+                ElevatedButton(
+                  onPressed: () async {
+                    if (claveIngresada.isEmpty) {
+                      _mostrarError('Ingresa la clave de seguridad');
+                      return;
+                    }
+
+                    Navigator.pop(context);
+
+                    final resultado = await RegistrosService.eliminarRegistroConClave(
+                      registro.idRegistro,
+                      claveIngresada,
+                    );
+
+                    // Remover carga
+                    _removerAlerta();
+
+                    // Limpiar mensaje
+                    String mensaje = resultado['message'] ?? '';
+                    // Remover emojis comunes
+                    mensaje = mensaje
+                        .replaceAll('✅', '')
+                        .replaceAll('❌', '')
+                        .replaceAll('⏳', '')
+                        .trim();
+
+                    if (resultado['success'] == true) {
+                      _mostrarExito(mensaje.isNotEmpty ? mensaje : 'Mantenimiento eliminado correctamente');
+                      _recargarLista();
+                    } else {
+                      _mostrarError(mensaje.isNotEmpty ? mensaje : 'Error al eliminar el mantenimiento');
+                    }
+                  },
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Colors.red,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                  ),
+                  child: const Text(
+                    'Eliminar',
+                    style: TextStyle(color: Colors.white),
+                  ),
+                ),
+              ],
+            );
+          },
+        );
+      },
+    );
+  }
+
+  // ================= PARSEAR FECHA =================
+  DateTime? _parsearFecha(String fecha) {
+    try {
+      final partes = fecha.split(',').map((p) => p.trim()).toList();
+      if (partes.length == 3) {
+        return DateTime(
+          int.parse(partes[0]),
+          int.parse(partes[1]),
+          int.parse(partes[2]),
+        );
+      }
+    } catch (_) {}
+
+    try {
+      return DateTime.parse(fecha);
+    } catch (_) {}
+
+    try {
+      final partes = fecha.split('/');
+      if (partes.length == 3) {
+        return DateTime(
+          int.parse(partes[2]),
+          int.parse(partes[1]),
+          int.parse(partes[0]),
+        );
+      }
+    } catch (_) {}
+
+    return null;
   }
 
   // ================= HELPERS DE ESTADO =================
@@ -68,6 +352,7 @@ class _MantenimientosPageState extends State<MantenimientosPage> {
   List<RegistroDTO> _aplicarFiltro(List<RegistroDTO> registros) {
     List<RegistroDTO> resultado;
 
+    // Filtro por estado
     switch (_filtroSeleccionado) {
       case 'recibido':
         resultado = registros.where((r) => r.estado == 0).toList();
@@ -89,6 +374,32 @@ class _MantenimientosPageState extends State<MantenimientosPage> {
         resultado = List.from(registros);
     }
 
+    // Filtro por fecha
+    if (_diaFiltro != null || _mesFiltro != null || _anioFiltro != null) {
+      resultado = resultado.where((r) {
+        final fecha = _parsearFecha(r.fecha);
+        if (fecha == null) return false;
+        if (_anioFiltro != null && fecha.year != _anioFiltro) return false;
+        if (_mesFiltro != null && fecha.month != _mesFiltro) return false;
+        if (_diaFiltro != null && fecha.day != _diaFiltro) return false;
+        return true;
+      }).toList();
+    }
+
+    // ================= FILTRO POR BÚSQUEDA =================
+    if (_terminoBusqueda.isNotEmpty) {
+      final termino = _terminoBusqueda.toLowerCase().trim();
+      resultado = resultado.where((r) {
+        final nombre = r.nombreCliente.toLowerCase();
+        final placa = r.placaMoto.toLowerCase();
+        final modelo = r.modeloMoto.toLowerCase();
+        return nombre.contains(termino) ||
+            placa.contains(termino) ||
+            modelo.contains(termino);
+      }).toList();
+    }
+
+    // Ordenamiento
     resultado.sort((a, b) => _ordenReciente
         ? b.fecha.compareTo(a.fecha)
         : a.fecha.compareTo(b.fecha));
@@ -98,16 +409,319 @@ class _MantenimientosPageState extends State<MantenimientosPage> {
 
   // ================= MENSAJE VACIO =================
   String _mensajeVacio() {
+    if (_terminoBusqueda.isNotEmpty) {
+      return 'No se encontraron mantenimientos que coincidan con la búsqueda';
+    }
     switch (_filtroSeleccionado) {
-      case 'recibido':   return 'No hay mantenimientos recibidos';
-      case 'enProceso':  return 'No hay mantenimientos en proceso';
+      case 'recibido': return 'No hay mantenimientos recibidos';
+      case 'enProceso': return 'No hay mantenimientos en proceso';
       case 'finalizado': return 'No hay mantenimientos finalizados';
-      case 'entregado':  return 'No hay mantenimientos entregados';
-      case 'facturado':  return 'No hay mantenimientos facturados';
-      default:           return 'No hay mantenimientos registrados';
+      case 'entregado': return 'No hay mantenimientos entregados';
+      case 'facturado': return 'No hay mantenimientos facturados';
+      default: return 'No hay mantenimientos registrados';
     }
   }
 
+  // ================= FILTRO DE FECHA =================
+  void _mostrarFiltroFecha() {
+    int? diaTemp = _diaFiltro;
+    int? mesTemp = _mesFiltro;
+    int? anioTemp = _anioFiltro;
+
+    final meses = [
+      'Ene', 'Feb', 'Mar', 'Abr', 'May', 'Jun',
+      'Jul', 'Ago', 'Sep', 'Oct', 'Nov', 'Dic'
+    ];
+
+    final aniosDisponibles = _registrosCache
+        .map((r) => _parsearFecha(r.fecha)?.year)
+        .whereType<int>()
+        .toSet()
+        .toList()
+      ..sort((a, b) => b.compareTo(a));
+
+    if (aniosDisponibles.isEmpty) {
+      aniosDisponibles.add(DateTime.now().year);
+    }
+
+    showModalBottomSheet(
+      context: context,
+      backgroundColor: const Color(0xFF1E1E1E),
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+      ),
+      builder: (context) {
+        return StatefulBuilder(
+          builder: (context, setModalState) {
+            return Padding(
+              padding: EdgeInsets.only(
+                left: 20,
+                right: 20,
+                top: 20,
+                bottom: MediaQuery.of(context).viewInsets.bottom + 20,
+              ),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      const Text(
+                        'Filtrar por fecha',
+                        style: TextStyle(
+                          color: Colors.white,
+                          fontSize: 18,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                      IconButton(
+                        icon: const Icon(Icons.close, color: Colors.white54),
+                        onPressed: () => Navigator.pop(context),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 4),
+                  const Text(
+                    'Selecciona año, mes y día',
+                    style: TextStyle(color: Colors.white54, fontSize: 12),
+                  ),
+                  const SizedBox(height: 16),
+                  Row(
+                    children: [
+                      Expanded(
+                        child: _buildDropdownFiltroCompacto<int>(
+                          label: 'Año',
+                          value: anioTemp,
+                          items: aniosDisponibles,
+                          itemLabel: (a) => a.toString(),
+                          onChanged: (v) => setModalState(() => anioTemp = v),
+                          width: 70,
+                        ),
+                      ),
+                      const SizedBox(width: 8),
+                      Expanded(
+                        child: _buildDropdownFiltroCompacto<int>(
+                          label: 'Mes',
+                          value: mesTemp,
+                          items: List.generate(12, (i) => i + 1),
+                          itemLabel: (m) => meses[m - 1],
+                          onChanged: (v) => setModalState(() => mesTemp = v),
+                          width: 60,
+                        ),
+                      ),
+                      const SizedBox(width: 8),
+                      Expanded(
+                        child: _buildDropdownFiltroCompacto<int>(
+                          label: 'Día',
+                          value: diaTemp,
+                          items: List.generate(31, (i) => i + 1),
+                          itemLabel: (d) => d.toString().padLeft(2, '0'),
+                          onChanged: (v) => setModalState(() => diaTemp = v),
+                          width: 50,
+                        ),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 20),
+                  Row(
+                    children: [
+                      Expanded(
+                        child: OutlinedButton(
+                          onPressed: () {
+                            setModalState(() {
+                              diaTemp = null;
+                              mesTemp = null;
+                              anioTemp = null;
+                            });
+                          },
+                          style: OutlinedButton.styleFrom(
+                            side: const BorderSide(color: Colors.white38),
+                            padding: const EdgeInsets.symmetric(vertical: 12),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(10),
+                            ),
+                          ),
+                          child: const Text(
+                            'Limpiar',
+                            style: TextStyle(color: Colors.white70),
+                          ),
+                        ),
+                      ),
+                      const SizedBox(width: 12),
+                      Expanded(
+                        child: ElevatedButton(
+                          onPressed: () {
+                            setState(() {
+                              _diaFiltro = diaTemp;
+                              _mesFiltro = mesTemp;
+                              _anioFiltro = anioTemp;
+                            });
+                            Navigator.pop(context);
+                          },
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: const Color(0xFFFBC02D),
+                            padding: const EdgeInsets.symmetric(vertical: 12),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(10),
+                            ),
+                          ),
+                          child: const Text(
+                            'Aplicar',
+                            style: TextStyle(
+                              color: Colors.black,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ],
+              ),
+            );
+          },
+        );
+      },
+    );
+  }
+
+  Widget _buildDropdownFiltroCompacto<T>({
+    required String label,
+    required T? value,
+    required List<T> items,
+    required String Function(T) itemLabel,
+    required void Function(T?) onChanged,
+    double width = 70,
+  }) {
+    return Container(
+      height: 44,
+      padding: const EdgeInsets.symmetric(horizontal: 8),
+      decoration: BoxDecoration(
+        color: Colors.grey[900],
+        borderRadius: BorderRadius.circular(8),
+        border: Border.all(color: const Color(0xFFFBC02D).withOpacity(0.4)),
+      ),
+      child: DropdownButtonHideUnderline(
+        child: DropdownButton<T?>(
+          isExpanded: true,
+          value: value,
+          dropdownColor: Colors.grey[900],
+          hint: Text(label, style: const TextStyle(color: Colors.white54, fontSize: 12)),
+          icon: const Icon(Icons.arrow_drop_down, color: Color(0xFFFBC02D), size: 20),
+          style: const TextStyle(color: Colors.white, fontSize: 13),
+          items: [
+            DropdownMenuItem<T?>(
+              value: null,
+              child: Text('Todo', style: const TextStyle(color: Colors.white54, fontSize: 12)),
+            ),
+            ...items.map(
+                  (item) => DropdownMenuItem<T?>(
+                value: item,
+                child: Text(
+                  itemLabel(item),
+                  style: const TextStyle(fontSize: 13),
+                ),
+              ),
+            ),
+          ],
+          onChanged: (v) => onChanged(v),
+          elevation: 8,
+        ),
+      ),
+    );
+  }
+
+  Widget _buildChipFiltroFecha() {
+    if (_diaFiltro == null && _mesFiltro == null && _anioFiltro == null) {
+      return const SizedBox.shrink();
+    }
+
+    final meses = [
+      'Ene', 'Feb', 'Mar', 'Abr', 'May', 'Jun',
+      'Jul', 'Ago', 'Sep', 'Oct', 'Nov', 'Dic'
+    ];
+
+    final partes = <String>[];
+    if (_diaFiltro != null) partes.add(_diaFiltro.toString().padLeft(2, '0'));
+    if (_mesFiltro != null) partes.add(meses[_mesFiltro! - 1]);
+    if (_anioFiltro != null) partes.add(_anioFiltro.toString());
+
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+      child: Align(
+        alignment: Alignment.centerLeft,
+        child: Chip(
+          avatar: const Icon(Icons.event, size: 16, color: Colors.black),
+          label: Text(
+            partes.join(' '),
+            style: const TextStyle(color: Colors.black, fontWeight: FontWeight.w600),
+          ),
+          backgroundColor: const Color(0xFFFBC02D),
+          deleteIcon: const Icon(Icons.close, size: 16, color: Colors.black),
+          onDeleted: () {
+            setState(() {
+              _diaFiltro = null;
+              _mesFiltro = null;
+              _anioFiltro = null;
+            });
+          },
+        ),
+      ),
+    );
+  }
+
+  // ================= BARRA DE BÚSQUEDA =================
+  Widget _buildSearchBar() {
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+      child: Container(
+        decoration: BoxDecoration(
+          color: const Color(0xFF1E1E1E),
+          borderRadius: BorderRadius.circular(12),
+          border: Border.all(
+            color: Color(0xFFFBC02D).withOpacity(0.2),
+            width: 1.5,
+          ),
+        ),
+        child: TextField(
+          style: const TextStyle(color: Colors.white),
+          controller: _searchController,
+          decoration: InputDecoration(
+            hintText: 'Buscar por nombre, placa o modelo...',
+            hintStyle: TextStyle(color: Colors.white.withOpacity(0.4)),
+            prefixIcon: Icon(
+              Icons.search,
+              color: Color(0xFFFBC02D),
+            ),
+            suffixIcon: _terminoBusqueda.isNotEmpty
+                ? IconButton(
+              icon: const Icon(Icons.clear, color: Color(0xFFE53935)),
+              onPressed: () {
+                setState(() {
+                  _terminoBusqueda = '';
+                  _searchController.clear();
+                });
+              },
+            )
+                : null,
+            border: InputBorder.none,
+            contentPadding: const EdgeInsets.symmetric(
+              horizontal: 16,
+              vertical: 12,
+            ),
+          ),
+          onChanged: (value) {
+            setState(() {
+              _terminoBusqueda = value;
+            });
+          },
+        ),
+      ),
+    );
+  }
+
+  // ================= BUILD =================
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -124,10 +738,20 @@ class _MantenimientosPageState extends State<MantenimientosPage> {
           style: TextStyle(
             color: Colors.black,
             fontWeight: FontWeight.normal,
-            fontSize: 22,
+            fontSize: 21,
           ),
         ),
         actions: [
+          IconButton(
+            icon: Icon(
+              Icons.calendar_month,
+              color: (_diaFiltro != null || _mesFiltro != null || _anioFiltro != null)
+                  ? Colors.black
+                  : Colors.black54,
+            ),
+            tooltip: 'Filtrar por Fecha',
+            onPressed: _mostrarFiltroFecha,
+          ),
           IconButton(
             icon: Icon(
               _ordenReciente ? Icons.arrow_downward : Icons.arrow_upward,
@@ -216,6 +840,8 @@ class _MantenimientosPageState extends State<MantenimientosPage> {
           return Column(
             children: [
               _buildHeaderStats(registros),
+              _buildSearchBar(),
+              _buildChipFiltroFecha(),
               Expanded(child: _buildListaMantenimientos(registros)),
             ],
           );
@@ -264,10 +890,16 @@ class _MantenimientosPageState extends State<MantenimientosPage> {
               ),
             ),
             const SizedBox(height: 8),
-            const Text(
-              "Presiona el botón + para agregar uno",
-              style: TextStyle(color: Colors.white38, fontSize: 14),
-            ),
+            if (_terminoBusqueda.isEmpty)
+              const Text(
+                "Presiona el botón + para agregar uno",
+                style: TextStyle(color: Colors.white38, fontSize: 14),
+              )
+            else
+              const Text(
+                "Intenta con otros términos de búsqueda",
+                style: TextStyle(color: Colors.white38, fontSize: 14),
+              ),
           ],
         ),
       );
@@ -283,11 +915,11 @@ class _MantenimientosPageState extends State<MantenimientosPage> {
   }
 
   Widget _buildHeaderStats(List<RegistroDTO> registros) {
-    final recibidos   = registros.where((r) => r.estado == 0).length;
-    final enProceso   = registros.where((r) => r.estado == 1).length;
+    final recibidos = registros.where((r) => r.estado == 0).length;
+    final enProceso = registros.where((r) => r.estado == 1).length;
     final finalizados = registros.where((r) => r.estado == 2).length;
-    final entregados  = registros.where((r) => r.estado == 3).length;
-    final facturados  = registros.where((r) => r.estado == 4).length;
+    final entregados = registros.where((r) => r.estado == 3).length;
+    final facturados = registros.where((r) => r.estado == 4).length;
 
     return Container(
       margin: const EdgeInsets.all(10),
@@ -448,8 +1080,8 @@ class _MantenimientosPageState extends State<MantenimientosPage> {
         child: Material(
           color: Colors.transparent,
           child: InkWell(
-            onTap: () {
-              Navigator.push(
+            onTap: () async {
+              final resultado = await Navigator.push(
                 context,
                 MaterialPageRoute(
                   builder: (_) => DetalleMantenimientoPage(
@@ -457,6 +1089,12 @@ class _MantenimientosPageState extends State<MantenimientosPage> {
                   ),
                 ),
               );
+              if (resultado == true) {
+                _recargarLista();
+              }
+            },
+            onLongPress: () {
+              _mostrarDialogoEliminar(registro);
             },
             borderRadius: BorderRadius.circular(16),
             child: Padding(
@@ -464,14 +1102,13 @@ class _MantenimientosPageState extends State<MantenimientosPage> {
               child: Row(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  // Imagen con badge
                   Stack(
                     children: [
                       ClipRRect(
                         borderRadius: BorderRadius.circular(12),
                         child: Container(
-                          width: 100,
-                          height: 100,
+                          width: 80,
+                          height: 80,
                           color: Colors.grey[800],
                           child: registro.rutaImagenMoto.isNotEmpty
                               ? Image.network(
@@ -512,10 +1149,7 @@ class _MantenimientosPageState extends State<MantenimientosPage> {
                       ),
                     ],
                   ),
-
                   const SizedBox(width: 12),
-
-                  // Información
                   Expanded(
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
@@ -538,7 +1172,7 @@ class _MantenimientosPageState extends State<MantenimientosPage> {
                             const SizedBox(width: 4),
                             Expanded(
                               child: Text(
-                                "${registro.marcaMoto} - ${registro.modeloMoto}",
+                                "${registro.placaMoto} - ${registro.modeloMoto}",
                                 style: const TextStyle(
                                     color: Colors.white70, fontSize: 13),
                                 maxLines: 1,
@@ -575,7 +1209,6 @@ class _MantenimientosPageState extends State<MantenimientosPage> {
                         Row(
                           mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           children: [
-                            // Badge de estado
                             Container(
                               padding: const EdgeInsets.symmetric(
                                   horizontal: 12, vertical: 6),
@@ -608,10 +1241,10 @@ class _MantenimientosPageState extends State<MantenimientosPage> {
                                 ],
                               ),
                             ),
-                            Icon(
+                            const Icon(
                               Icons.arrow_forward_ios,
                               size: 16,
-                              color: const Color(0xFFFFD700).withOpacity(0.5),
+                              color: Color(0xFFFFD700),
                             ),
                           ],
                         ),

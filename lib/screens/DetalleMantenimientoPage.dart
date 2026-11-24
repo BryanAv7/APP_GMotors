@@ -1,12 +1,17 @@
 import 'package:flutter/material.dart';
 import '../models/RegistroDetalleDTO.dart';
 import '../models/detalle_ui.dart';
-import '../models/Tipo.dart';
+import '../models/Tipo.dart' hide Producto;
+import '../models/productos.dart';
 import '../services/registros_service.dart';
 import '../services/tipo_service.dart';
+import '../services/productos_service.dart';
 import '../screens/seleccionar_productos_page.dart';
 import 'package:flutter/services.dart';
 import '../services/pdf_factura_service.dart';
+import '../services/auth_service.dart';
+import '../utils/token_manager.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 class DetalleMantenimientoPage extends StatefulWidget {
   final int idRegistro;
@@ -25,11 +30,14 @@ class _DetalleMantenimientoPageState extends State<DetalleMantenimientoPage> {
   late Future<RegistroDetalleDTO> futureDetalle;
   List<DetalleUI> detallesSeleccionados = [];
   List<Tipo> tiposMantenimiento = [];
+  List<Producto> productosCatalogo = [];
   bool guardando = false;
   bool intentoGuardar = false;
   final _formKey = GlobalKey<FormState>();
   int? idTipoSeleccionado;
   int? estadoSeleccionado;
+  String? telefonoCliente;
+  bool esAdministrador = false;
   final TextEditingController observacionesCtrl = TextEditingController();
   final TextEditingController kilometrajeCtrl = TextEditingController();
 
@@ -39,6 +47,7 @@ class _DetalleMantenimientoPageState extends State<DetalleMantenimientoPage> {
     _cargarTipos();
     _cargarRegistro();
     _cargarTodoEnOrden();
+    _verificarAdministrador();
   }
 
   Future<void> _cargarTipos() async {
@@ -52,9 +61,56 @@ class _DetalleMantenimientoPageState extends State<DetalleMantenimientoPage> {
     }
   }
 
+  // Cargar nombre de los productos
+  Future<void> _cargarProductosCatalogo() async {
+    try {
+      final productos = await ProductoService.listarProductos();
+      setState(() {
+        productosCatalogo = productos;
+      });
+    } catch (e) {
+      print('Error al cargar catálogo de productos: $e');
+    }
+  }
+
   Future<void> _cargarTodoEnOrden() async {
-    await _cargarTipos();    // espera a que tipos estén listos
-    await _cargarRegistro(); // luego carga el registro
+    await _cargarTipos();
+    await _cargarProductosCatalogo();
+    await _cargarRegistro();
+  }
+
+  // En caso de error. Buscar el nombre del producto por ID.
+  String _cargarNombreProducto(String? descripcion, int? idProducto) {
+    if (descripcion != null && descripcion.trim().isNotEmpty) {
+      return descripcion;
+    }
+
+    if (idProducto != null && productosCatalogo.isNotEmpty) {
+      final encontrado = productosCatalogo
+          .where((p) => p.idProducto == idProducto)
+          .toList();
+      if (encontrado.isNotEmpty) {
+        return encontrado.first.nombre ?? '';
+      }
+    }
+
+    return descripcion ?? '';
+  }
+
+
+  String? _cargarImagenProducto(int? idProducto) {
+    if (idProducto == null || productosCatalogo.isEmpty) return null;
+
+    final encontrado = productosCatalogo
+        .where((p) => p.idProducto == idProducto)
+        .toList();
+
+    if (encontrado.isEmpty) return null;
+
+    final ruta = encontrado.first.rutaImagenProductos;
+    if (ruta == null || ruta.trim().isEmpty) return null;
+
+    return ruta;
   }
 
   Future<void> _cargarRegistro() async {
@@ -63,7 +119,6 @@ class _DetalleMantenimientoPageState extends State<DetalleMantenimientoPage> {
     try {
       final detalle = await futureDetalle;
 
-      // Cargar observaciones
       if (detalle.descripcion != null) {
         setState(() {
           observacionesCtrl.text = detalle.descripcion!;
@@ -76,7 +131,6 @@ class _DetalleMantenimientoPageState extends State<DetalleMantenimientoPage> {
         });
       }
 
-      // Buscar el ID del tipo por su nombre
       int? idTipo;
       if (detalle.tipoMantenimiento != null && tiposMantenimiento.isNotEmpty) {
         try {
@@ -92,6 +146,7 @@ class _DetalleMantenimientoPageState extends State<DetalleMantenimientoPage> {
       setState(() {
         idTipoSeleccionado = idTipo;
         estadoSeleccionado = detalle.estado;
+        telefonoCliente = detalle.telefonoCliente;
       });
 
       if (detalle.idFactura != null) {
@@ -99,25 +154,80 @@ class _DetalleMantenimientoPageState extends State<DetalleMantenimientoPage> {
           detalle.idFactura!,
         );
 
-        setState(() {
-          detallesSeleccionados = detalles.map((d) {
-            final desc = d.descripcion; // viene del backend, puede traer [PROD] o [MO]
 
-            return DetalleUI(
-              idProducto: d.idProducto,
-              nombre: quitarMarca(desc),            // texto limpio, sin la marca
-              cantidad: d.cantidad,
-              precioUnitario: d.precioUnitario,
-              esProducto: d.idProducto != null,     // con ID = producto de inventario
-              tipoConcepto: d.idProducto == null
-                  ? tipoDesdeDescripcion(desc)      // 'producto', 'manoObra' o null
-                  : null,
-            );
-          }).toList();                              // sin .toSet()
-        });
+        if (productosCatalogo.isEmpty) {
+          await _cargarProductosCatalogo();
+        }
+
+        setState(() {
+  detallesSeleccionados = detalles.map((d) {
+    final desc = d.descripcion; // puede traer [PROD] o [MO]
+    final esInventario = d.idProducto != null;
+
+    return DetalleUI(
+      idProducto: d.idProducto,
+      nombre: esInventario
+          ? _cargarNombreProducto(desc, d.idProducto)
+          : quitarMarca(desc),
+      cantidad: d.cantidad,
+      precioUnitario: d.precioUnitario,
+      esProducto: esInventario,
+      imagenUrl: esInventario ? _cargarImagenProducto(d.idProducto) : null,
+      tipoConcepto: esInventario ? null : tipoDesdeDescripcion(desc),
+    );
+  }).toList(); // sin .toSet()
+});
       }
     } catch (e) {
       print('Error al cargar detalles: $e');
+    }
+  }
+
+  Future<void> _verificarAdministrador() async {
+    try {
+      final userMap = await TokenManager.getUserJson();
+
+      if (userMap == null) {
+        //print('[DetalleMantenimiento] No hay usuario guardado');
+        return;
+      }
+
+      final rolesList = userMap['roles'] as List? ?? [];
+
+      bool esAdmin = false;
+
+      for (var item in rolesList) {
+        if (item is Map) {
+
+          final idRol = item['idRol'];
+
+          if (idRol == 1 || idRol?.toString() == '1') {
+            esAdmin = true;
+            break;
+          }
+
+          final rolObj = item['rol'];
+
+          if (rolObj is Map) {
+            final idRolInterno = rolObj['id_rol'];
+
+            if (idRolInterno == 1 ||
+                idRolInterno?.toString() == '1') {
+              esAdmin = true;
+              break;
+            }
+          }
+        }
+      }
+
+      if (!mounted) return;
+
+      setState(() {
+        esAdministrador = esAdmin;
+      });
+
+    } catch (e) {
+      print("Error al cargar el rol del usuario: $e");
     }
   }
 
@@ -126,6 +236,39 @@ class _DetalleMantenimientoPageState extends State<DetalleMantenimientoPage> {
     observacionesCtrl.dispose();
     kilometrajeCtrl.dispose();
     super.dispose();
+  }
+
+  String? _formatearNumeroWhatsApp(String? numero) {
+    if (numero == null || numero.trim().isEmpty) return null;
+
+    String limpio = numero.replaceAll(RegExp(r'[^0-9]'), '');
+
+    if (limpio.isEmpty) return null;
+
+    if (limpio.startsWith('0') && limpio.length == 10) {
+      limpio = '593${limpio.substring(1)}';
+    } else if (limpio.length == 9) {
+      limpio = '593$limpio';
+    }
+
+    return limpio;
+  }
+
+  Future<void> _abrirWhatsApp() async {
+    final numeroFormateado = _formatearNumeroWhatsApp(telefonoCliente);
+
+    if (numeroFormateado == null) {
+      _mostrarError('Este cliente no tiene número registrado');
+      return;
+    }
+
+    final Uri url = Uri.parse('https://wa.me/$numeroFormateado');
+
+    if (await canLaunchUrl(url)) {
+      await launchUrl(url, mode: LaunchMode.externalApplication);
+    } else {
+      if (mounted) _mostrarError('No se pudo abrir WhatsApp');
+    }
   }
 
   @override
@@ -137,7 +280,7 @@ class _DetalleMantenimientoPageState extends State<DetalleMantenimientoPage> {
         elevation: 0,
         leading: IconButton(
           icon: const Icon(Icons.arrow_back, color: Colors.black),
-          onPressed: () => Navigator.pop(context),
+          onPressed: () => Navigator.pop(context, false), // 👈 Enviar false al cancelar
         ),
         title: const Text(
           "Actualizar Mantenimiento",
@@ -148,6 +291,23 @@ class _DetalleMantenimientoPageState extends State<DetalleMantenimientoPage> {
           ),
         ),
       ),
+      floatingActionButton: (
+          esAdministrador &&
+              telefonoCliente != null &&
+              telefonoCliente!.trim().isNotEmpty
+      )
+          ? FloatingActionButton(
+        mini: true,
+        heroTag: 'btnWhatsApp',
+        backgroundColor: const Color(0xFF25D366),
+        onPressed: _abrirWhatsApp,
+        child: const Icon(
+          Icons.chat,
+          color: Colors.white,
+          size: 22,
+        ),
+      )
+          : null,
       body: FutureBuilder<RegistroDetalleDTO>(
         future: futureDetalle,
         builder: (context, snapshot) {
@@ -198,7 +358,6 @@ class _DetalleMantenimientoPageState extends State<DetalleMantenimientoPage> {
                   _buildTipoInfo(),
                   const SizedBox(height: 20),
 
-                  // 🆕 NUEVO BLOQUE: Estado del Mantenimiento
                   _buildSectionTitle('Estado del Mantenimiento', Icons.flag),
                   const SizedBox(height: 12),
                   _buildEstadoSelector(),
@@ -486,7 +645,6 @@ class _DetalleMantenimientoPageState extends State<DetalleMantenimientoPage> {
     );
   }
 
-  // 🆕 NUEVO WIDGET: Selector de Estado con Chips
   Widget _buildEstadoSelector() {
     final bool error = intentoGuardar && estadoSeleccionado == null;
 
@@ -560,7 +718,6 @@ class _DetalleMantenimientoPageState extends State<DetalleMantenimientoPage> {
     );
   }
 
-  // 🆕 NUEVO WIDGET: Chip individual de estado
   Widget _buildChipEstado(int valor, String texto, Color color) {
     final bool seleccionado = estadoSeleccionado == valor;
 
@@ -610,15 +767,14 @@ class _DetalleMantenimientoPageState extends State<DetalleMantenimientoPage> {
     );
   }
 
-  // 🆕 NUEVO HELPER: Obtener color según estado
   Color _getColorEstado(int estado) {
     switch (estado) {
       case 1:
-        return Colors.blue; // En Proceso
+        return Colors.blue;
       case 2:
-        return Colors.green; // Finalizado
+        return Colors.green;
       case 3:
-        return Colors.orange; // Reservado
+        return Colors.orange;
       default:
         return Colors.white24;
     }
@@ -911,7 +1067,6 @@ class _DetalleMantenimientoPageState extends State<DetalleMantenimientoPage> {
     );
   }
 
-
   Widget _buildGuardarButton() {
     return Container(
       width: double.infinity,
@@ -954,7 +1109,6 @@ class _DetalleMantenimientoPageState extends State<DetalleMantenimientoPage> {
     );
   }
 
-  // 🔄 MODIFICADO: Validación incluye estado
   void _validarAntesDeGuardar() {
     setState(() => intentoGuardar = true);
 
@@ -976,7 +1130,7 @@ class _DetalleMantenimientoPageState extends State<DetalleMantenimientoPage> {
     _actualizarMantenimiento();
   }
 
-  // 🔄 MODIFICADO: Ahora actualiza estado Y factura
+  // Actualizar estado y factura
   Future<void> _actualizarMantenimiento() async {
     showDialog(
       context: context,
@@ -1012,7 +1166,7 @@ class _DetalleMantenimientoPageState extends State<DetalleMantenimientoPage> {
     try {
       setState(() => guardando = true);
 
-      // 1️⃣ PRIMERO: Actualizar el estado
+      //  Actualizar el estado
       print('[DetalleMantenimiento] Actualizando estado a: $estadoSeleccionado');
 
       final resultadoEstado = await RegistrosService.actualizarEstado(
@@ -1030,7 +1184,7 @@ class _DetalleMantenimientoPageState extends State<DetalleMantenimientoPage> {
 
       print('[DetalleMantenimiento] Estado actualizado exitosamente');
 
-      // 2️⃣ SEGUNDO: Actualizar la factura con los detalles
+      //  Actualizar la factura con los detalles
       final detallesJSON = detallesSeleccionados
           .map((detalle) => {
         "idProducto": detalle.idProducto,
@@ -1050,30 +1204,7 @@ class _DetalleMantenimientoPageState extends State<DetalleMantenimientoPage> {
       Navigator.pop(context); // Cerrar loading dialog
 
       if (resultadoFactura != null && resultadoFactura['success'] == true) {
-        // Mostrar mensaje de éxito
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Row(
-              children: const [
-                Icon(Icons.check_circle, color: Colors.white, size: 24),
-                SizedBox(width: 12),
-                Expanded(
-                  child: Text(
-                    'Mantenimiento actualizado exitosamente',
-                    style: TextStyle(fontSize: 15),
-                  ),
-                ),
-              ],
-            ),
-            backgroundColor: Colors.green.shade700,
-            behavior: SnackBarBehavior.floating,
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(12),
-            ),
-          ),
-        );
 
-        // Volver a la pantalla anterior
         Navigator.pop(context, true);
       } else {
         _mostrarError(resultadoFactura?['error'] ?? "Error al actualizar factura");

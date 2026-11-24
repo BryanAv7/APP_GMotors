@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import '../services/QuickAccount_service.dart';
 import '../services/moto_service.dart';
+import 'package:flutter/services.dart';
 
 class QuickAccountCreationScreen extends StatefulWidget {
   const QuickAccountCreationScreen({super.key});
@@ -17,6 +18,11 @@ class _QuickAccountCreationScreenState
   // Controladores de texto
   final TextEditingController nombreCompletoCtrl = TextEditingController();
   final TextEditingController placaCtrl = TextEditingController();
+  final TextEditingController modeloCtrl = TextEditingController();
+  final TextEditingController cedulaCtrl = TextEditingController();
+  final TextEditingController direccionCtrl = TextEditingController();
+  final TextEditingController telefonoCtrl = TextEditingController();
+  final TextEditingController correoCtrl = TextEditingController();
 
   // Para evitar múltiples envíos
   bool _isLoading = false;
@@ -37,13 +43,20 @@ class _QuickAccountCreationScreenState
       _formatearPlaca();
       _validarPlaca();
     });
+    telefonoCtrl.addListener(_formatearTelefono);
   }
 
   @override
   void dispose() {
     placaCtrl.removeListener(_validarPlaca);
+    telefonoCtrl.removeListener(_formatearTelefono);
     nombreCompletoCtrl.dispose();
     placaCtrl.dispose();
+    modeloCtrl.dispose();
+    cedulaCtrl.dispose();
+    direccionCtrl.dispose();
+    telefonoCtrl.dispose();
+    correoCtrl.dispose();
     super.dispose();
   }
 
@@ -73,6 +86,24 @@ class _QuickAccountCreationScreenState
         text: placa,
         selection: TextSelection.fromPosition(
           TextPosition(offset: placa.length),
+        ),
+      );
+    }
+  }
+
+
+  void _formatearTelefono() {
+    String telefono = telefonoCtrl.text.replaceAll(RegExp(r'[^0-9]'), '');
+
+    if (telefono.length > 10) {
+      telefono = telefono.substring(0, 10);
+    }
+
+    if (telefonoCtrl.text != telefono) {
+      telefonoCtrl.value = telefonoCtrl.value.copyWith(
+        text: telefono,
+        selection: TextSelection.fromPosition(
+          TextPosition(offset: telefono.length),
         ),
       );
     }
@@ -248,7 +279,7 @@ class _QuickAccountCreationScreenState
       return;
     }
 
-// Validar que placa NO esté vacía
+    // Validar que placa NO esté vacía
     if (placaCtrl.text.trim().isEmpty) {
       _showSnack('La placa del vehículo es obligatoria');
       return;
@@ -256,10 +287,31 @@ class _QuickAccountCreationScreenState
 
     _formatearPlaca();
 
-// Validar placa
+    // Validar placa
     final errorPlaca = QuickAccountService.validarPlaca(placaCtrl.text);
     if (errorPlaca != null) {
       _showSnack(errorPlaca);
+      return;
+    }
+
+    // validar correo
+    final errorCorreo = QuickAccountService.validarCorreo(correoCtrl.text);
+    if (errorCorreo != null) {
+      _showSnack(errorCorreo);
+      return;
+    }
+
+    // validar cedula
+    final errorCedula = QuickAccountService.validarCedula(cedulaCtrl.text);
+    if (errorCedula != null) {
+      _showSnack(errorCedula);
+      return;
+    }
+
+    // validar teléfono
+    final errorTelefono = QuickAccountService.validarTelefono(telefonoCtrl.text);
+    if (errorTelefono != null) {
+      _showSnack(errorTelefono);
       return;
     }
 
@@ -268,12 +320,17 @@ class _QuickAccountCreationScreenState
     final response = await QuickAccountService.crearCuentaRapida(
       nombreCompleto: nombreCompletoCtrl.text,
       placa: placaCtrl.text,
+      modeloMoto: modeloCtrl.text,
+      cedula: cedulaCtrl.text,
+      direccion: direccionCtrl.text,
+      telefono: telefonoCtrl.text,
+      correo: correoCtrl.text, // 🆕 NUEVO
     );
 
     setState(() => _isLoading = false);
 
     if (response.success) {
-      _showSnack("¡Cuenta rápida creada exitosamente!");
+      //_showSnack("¡Cuenta rápida creada exitosamente!");
 
       // Mostrar detalles de la cuenta
       _mostrarDetallesCuenta(
@@ -289,6 +346,11 @@ class _QuickAccountCreationScreenState
       Future.delayed(const Duration(seconds: 1), () {
         nombreCompletoCtrl.clear();
         placaCtrl.clear();
+        modeloCtrl.clear();
+        cedulaCtrl.clear();
+        direccionCtrl.clear();
+        telefonoCtrl.clear();
+        correoCtrl.clear();
       });
     } else {
       _showSnack('Error: ${response.error}');
@@ -305,52 +367,141 @@ class _QuickAccountCreationScreenState
       ) {
     showDialog(
       context: context,
+      barrierDismissible: false,
       builder: (context) => AlertDialog(
         backgroundColor: const Color(0xFF1E1E1E),
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-        title: const Text(
-          'Cuenta Creada',
-          style: TextStyle(
-            color: Colors.white,
-            fontWeight: FontWeight.bold,
-            fontSize: 20,
-          ),
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(16),
+          side: const BorderSide(color: Color(0xFFFBC02D), width: 2),
+        ),
+        title: Row(
+          children: [
+            Container(
+              padding: const EdgeInsets.all(8),
+              decoration: const BoxDecoration(
+                color: Color(0xFFFBC02D),
+                shape: BoxShape.circle,
+              ),
+              child: const Icon(
+                Icons.check,
+                color: Colors.black,
+                size: 24,
+              ),
+            ),
+            const SizedBox(width: 12),
+            const Text(
+              '¡Cuenta Creada!',
+              style: TextStyle(
+                color: Colors.white,
+                fontWeight: FontWeight.bold,
+                fontSize: 20,
+              ),
+            ),
+          ],
         ),
         content: SingleChildScrollView(
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             mainAxisSize: MainAxisSize.min,
             children: [
-              if (email != null) _buildDetailRow('Email:', email),
-              const SizedBox(height: 12),
-              if (contrasena != null) _buildDetailRow('Contraseña:', contrasena),
-              const SizedBox(height: 16),
+              const SizedBox(height: 8),
               Container(
                 padding: const EdgeInsets.all(12),
                 decoration: BoxDecoration(
-                  color: Color(0xFFFBC02D).withOpacity(0.2),
-                  borderRadius: BorderRadius.circular(8),
-                  border: Border.all(color: Color(0xFFFBC02D)),
-                ),
-                child: const Text(
-                  '⚠️ Guarda estos datos temporales. El usuario DEBE cambiar la contraseña cuando solicite su cuenta.',
-                  style: TextStyle(
-                    color: Color(0xFFFBC02D),
-                    fontSize: 12,
-                    fontWeight: FontWeight.w500,
+                  color: const Color(0xFFFBC02D).withOpacity(0.1),
+                  borderRadius: BorderRadius.circular(10),
+                  border: Border.all(
+                    color: const Color(0xFFFBC02D).withOpacity(0.3),
                   ),
                 ),
+                child: const Row(
+                  children: [
+                    Icon(Icons.info_outline, color: Color(0xFFFBC02D), size: 18),
+                    SizedBox(width: 8),
+                    Expanded(
+                      child: Text(
+                        'Entrega estas credenciales al cliente',
+                        style: TextStyle(
+                          color: Colors.white70,
+                          fontSize: 13,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
               ),
+              const SizedBox(height: 16),
+              if (email != null && email.isNotEmpty)
+                _buildDetailRow('Correo:', email),
+              if (contrasena != null && contrasena.isNotEmpty)
+                _buildDetailRow('Contraseña:', contrasena),
             ],
           ),
         ),
         actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: const Text(
-              'Cerrar',
-              style: TextStyle(color: Color(0xFFFBC02D), fontWeight: FontWeight.bold),
-            ),
+          Row(
+            children: [
+              Expanded(
+                child: TextButton(
+                  onPressed: () async {
+                    // Construir texto con las credenciales
+                    String credenciales = '';
+                    if (email != null && email.isNotEmpty) {
+                      credenciales += 'Correo: $email\n';
+                    }
+                    if (contrasena != null && contrasena.isNotEmpty) {
+                      credenciales += 'Contraseña: $contrasena\n';
+                    }
+
+                    if (credenciales.isNotEmpty) {
+                      await Clipboard.setData(ClipboardData(text: credenciales.trim()));
+                    }
+                  },
+                  style: TextButton.styleFrom(
+                    backgroundColor: Colors.white10,
+                    padding: const EdgeInsets.symmetric(vertical: 12),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                  ),
+                  child: const Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Icon(Icons.copy, color: Colors.white70, size: 18),
+                      SizedBox(width: 6),
+                      Text(
+                        'Copiar',
+                        style: TextStyle(
+                          color: Colors.white70,
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+              const SizedBox(width: 10),
+              Expanded(
+                child: ElevatedButton(
+                  onPressed: () => Navigator.pop(context),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: const Color(0xFFFBC02D),
+                    padding: const EdgeInsets.symmetric(vertical: 12),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                  ),
+                  child: const Text(
+                    'Cerrar',
+                    style: TextStyle(
+                      color: Colors.black,
+                      fontWeight: FontWeight.bold,
+                      fontSize: 14,
+                    ),
+                  ),
+                ),
+              ),
+            ],
           ),
         ],
       ),
@@ -359,7 +510,7 @@ class _QuickAccountCreationScreenState
 
   Widget _buildDetailRow(String label, String value) {
     return Padding(
-      padding: const EdgeInsets.only(bottom: 12),
+      padding: const EdgeInsets.only(bottom: 10),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -373,10 +524,11 @@ class _QuickAccountCreationScreenState
           ),
           const SizedBox(height: 4),
           Container(
-            padding: const EdgeInsets.all(8),
+            width: double.infinity,
+            padding: const EdgeInsets.all(10),
             decoration: BoxDecoration(
               color: const Color(0xFF2A2A2A),
-              borderRadius: BorderRadius.circular(6),
+              borderRadius: BorderRadius.circular(8),
               border: Border.all(color: Colors.white12),
             ),
             child: SelectableText(
@@ -384,7 +536,7 @@ class _QuickAccountCreationScreenState
               style: const TextStyle(
                 color: Colors.white,
                 fontSize: 13,
-                fontWeight: FontWeight.bold,
+                fontWeight: FontWeight.w600,
               ),
             ),
           ),
@@ -396,8 +548,13 @@ class _QuickAccountCreationScreenState
   void _showSnack(String msg) {
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
-        content: Text(msg),
-        backgroundColor: Color(0xFFFBC02D),
+        content: Text(
+          msg,
+          style: const TextStyle(
+            fontWeight: FontWeight.bold,
+          ),
+        ),
+        backgroundColor: Color(0xFFFF0000),
         behavior: SnackBarBehavior.floating,
       ),
     );
@@ -429,6 +586,28 @@ class _QuickAccountCreationScreenState
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
+              const SizedBox(height: 2),
+
+              // Datos por defecto
+              Container(
+                padding: const EdgeInsets.all(12),
+                decoration: BoxDecoration(
+                  color: Colors.orange[900]?.withOpacity(0.2),
+                  borderRadius: BorderRadius.circular(8),
+                  border: Border.all(color: Colors.orange[400]!),
+                ),
+                child: const Text(
+                  '💡 Si no ingresas un correo, se genera automáticamente:\n'
+                      '• Email: nombreUsuario@gmotors.com\n'
+                      '• Contraseña: root111',
+                  style: TextStyle(
+                    color: Colors.orange,
+                    fontSize: 12,
+                    height: 1.6,
+                  ),
+                ),
+              ),
+
               const SizedBox(height: 20),
 
               // Nombre Completo
@@ -471,11 +650,17 @@ class _QuickAccountCreationScreenState
                   ),
                   border: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(12),
-                    borderSide: const BorderSide(color: Color(0xFFFBC02D)),
+                    borderSide: BorderSide(
+                      color: const Color(0xFFFBC02D).withOpacity(0.2),
+                      width: 1,
+                    ),
                   ),
                   enabledBorder: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(12),
-                    borderSide: const BorderSide(color: Color(0xFFFBC02D)),
+                    borderSide: BorderSide(
+                      color: const Color(0xFFFBC02D).withOpacity(0.2),
+                      width: 1,
+                    ),
                   ),
                   focusedBorder: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(12),
@@ -484,7 +669,67 @@ class _QuickAccountCreationScreenState
                 ),
               ),
 
-              const SizedBox(height: 30),
+              const SizedBox(height: 24),
+
+              // Separador de campos opcionales
+              Row(
+                children: [
+                  Expanded(child: Divider(color: Colors.grey[700])),
+                  Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 8),
+                    child: Text(
+                      'Datos Opcionales',
+                      style: TextStyle(color: Colors.grey[500], fontSize: 12),
+                    ),
+                  ),
+                  Expanded(child: Divider(color: Colors.grey[700])),
+                ],
+              ),
+              const SizedBox(height: 20),
+
+
+              _buildField(
+                correoCtrl,
+                "Correo Electrónico",
+                isRequired: false,
+                keyboardType: TextInputType.emailAddress,
+              ),
+              const SizedBox(height: 20),
+
+              // Modelo de la moto (opcional)
+              _buildField(
+                modeloCtrl,
+                "Modelo de la Moto",
+                isRequired: false,
+              ),
+              const SizedBox(height: 20),
+
+              // Cédula (opcional)
+              _buildField(
+                cedulaCtrl,
+                "Cédula/RUC",
+                isRequired: false,
+                keyboardType: TextInputType.number,
+              ),
+              const SizedBox(height: 20),
+
+              // Teléfono (opcional) - misma alerta que cédula: solo al crear cuenta
+              _buildField(
+                telefonoCtrl,
+                "Teléfono",
+                isRequired: false,
+                keyboardType: TextInputType.phone,
+              ),
+              const SizedBox(height: 20),
+
+              // Dirección (opcional)
+              _buildField(
+                direccionCtrl,
+                "Dirección",
+                isRequired: false,
+              ),
+
+              const SizedBox(height: 25),
 
               // Botón Crear
               SizedBox(
@@ -510,29 +755,6 @@ class _QuickAccountCreationScreenState
                   ),
                 ),
               ),
-
-              const SizedBox(height: 20),
-
-              // Datos por defecto
-              Container(
-                padding: const EdgeInsets.all(12),
-                decoration: BoxDecoration(
-                  color: Colors.orange[900]?.withOpacity(0.2),
-                  borderRadius: BorderRadius.circular(8),
-                  border: Border.all(color: Colors.orange[400]!),
-                ),
-                child: const Text(
-                  '💡 Se genera automáticamente los siguientes campos:\n'
-                      '• Email: user[nombreUsuario]@gmotors.com\n'
-                      '• Contraseña: root111\n'
-                      '• Rol: Cliente',
-                  style: TextStyle(
-                    color: Colors.orange,
-                    fontSize: 12,
-                    height: 1.6,
-                  ),
-                ),
-              ),
             ],
           ),
         ),
@@ -544,10 +766,13 @@ class _QuickAccountCreationScreenState
       TextEditingController ctrl,
       String hint, {
         bool isPlaca = false,
+        bool isRequired = true,
+        TextInputType? keyboardType,
       }) {
     return TextField(
       controller: ctrl,
       style: const TextStyle(color: Colors.white),
+      keyboardType: keyboardType,
       textCapitalization: isPlaca ? TextCapitalization.characters : TextCapitalization.sentences,
       decoration: InputDecoration(
         hintText: hint,
@@ -559,14 +784,15 @@ class _QuickAccountCreationScreenState
                 text: hint,
                 style: const TextStyle(color: Colors.grey),
               ),
-              const TextSpan(
-                text: ' *',
-                style: TextStyle(
-                  color: Colors.red,
-                  fontWeight: FontWeight.bold,
-                  fontSize: 14,
+              if (isRequired)
+                const TextSpan(
+                  text: ' *',
+                  style: TextStyle(
+                    color: Colors.red,
+                    fontWeight: FontWeight.bold,
+                    fontSize: 14,
+                  ),
                 ),
-              ),
             ],
           ),
         ),
@@ -574,11 +800,17 @@ class _QuickAccountCreationScreenState
         fillColor: Colors.grey[850],
         border: OutlineInputBorder(
           borderRadius: BorderRadius.circular(12),
-          borderSide: const BorderSide(color: Color(0xFFFBC02D)),
+          borderSide: BorderSide(
+            color: const Color(0xFFFBC02D).withOpacity(0.2),
+            width: 1,
+          ),
         ),
         enabledBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(12),
-          borderSide: const BorderSide(color: Color(0xFFFBC02D)),
+          borderSide: BorderSide(
+            color: const Color(0xFFFBC02D).withOpacity(0.2),
+            width: 1,
+          ),
         ),
         focusedBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(12),

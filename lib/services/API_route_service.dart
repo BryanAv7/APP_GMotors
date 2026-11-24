@@ -1,10 +1,10 @@
 import 'dart:convert';
 import 'package:http/http.dart' as http;
 import 'package:latlong2/latlong.dart';
+import '../config/api.dart';
+import '../utils/token_manager.dart';
 
 class RouteService {
-  static const String _apiKey = ''; // poner la clave
-  static const String _baseUrl = 'https://api.openrouteservice.org/v2';
 
   // Calcular ruta entre dos puntos
   static Future<Map<String, dynamic>?> calcularRuta({
@@ -13,12 +13,28 @@ class RouteService {
     List<LatLng>? waypoints,
   }) async {
     try {
+      final baseUrl = await ApiConfig.getBaseUrl();
+
+      if (baseUrl.isEmpty) {
+        return {
+          'success': false,
+          'error': 'No hay IP configurada'
+        };
+      }
+
+      final token = await TokenManager.getToken();
+
+      if (token == null || token.isEmpty) {
+        return {
+          'success': false,
+          'error': 'No hay token de autenticación'
+        };
+      }
 
       List<List<double>> coordinates = [
         [origen.longitude, origen.latitude],
       ];
 
-      // Agregar waypoints si existen
       if (waypoints != null) {
         for (var point in waypoints) {
           coordinates.add([point.longitude, point.latitude]);
@@ -27,15 +43,18 @@ class RouteService {
 
       coordinates.add([destino.longitude, destino.latitude]);
 
-      print('📍 Calculando ruta...');
-      print('Origen: ${origen.latitude}, ${origen.longitude}');
-      print('Destino: ${destino.latitude}, ${destino.longitude}');
+      //print('📍 Calculando ruta...');
+      //print('Origen: ${origen.latitude}, ${origen.longitude}');
+      //print('Destino: ${destino.latitude}, ${destino.longitude}');
+
+      final url = Uri.parse("$baseUrl/routes/calcular-ruta");
+      //print('📡 URL: $url');
 
       final response = await http.post(
-        Uri.parse('$_baseUrl/directions/driving-car/geojson'),
+        url,
         headers: {
-          'Authorization': _apiKey,
           'Content-Type': 'application/json',
+          'Authorization': 'Bearer $token',
         },
         body: jsonEncode({
           'coordinates': coordinates,
@@ -44,24 +63,30 @@ class RouteService {
 
       if (response.statusCode == 200) {
         final data = jsonDecode(response.body);
-        final route = data['features'][0];
-        final properties = route['properties'];
-        final geometry = route['geometry']['coordinates'];
 
-        // Convertir coordenadas
-        List<LatLng> polylinePoints = [];
-        for (var coord in geometry) {
-          polylinePoints.add(LatLng(coord[1], coord[0]));
+        if (data['success'] == true) {
+          List<LatLng> polylinePoints = [];
+          for (var point in data['polyline']) {
+            polylinePoints.add(LatLng(point['lat'], point['lng']));
+          }
+
+          return {
+            'success': true,
+            'distancia_km': data['distancia_km'],
+            'duracion_minutos': data['duracion_minutos'],
+            'polyline': polylinePoints,
+          };
+        } else {
+          return {'success': false, 'error': data['error']};
         }
-
+      } else if (response.statusCode == 403 || response.statusCode == 401) {
+        print('❌ Error de autenticación: ${response.statusCode}');
         return {
-          'success': true,
-          'distancia_km': (properties['summary']['distance'] / 1000),
-          'duracion_minutos': (properties['summary']['duration'] / 60).round(),
-          'polyline': polylinePoints,
+          'success': false,
+          'error': 'Sesión expirada. Por favor, inicia sesión nuevamente.'
         };
       } else {
-        print('❌ Error ${response.statusCode}: ${response.body}');
+        //print('❌ Error ${response.statusCode}: ${response.body}');
         return {
           'success': false,
           'error': 'Error al calcular ruta: ${response.statusCode}'
@@ -76,30 +101,51 @@ class RouteService {
   // Buscar lugar por nombre
   static Future<Map<String, dynamic>?> buscarLugar(String query) async {
     try {
+      final baseUrl = await ApiConfig.getBaseUrl();
+
+      if (baseUrl.isEmpty) {
+        return {
+          'success': false,
+          'error': 'No hay IP configurada'
+        };
+      }
+
+      final token = await TokenManager.getToken();
+
+      if (token == null || token.isEmpty) {
+        return {
+          'success': false,
+          'error': 'No hay token de autenticación'
+        };
+      }
+
+      final url = Uri.parse("$baseUrl/routes/buscar-lugar?query=$query");
+      //print('📡 URL búsqueda: $url');
+
       final response = await http.get(
-        Uri.parse('$_baseUrl/geocode/search?api_key=$_apiKey&text=$query&size=5'),
+        url,
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': 'Bearer $token',
+        },
       );
 
       if (response.statusCode == 200) {
         final data = jsonDecode(response.body);
 
-        if (data['features'].isEmpty) {
-          return {'success': false, 'error': 'Lugar no encontrado'};
+        if (data['success'] == true) {
+          return {
+            'success': true,
+            'lugares': data['lugares'],
+          };
+        } else {
+          return {'success': false, 'error': data['error']};
         }
-
-        List<Map<String, dynamic>> lugares = [];
-        for (var feature in data['features']) {
-          final coords = feature['geometry']['coordinates'];
-          lugares.add({
-            'nombre': feature['properties']['label'],
-            'lat': coords[1],
-            'lng': coords[0],
-          });
-        }
-
+      } else if (response.statusCode == 403 || response.statusCode == 401) {
+        print('❌ Error de autenticación: ${response.statusCode}');
         return {
-          'success': true,
-          'lugares': lugares,
+          'success': false,
+          'error': 'Sesión expirada. Por favor, inicia sesión nuevamente.'
         };
       }
       return {'success': false, 'error': 'Error en búsqueda'};

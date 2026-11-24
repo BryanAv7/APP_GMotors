@@ -102,7 +102,7 @@ class _InventarioScreenState extends State<InventarioScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.grey[850],
+      backgroundColor: const Color(0xFF121212),
       appBar: AppBar(
         backgroundColor: Colors.yellow[700],
         elevation: 0,
@@ -117,7 +117,7 @@ class _InventarioScreenState extends State<InventarioScreen> {
       body: Column(
         children: [
           Container(
-            color: Colors.grey[850],
+            color: const Color(0xFF121212),
             padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
             child: TextField(
               onChanged: _filtrarProductos,
@@ -140,7 +140,7 @@ class _InventarioScreenState extends State<InventarioScreen> {
 
 
           Container(
-            color: Colors.grey[850],
+            color: const Color(0xFF121212),
             height: 50,
             child: ListView(
               scrollDirection: Axis.horizontal,

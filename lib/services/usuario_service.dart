@@ -16,6 +16,7 @@ class UsuarioService {
       final Map<String, dynamic> body = {};
       if (usuario.nombreCompleto != null) body['nombre_completo'] = usuario.nombreCompleto;
       if (usuario.nombreUsuario != null) body['nombre_usuario'] = usuario.nombreUsuario;
+      if (usuario.correo != null) body['correo'] = usuario.correo;
       if (usuario.descripcion != null) body['descripcion'] = usuario.descripcion;
       if (usuario.pais != null) body['pais'] = usuario.pais;
       if (usuario.ciudad != null) body['ciudad'] = usuario.ciudad;

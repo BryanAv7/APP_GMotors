@@ -108,13 +108,20 @@ class _HomeUserScreenState extends State<HomeUserScreen> {
         ),
         actions: [
           IconButton(
-            icon: const Icon(Icons.logout, color: Colors.black),
+            icon: const Icon(Icons.logout_rounded, color: Colors.black),
             tooltip: "Cerrar sesión",
             onPressed: () async {
               await AuthService.logout();
               if (!context.mounted) return;
+
               Navigator.pushReplacementNamed(context, "/login");
             },
+            style: IconButton.styleFrom(
+              backgroundColor: Colors.black.withOpacity(0.08),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(10),
+              ),
+            ),
           ),
         ],
       ),
@@ -183,12 +190,14 @@ class _HomeUserScreenState extends State<HomeUserScreen> {
         selectedItemColor: Colors.black,
         unselectedItemColor: Colors.black54,
         type: BottomNavigationBarType.fixed,
+        selectedFontSize: 11,
+        unselectedFontSize: 11,
         items: const [
-          BottomNavigationBarItem(icon: Icon(Icons.home), label: ''),
-          BottomNavigationBarItem(icon: Icon(Icons.map), label: ''),
-          BottomNavigationBarItem(icon: Icon(Icons.notifications), label: ''),
-          BottomNavigationBarItem(icon: Icon(Icons.help_outline), label: ''),
-          BottomNavigationBarItem(icon: Icon(Icons.person), label: ''),
+          BottomNavigationBarItem(icon: Icon(Icons.home), label: 'Inicio'),
+          BottomNavigationBarItem(icon: Icon(Icons.map), label: 'Rutas'),
+          BottomNavigationBarItem(icon: Icon(Icons.notifications), label: 'Alertas'),
+          BottomNavigationBarItem(icon: Icon(Icons.live_help), label: 'Información'),
+          BottomNavigationBarItem(icon: Icon(Icons.person), label: 'Perfil'),
         ],
         onTap: _onItemTapped,
       ),

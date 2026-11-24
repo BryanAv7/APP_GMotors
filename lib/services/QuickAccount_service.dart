@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'package:http/http.dart' as http;
 import '../config/api.dart';
+import '../utils/token_manager.dart';
 
 class QuickAccountResponse {
   final bool success;
@@ -54,6 +55,11 @@ class QuickAccountService {
   static Future<QuickAccountResponse> crearCuentaRapida({
     required String nombreCompleto,
     required String placa,
+    String? modeloMoto,
+    String? cedula,
+    String? direccion,
+    String? telefono,
+    String? correo,
   }) async {
     try {
       final baseUrl = await ApiConfig.getBaseUrl();
@@ -62,15 +68,32 @@ class QuickAccountService {
         return QuickAccountResponse.error("IP del servidor no configurada");
       }
 
+      final token = await TokenManager.getToken();
+
+      if (token == null || token.isEmpty) {
+        return QuickAccountResponse.error("No hay sesión activa. Inicia sesión nuevamente.");
+      }
+
       final url = Uri.parse('$baseUrl/quick-accounts/create');
 
       final body = {
         'nombre_completo': nombreCompleto.trim(),
         'placa': placa.trim().toUpperCase(),
+        if (modeloMoto != null && modeloMoto.trim().isNotEmpty)
+          'modelo_moto': modeloMoto.trim(),
+        if (cedula != null && cedula.trim().isNotEmpty)
+          'cedula': cedula.trim(),
+        if (direccion != null && direccion.trim().isNotEmpty)
+          'direccion': direccion.trim(),
+        if (telefono != null && telefono.trim().isNotEmpty)
+          'telefono': telefono.trim(),
+        if (correo != null && correo.trim().isNotEmpty)
+          'correo': correo.trim(),
       };
 
       final headers = {
         'Content-Type': 'application/json',
+        'Authorization': 'Bearer $token',
       };
 
       final response = await http.post(
@@ -82,9 +105,9 @@ class QuickAccountService {
       // Manejar respuesta vacía
       if (response.body.isEmpty) {
         if (response.statusCode == 403) {
-          return QuickAccountResponse.error("Acceso denegado (403) - Verifica la configuración CORS del servidor");
+          return QuickAccountResponse.error("No tienes permisos para esta acción (403)");
         } else if (response.statusCode == 401) {
-          return QuickAccountResponse.error("No autorizado (401)");
+          return QuickAccountResponse.error("Sesión expirada, inicia sesión de nuevo (401)");
         } else {
           return QuickAccountResponse.error("Error ${response.statusCode}: Respuesta vacía");
         }
@@ -101,11 +124,9 @@ class QuickAccountService {
           return QuickAccountResponse.error(errorMsg);
         }
       } catch (e) {
-
         return QuickAccountResponse.error('Error al procesar respuesta del servidor');
       }
     } catch (e) {
-
       return QuickAccountResponse.error('Error de conexión: $e');
     }
   }
@@ -129,6 +150,41 @@ class QuickAccountService {
     }
     if (placa.length < 6) {
       return "La placa debe tener al menos 6 caracteres";
+    }
+    return null;
+  }
+
+
+  static String? validarCedula(String cedula) {
+    final limpio = cedula.trim();
+    if (limpio.isEmpty) {
+      return null;
+    }
+    if (limpio.length < 10 || limpio.length > 13) {
+      return "La cédula debe tener entre 10 y 13 dígitos";
+    }
+    return null;
+  }
+
+  static String? validarTelefono(String telefono) {
+    final limpio = telefono.trim();
+    if (limpio.isEmpty) {
+      return null;
+    }
+    if (limpio.length != 10) {
+      return "El teléfono debe tener 10 dígitos";
+    }
+    return null;
+  }
+
+
+  static String? validarCorreo(String correo) {
+    if (correo.trim().isEmpty) {
+      return null;
+    }
+    final regex = RegExp(r'^[\w\.\-]+@([\w\-]+\.)+[\w\-]{2,}$');
+    if (!regex.hasMatch(correo.trim())) {
+      return "Ingresa un correo válido";
     }
     return null;
   }
