@@ -96,7 +96,7 @@ class AppInfoScreen extends StatelessWidget {
                       border: Border.all(color: const Color(0xFFFBC02D).withOpacity(0.4)),
                     ),
                     child: const Text(
-                      'Versión 1.6.3',
+                      'Versión 1.7.0',
                       style: TextStyle(color: Color(0xFFFBC02D), fontSize: 12),
                     ),
                   ),
