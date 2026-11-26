@@ -20,7 +20,6 @@ class PdfHistorialMantenimientosService {
   static const _verde = PdfColor.fromInt(0xFF28A745);
   static const _azul = PdfColor.fromInt(0xFF007BFF);
   static const _grisHeader = PdfColor.fromInt(0xFFF2F2F2);
-  static const _verdeOpaco30 = PdfColor.fromInt(0x4D28A745);
 
   // =====================================================
   // GENERAR HISTORIAL
@@ -248,7 +247,7 @@ class PdfHistorialMantenimientosService {
             final List<DetalleFacturaDTO> detalles =
             idFactura != null ? (detallesFacturas[idFactura] ?? []) : [];
 
-            widgets.add(
+            widgets.addAll(
               _buildMantenimientoCard(
                 index: i,
                 registro: registro,
@@ -351,7 +350,6 @@ class PdfHistorialMantenimientosService {
     );
   }
 
-
   // =====================================================
   // RESUMEN
   // =====================================================
@@ -402,172 +400,255 @@ class PdfHistorialMantenimientosService {
   }
 
   // =====================================================
-  // TARJETA DE MANTENIMIENTO
+  // TARJETA DE MANTENIMIENTO (dividida en segmentos para
+  // poder saltar de página entre ellos)
   // =====================================================
 
-  static pw.Widget _buildMantenimientoCard({
+  static List<pw.Widget> _buildMantenimientoCard({
     required int index,
     required RegistroDetalleDTO registro,
     required List<DetalleFacturaDTO> detalles,
     Map<int, String>? mapaNombresProductos,
   }) {
     final bool tieneFactura = registro.idFactura != null && detalles.isNotEmpty;
+    final PdfColor fondo = index % 2 == 0 ? PdfColors.white : _grisHeader;
 
-    return pw.Container(
-      decoration: pw.BoxDecoration(
-        border: pw.Border.all(color: _grisLinea, width: 0.8),
-        borderRadius: pw.BorderRadius.circular(5),
-        color: index % 2 == 0 ? PdfColors.white : _grisHeader,
-      ),
-      padding: const pw.EdgeInsets.all(12),
-      child: pw.Column(
-        crossAxisAlignment: pw.CrossAxisAlignment.start,
-        children: [
-          // =============================================
-          // Cabecera
-          // =============================================
-          pw.Row(
-            mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
-            children: [
-              pw.Row(
-                children: [
-                  pw.Container(
-                    width: 22,
-                    height: 22,
-                    alignment: pw.Alignment.center,
-                    decoration: const pw.BoxDecoration(
-                      color: _rojo,
-                      shape: pw.BoxShape.circle,
-                    ),
-                    child: pw.Text(
-                      '${index + 1}',
-                      style: pw.TextStyle(
-                        fontSize: 10,
-                        fontWeight: pw.FontWeight.bold,
-                        color: PdfColors.white,
-                      ),
-                    ),
+    final List<pw.Widget> piezas = [];
+
+    // ── Segmento 1: cabecera + datos principales ──
+    piezas.add(
+      _segmento(
+        fondo: fondo,
+        top: true,
+        padding: const pw.EdgeInsets.fromLTRB(12, 12, 12, 6),
+        child: pw.Column(
+          crossAxisAlignment: pw.CrossAxisAlignment.start,
+          children: [
+            pw.Row(
+              children: [
+                pw.Container(
+                  width: 22,
+                  height: 22,
+                  alignment: pw.Alignment.center,
+                  decoration: const pw.BoxDecoration(
+                    color: _rojo,
+                    shape: pw.BoxShape.circle,
                   ),
-                  pw.SizedBox(width: 8),
-                  pw.Text(
-                    'Tipo de Mantenimiento: ',
+                  child: pw.Text(
+                    '${index + 1}',
                     style: pw.TextStyle(
-                      fontSize: 11,
+                      fontSize: 10,
                       fontWeight: pw.FontWeight.bold,
-                      color: _grisOscuro,
+                      color: PdfColors.white,
                     ),
                   ),
-                  pw.Text(
-                    registro.tipoMantenimiento ?? 'Sin tipo',
-                    style: pw.TextStyle(
-                      fontSize: 11,
-                      fontWeight: pw.FontWeight.normal,
-                      color: _azul,
-                    ),
+                ),
+                pw.SizedBox(width: 8),
+                pw.Text(
+                  'Tipo de Mantenimiento: ',
+                  style: pw.TextStyle(
+                    fontSize: 11,
+                    fontWeight: pw.FontWeight.bold,
+                    color: _grisOscuro,
                   ),
-                ],
-              ),
-            ],
-          ),
-
-          pw.SizedBox(height: 6),
-
-          // =============================================
-          // Datos principales
-          // =============================================
-          pw.Row(
-            children: [
-              _campoInfo('Fecha', _formatearFecha(registro.fecha)),
-              pw.SizedBox(width: 14),
-              _campoInfo('Vehículo',
-                  '${registro.marcaMoto ?? ''} ${registro.modeloMoto ?? ''}'.trim()),
-              pw.SizedBox(width: 14),
-              _campoInfo('Placa', registro.placaMoto ?? 'N/A'),
-              pw.SizedBox(width: 14),
-              if (registro.kilometraje != null)
-                _campoInfo('KM', '${registro.kilometraje}'),
-            ],
-          ),
-
-          // =============================================
-          // Detalles de factura
-          // =============================================
-          if (tieneFactura) ...[
-            pw.SizedBox(height: 10),
-            pw.Container(
-              decoration: pw.BoxDecoration(
-                color: PdfColors.white,
-                border: pw.Border.all(color: _verdeOpaco30, width: 0.5),
-                borderRadius: pw.BorderRadius.circular(3),
-              ),
-              padding: const pw.EdgeInsets.all(8),
-              child: pw.Column(
-                crossAxisAlignment: pw.CrossAxisAlignment.start,
-                children: [
-                  pw.Row(
-                    mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
-                    children: [
-                      pw.Text(
-                        'DETALLE DE FACTURA',
-                        style: pw.TextStyle(
-                          fontSize: 8,
-                          fontWeight: pw.FontWeight.bold,
-                          color: _verde,
-                          letterSpacing: 0.5,
-                        ),
-                      ),
-                      pw.Text(
-                        'Factura #${registro.idFactura}',
-                        style: pw.TextStyle(fontSize: 7, color: _grisMedio),
-                      ),
-                    ],
+                ),
+                pw.Text(
+                  registro.tipoMantenimiento ?? 'Sin tipo',
+                  style: pw.TextStyle(
+                    fontSize: 11,
+                    fontWeight: pw.FontWeight.normal,
+                    color: _azul,
                   ),
-                  pw.SizedBox(height: 6),
-                  _buildTablaDetalles(detalles, mapaNombresProductos),
-                ],
-              ),
+                ),
+              ],
+            ),
+            pw.SizedBox(height: 6),
+            pw.Row(
+              children: [
+                _campoInfo('Fecha', _formatearFecha(registro.fecha)),
+                pw.SizedBox(width: 14),
+                _campoInfo('Vehículo',
+                    '${registro.marcaMoto ?? ''} ${registro.modeloMoto ?? ''}'.trim()),
+                pw.SizedBox(width: 14),
+                _campoInfo('Placa', registro.placaMoto ?? 'N/A'),
+                pw.SizedBox(width: 14),
+                if (registro.kilometraje != null)
+                  _campoInfo('KM', '${registro.kilometraje}'),
+              ],
             ),
           ],
+        ),
+      ),
+    );
 
-          // =============================================
-          // Recuadro de Subtotal
-          // =============================================
-          pw.SizedBox(height: 8),
-          pw.Align(
-            alignment: pw.Alignment.centerRight,
-            child: pw.Container(
-              width: 140,
-              padding: const pw.EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-              decoration: pw.BoxDecoration(
-                color: PdfColors.white,
-                border: pw.Border.all(color: _rojo, width: 1),
-                borderRadius: pw.BorderRadius.circular(3),
+    // ── Segmentos de detalle de factura ──
+    if (tieneFactura) {
+      piezas.add(
+        _segmento(
+          fondo: fondo,
+          padding: const pw.EdgeInsets.fromLTRB(12, 6, 12, 4),
+          child: pw.Row(
+            mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
+            children: [
+              pw.Text(
+                'DETALLE DE FACTURA',
+                style: pw.TextStyle(
+                  fontSize: 8,
+                  fontWeight: pw.FontWeight.bold,
+                  color: _verde,
+                  letterSpacing: 0.5,
+                ),
               ),
-              child: pw.Row(
-                mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
-                children: [
-                  pw.Text(
-                    'TOTAL',
-                    style: pw.TextStyle(
-                      fontSize: 8,
-                      fontWeight: pw.FontWeight.bold,
-                      color: _grisOscuro,
-                    ),
-                  ),
-                  pw.Text(
-                    '\$${(registro.costoTotal ?? 0).toStringAsFixed(2)}',
-                    style: pw.TextStyle(
-                      fontSize: 14,
-                      fontWeight: pw.FontWeight.bold,
-                      color: _verde,
-                    ),
-                  ),
-                ],
+              pw.Text(
+                'Factura #${registro.idFactura}',
+                style: pw.TextStyle(fontSize: 7, color: _grisMedio),
               ),
+            ],
+          ),
+        ),
+      );
+
+      // Cabecera de la tabla
+      piezas.add(
+        _segmento(
+          fondo: fondo,
+          padding: const pw.EdgeInsets.symmetric(horizontal: 12),
+          child: _filaDetalle(
+            decoration: const pw.BoxDecoration(color: _grisHeader),
+            celdas: [
+              _celdaCabecera('Producto / Servicio', align: pw.TextAlign.left),
+              _celdaCabecera('Cant.', align: pw.TextAlign.center),
+              _celdaCabecera('Precio', align: pw.TextAlign.center),
+              _celdaCabecera('Subtotal', align: pw.TextAlign.center),
+            ],
+          ),
+        ),
+      );
+
+      // Una fila por producto (cada una puede caer en otra hoja)
+      for (final d in detalles) {
+        String nombreProducto = d.descripcion;
+        if (d.idProducto != null && mapaNombresProductos != null) {
+          nombreProducto = mapaNombresProductos[d.idProducto] ?? d.descripcion;
+        }
+        if (nombreProducto.isEmpty) {
+          nombreProducto = 'Producto #${d.idProducto ?? '?'}';
+        }
+
+        piezas.add(
+          _segmento(
+            fondo: fondo,
+            padding: const pw.EdgeInsets.symmetric(horizontal: 12),
+            child: _filaDetalle(
+              celdas: [
+                _celdaDato(nombreProducto, align: pw.TextAlign.left),
+                _celdaDato('${d.cantidad}', align: pw.TextAlign.center),
+                _celdaDato(
+                  '\$${d.precioUnitario.toStringAsFixed(2)}',
+                  align: pw.TextAlign.center,
+                ),
+                _celdaDato(
+                  '\$${d.subtotal.toStringAsFixed(2)}',
+                  align: pw.TextAlign.center,
+                  bold: true,
+                ),
+              ],
             ),
           ),
-        ],
+        );
+      }
+    }
+
+    // ── Segmento final: recuadro TOTAL ──
+    piezas.add(
+      _segmento(
+        fondo: fondo,
+        bottom: true,
+        padding: const pw.EdgeInsets.fromLTRB(12, 8, 12, 12),
+        child: pw.Align(
+          alignment: pw.Alignment.centerRight,
+          child: pw.Container(
+            width: 140,
+            padding: const pw.EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+            decoration: pw.BoxDecoration(
+              color: PdfColors.white,
+              border: pw.Border.all(color: _rojo, width: 1),
+              borderRadius: pw.BorderRadius.circular(3),
+            ),
+            child: pw.Row(
+              mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
+              children: [
+                pw.Text(
+                  'TOTAL',
+                  style: pw.TextStyle(
+                    fontSize: 8,
+                    fontWeight: pw.FontWeight.bold,
+                    color: _grisOscuro,
+                  ),
+                ),
+                pw.Text(
+                  '\$${(registro.costoTotal ?? 0).toStringAsFixed(2)}',
+                  style: pw.TextStyle(
+                    fontSize: 14,
+                    fontWeight: pw.FontWeight.bold,
+                    color: _verde,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
       ),
+    );
+
+    return piezas;
+  }
+
+  // Segmento con fondo y bordes laterales (arriba/abajo solo en los extremos)
+  static pw.Widget _segmento({
+    required pw.Widget child,
+    required PdfColor fondo,
+    required pw.EdgeInsets padding,
+    bool top = false,
+    bool bottom = false,
+  }) {
+    const lado = pw.BorderSide(color: _grisLinea, width: 0.8);
+    final oculto = pw.BorderSide(color: fondo, width: 0.8);
+    return pw.Container(
+      width: double.infinity,
+      padding: padding,
+      decoration: pw.BoxDecoration(
+        color: fondo,
+        border: pw.Border(
+          left: lado,
+          right: lado,
+          top: top ? lado : oculto,
+          bottom: bottom ? lado : oculto,
+        ),
+      ),
+      child: child,
+    );
+  }
+
+  // Tabla de una sola fila con los mismos anchos de columna
+  static pw.Widget _filaDetalle({
+    required List<pw.Widget> celdas,
+    pw.BoxDecoration? decoration,
+  }) {
+    return pw.Table(
+      border: pw.TableBorder(
+        horizontalInside: pw.BorderSide(color: _grisLinea, width: 0.3),
+        bottom: pw.BorderSide(color: _grisLinea, width: 0.3),
+      ),
+      columnWidths: {
+        0: const pw.FlexColumnWidth(4.5),
+        1: const pw.FlexColumnWidth(1),
+        2: const pw.FlexColumnWidth(1.5),
+        3: const pw.FlexColumnWidth(1.8),
+      },
+      children: [
+        pw.TableRow(decoration: decoration, children: celdas),
+      ],
     );
   }
 
@@ -592,77 +673,6 @@ class PdfHistorialMantenimientosService {
             color: _grisOscuro,
           ),
         ),
-      ],
-    );
-  }
-
-  // =============================================
-  // Tabla de detalles de factura
-  // =============================================
-  static pw.Widget _buildTablaDetalles(
-      List<DetalleFacturaDTO> detalles,
-      Map<int, String>? mapaNombresProductos,
-      ) {
-    if (detalles.isEmpty) {
-      return pw.Text(
-        'Sin productos registrados',
-        style: pw.TextStyle(fontSize: 7, color: _grisMedio, fontStyle: pw.FontStyle.italic),
-      );
-    }
-
-    return pw.Table(
-      border: pw.TableBorder(
-        horizontalInside: pw.BorderSide(color: _grisLinea, width: 0.3),
-      ),
-      columnWidths: {
-        0: const pw.FlexColumnWidth(4.5),
-        1: const pw.FlexColumnWidth(1),
-        2: const pw.FlexColumnWidth(1.5),
-        3: const pw.FlexColumnWidth(1.8),
-      },
-      children: [
-        // Cabecera
-        pw.TableRow(
-          decoration: const pw.BoxDecoration(color: _grisHeader),
-          children: [
-            _celdaCabecera('Producto / Servicio', align: pw.TextAlign.left),
-            _celdaCabecera('Cant.', align: pw.TextAlign.center),
-            _celdaCabecera('Precio', align: pw.TextAlign.center),
-            _celdaCabecera('Subtotal', align: pw.TextAlign.center),
-          ],
-        ),
-        // Filas
-        ...detalles.map((d) {
-          String nombreProducto = d.descripcion;
-          if (d.idProducto != null && mapaNombresProductos != null) {
-            nombreProducto = mapaNombresProductos[d.idProducto] ?? d.descripcion;
-          }
-          if (nombreProducto.isEmpty) {
-            nombreProducto = 'Producto #${d.idProducto ?? '?'}';
-          }
-
-          return pw.TableRow(
-            children: [
-              _celdaDato(
-                nombreProducto,
-                align: pw.TextAlign.left,
-              ),
-              _celdaDato(
-                '${d.cantidad}',
-                align: pw.TextAlign.center,
-              ),
-              _celdaDato(
-                '\$${d.precioUnitario.toStringAsFixed(2)}',
-                align: pw.TextAlign.center,
-              ),
-              _celdaDato(
-                '\$${d.subtotal.toStringAsFixed(2)}',
-                align: pw.TextAlign.center,
-                bold: true,
-              ),
-            ],
-          );
-        }).toList(),
       ],
     );
   }

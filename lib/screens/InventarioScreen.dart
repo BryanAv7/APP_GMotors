@@ -121,8 +121,11 @@ class _InventarioScreenState extends State<InventarioScreen> {
             padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
             child: TextField(
               onChanged: _filtrarProductos,
+              style: const TextStyle(color: Colors.black),
+              cursorColor: Colors.black,
               decoration: InputDecoration(
                 hintText: 'Buscar producto...',
+                hintStyle: const TextStyle(color: Colors.black54),
                 filled: true,
                 fillColor: Colors.grey[100],
                 border: OutlineInputBorder(
